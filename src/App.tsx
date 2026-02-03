@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTimer } from "./hooks/useTimer";
 import { Timer } from "./components/Timer";
 import { Controls } from "./components/Controls";
@@ -67,14 +66,21 @@ function App() {
       appRef.current.requestFullscreen().catch(console.error);
     } else {
       document.exitFullscreen().catch(console.error);
+      setIsFullscreen(false);
+      setShowControls(true);
     }
   };
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      const active = document.fullscreenElement !== null;
+      const active = !!document.fullscreenElement;
       setIsFullscreen(active);
-      setShowControls(!active);
+
+      if (active) {
+        setShowControls(false);
+      } else {
+        setShowControls(true);
+      }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -88,57 +94,29 @@ function App() {
     setSettingsVersion((prev) => prev + 1);
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        when: "beforeChildren",
-        staggerChildren: 0.15,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: easeOut, // ✅ use easing function instead of string
-      },
-    },
-  };
-
   return (
-    <motion.div
+    <div
       ref={appRef}
       className={`relative min-h-screen w-full flex flex-col items-center justify-center p-8 transition-colors duration-300 ${theme}`}
       style={{
         backgroundColor: "var(--color-bg)",
         color: "var(--color-fg)",
       }}
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
     >
-      {/* Header (non-fullscreen) */}
+      {/* Header */}
       {!isFullscreen && (
-        <motion.div className="absolute top-8 left-8" variants={itemVariants}>
+        <div className="absolute top-8 left-8">
           <h1 className="text-2xl font-bold tracking-widest">FURŌ</h1>
           <p className="mt-1 text-xs font-bold tracking-widest text-border">
             FLOW
           </p>
-        </motion.div>
+        </div>
       )}
 
       {!isFullscreen && (
-        <motion.div className="absolute top-8 right-8" variants={itemVariants}>
+        <div className="absolute top-8 right-8">
           <ThemeToggle />
-        </motion.div>
+        </div>
       )}
 
       {/* Hover zone (fullscreen only) */}
@@ -151,41 +129,34 @@ function App() {
       )}
 
       {/* Main content */}
-      <motion.div
+      <div
         className={`flex flex-col items-center transition-all duration-500 ${
           isFullscreen ? "gap-32" : "gap-16"
         }`}
-        variants={containerVariants}
       >
-        {/* Settings (hidden in fullscreen) */}
+        {/* Settings */}
         {!isFullscreen && (
-          <motion.div className="z-50" variants={itemVariants}>
+          <div className="z-50">
             <Settings onSwitchMode={switchMode} currentMode={mode} />
-          </motion.div>
+          </div>
         )}
 
         {/* Timer */}
-        <motion.div variants={itemVariants}>
+        <div>
           <Timer
             status={status}
             timeLeft={timeLeft}
             totalTime={totalTime}
             isFullscreen={isFullscreen}
           />
-        </motion.div>
+        </div>
 
         {/* Controls */}
-        <AnimatePresence>
-          <motion.div
-            className={`z-50 ${
-              isFullscreen && !showControls
-                ? "opacity-0 scale-95 translate-y-4"
-                : ""
+        {(showControls || !isFullscreen) && (
+          <div
+            className={`z-50 transition-opacity duration-300 ${
+              isFullscreen && !showControls ? "opacity-0" : "opacity-100"
             }`}
-            variants={itemVariants}
-            style={{
-              transition: "opacity 0.3s, transform 0.3s",
-            }}
           >
             <Controls
               status={status}
@@ -195,33 +166,28 @@ function App() {
               onFullscreenChange={toggleFullscreen}
               onSettingsClick={() => setIsSettingsOpen(true)}
             />
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
+          </div>
+        )}
+      </div>
 
-      {/* Footer (non-fullscreen) */}
+      {/* Footer */}
       {!isFullscreen && (
-        <motion.div
-          className="absolute bottom-8 flex items-center gap-2 text-sm font-semibold tracking-widest"
-          variants={itemVariants}
-        >
+        <div className="absolute bottom-8 flex items-center gap-2 text-sm font-semibold tracking-widest">
           <Copyright size={12} />
           2026 JasDev. All rights reserved.
-        </motion.div>
+        </div>
       )}
 
       {/* Settings Modal */}
-      <AnimatePresence>
-        {isSettingsOpen && (
-          <SettingsModal
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            currentSettings={timerSettings}
-            onSave={handleSaveSettings}
-          />
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {isSettingsOpen && (
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          currentSettings={timerSettings}
+          onSave={handleSaveSettings}
+        />
+      )}
+    </div>
   );
 }
 
