@@ -1,7 +1,7 @@
-// Controls.tsx buttons to trigger the timer
+// Controls.tsx – buttons to control the timer
 
 import { useState } from "react";
-import { Maximize, Minimize } from "lucide-react";
+import { Maximize, Minimize, Settings as SettingsIcon } from "lucide-react";
 import type { TimerStatus } from "../types/timer";
 
 interface ControlsProps {
@@ -10,17 +10,29 @@ interface ControlsProps {
   onPause: () => void;
   onReset: () => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
+  onSettingsClick?: () => void;
 }
 
-const baseButton =
-  "px-6 py-3 text-sm tracking-widest transition-all duration-200 rounded-md border-2 font-semibold";
+/* ─────────────────────────────
+   Tailwind class presets
+   ───────────────────────────── */
 
-const activeButton = "bg-secondary text-primary border-secondary";
+const buttonBase =
+  "px-6 py-3 text-sm tracking-widest font-semibold rounded-md border-2 transition-all duration-200";
 
-const inactiveButton = "bg-transparent text-secondary border-secondary";
+const buttonActive =
+  "bg-[var(--color-fg)] text-[var(--color-bg)] border-[var(--color-fg)]";
+
+const buttonInactive =
+  "bg-transparent text-[var(--color-fg)] border-[var(--color-border)] hover:border-[var(--color-fg)]";
+
+const buttonDanger =
+  "bg-red-600 text-white border-red-600 hover:bg-red-700";
 
 const iconButton =
-  "p-3 text-sm transition-all duration-200 rounded-md border-2 bg-transparent text-secondary border-secondary";
+  "p-3 rounded-md border-2 bg-transparent text-[var(--color-fg)] border-[var(--color-border)] transition-all duration-200 hover:border-[var(--color-fg)]";
+
+/* ───────────────────────────── */
 
 export const Controls = ({
   status,
@@ -28,6 +40,7 @@ export const Controls = ({
   onPause,
   onReset,
   onFullscreenChange,
+  onSettingsClick,
 }: ControlsProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -35,17 +48,28 @@ export const Controls = ({
   const isRunning = status === "running";
 
   const toggleFullscreen = () => {
-    const newFullscreenState = !isFullscreen;
-    setIsFullscreen(newFullscreenState);
-    onFullscreenChange?.(newFullscreenState);
+    const next = !isFullscreen;
+    setIsFullscreen(next);
+    onFullscreenChange?.(next);
   };
 
   return (
     <div className="flex items-center justify-center gap-4">
-      {isIdle && (
+      {isIdle ? (
         <>
-          <button onClick={onStart} className={`${baseButton} ${activeButton}`}>
+          <button
+            onClick={onStart}
+            className={`${buttonBase} ${buttonActive}`}
+          >
             START
+          </button>
+
+          <button
+            onClick={onSettingsClick}
+            className={iconButton}
+            aria-label="Open settings"
+          >
+            <SettingsIcon size={20} />
           </button>
 
           <button
@@ -56,29 +80,37 @@ export const Controls = ({
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
         </>
-      )}
-
-      {!isIdle && (
+      ) : (
         <>
           <button
             onClick={isRunning ? onPause : onStart}
-            className={`${baseButton} ${activeButton}`}
+            className={`${buttonBase} ${
+              isRunning ? buttonActive : buttonInactive
+            }`}
           >
             {isRunning ? "PAUSE" : "START"}
           </button>
 
           <button
             onClick={onReset}
-            className={`${baseButton} bg-red-600 text-white border-red-600 hover:bg-red-700`}
+            className={`${buttonBase} ${buttonDanger}`}
           >
             STOP
           </button>
 
           <button
             onClick={onReset}
-            className={`${baseButton} ${inactiveButton}`}
+            className={`${buttonBase} ${buttonInactive}`}
           >
             RESET
+          </button>
+
+          <button
+            onClick={onSettingsClick}
+            className={iconButton}
+            aria-label="Open settings"
+          >
+            <SettingsIcon size={20} />
           </button>
 
           <button

@@ -3,20 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { TimerMode, TimerStatus, TimerSettings } from '../types/timer';
 
-const DEFAULT_SETTINGS: TimerSettings = {
-  workDuration: 25,
-  breakDuration: 5,
-  longBreakDuration: 15,
-  sessionsBeforeLongBreak: 4,
-};
-
-export const useTimer = (settings: TimerSettings = DEFAULT_SETTINGS) => {
+export const useTimer = (settings: TimerSettings) => {
   const [mode, setMode] = useState<TimerMode>('focus');
   const [status, setStatus] = useState<TimerStatus>('idle');
-  const [timeLeft, setTimeLeft] = useState(settings.workDuration * 60);
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
-
-  const intervalRef = useRef<number | null>(null);
 
   const getTotalTime = useCallback((currentMode: TimerMode): number => {
     switch (currentMode) {
@@ -27,9 +17,14 @@ export const useTimer = (settings: TimerSettings = DEFAULT_SETTINGS) => {
       case 'longBreak':
         return settings.longBreakDuration * 60;
       case 'infinite':
-        return 0; // special case, no upper bound
+        return 0;
     }
   }, [settings]);
+
+  const [timeLeft, setTimeLeft] = useState(() => getTotalTime('focus'));
+  const [totalTime, setTotalTime] = useState(() => getTotalTime('focus'));
+
+  const intervalRef = useRef<number | null>(null);
 
   const start = useCallback(() => {
     setStatus('running');
@@ -41,13 +36,17 @@ export const useTimer = (settings: TimerSettings = DEFAULT_SETTINGS) => {
 
   const reset = useCallback(() => {
     setStatus('idle');
-    setTimeLeft(mode === 'infinite' ? 0 : getTotalTime(mode));
+    const newTotal = getTotalTime(mode);
+    setTotalTime(newTotal);
+    setTimeLeft(mode === 'infinite' ? 0 : newTotal);
   }, [mode, getTotalTime]);
 
   const switchMode = useCallback(
     (newMode: TimerMode) => {
       setMode(newMode);
-      setTimeLeft(newMode === 'infinite' ? 0 : getTotalTime(newMode));
+      const newTotal = getTotalTime(newMode);
+      setTotalTime(newTotal);
+      setTimeLeft(newMode === 'infinite' ? 0 : newTotal);
       setStatus('idle');
     },
     [getTotalTime]
@@ -58,11 +57,9 @@ export const useTimer = (settings: TimerSettings = DEFAULT_SETTINGS) => {
       intervalRef.current = window.setInterval(() => {
         setTimeLeft((prev) => {
           if (mode === 'infinite') {
-            // Count upwards
             return prev + 1;
           }
 
-          // Countdown logic
           if (prev <= 1) {
             setStatus('idle');
 
@@ -72,15 +69,20 @@ export const useTimer = (settings: TimerSettings = DEFAULT_SETTINGS) => {
 
               if (newSessions % settings.sessionsBeforeLongBreak === 0) {
                 setMode('longBreak');
-                return settings.longBreakDuration * 60;
+                const newTotal = settings.longBreakDuration * 60;
+                setTotalTime(newTotal);
+                return newTotal;
               } else {
                 setMode('shortbreak');
-                return settings.breakDuration * 60;
+                const newTotal = settings.breakDuration * 60;
+                setTotalTime(newTotal);
+                return newTotal;
               }
             } else {
-              // After break, go back to work
               setMode('focus');
-              return settings.workDuration * 60;
+              const newTotal = settings.workDuration * 60;
+              setTotalTime(newTotal);
+              return newTotal;
             }
           }
 
@@ -105,7 +107,7 @@ export const useTimer = (settings: TimerSettings = DEFAULT_SETTINGS) => {
     mode,
     status,
     timeLeft,
-    totalTime: getTotalTime(mode),
+    totalTime,
     sessionsCompleted,
     start,
     pause,

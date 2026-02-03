@@ -1,24 +1,30 @@
-// hooks/useTheme.ts - Custom hook for dark/light mode management
+// hooks/useTheme.ts
+import { useEffect, useState } from "react";
 
-import { useEffect } from 'react';
-import useLocalStorageState from 'use-local-storage-state';
+type Theme = "light" | "dark";
 
 export const useTheme = () => {
-  const [theme, setTheme] = useLocalStorageState<'light' | 'dark'>('theme', {
-    defaultValue: 'light',
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Check localStorage or default to light
+    const stored = localStorage.getItem("theme");
+    return (stored as Theme) || "light";
   });
 
   useEffect(() => {
-    // Apply theme class to html element
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    const root = document.documentElement;
+
+    if (theme === "dark") {
+      root.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove("dark");
     }
+
+    // Save preference
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
   return { theme, toggleTheme };

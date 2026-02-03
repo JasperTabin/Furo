@@ -1,4 +1,4 @@
-// components/Timer.tsx - Displays the countdown clock and progress bar
+// components/Timer.tsx – Displays the countdown clock and progress bar
 
 import { formatTime } from "../utils/formatTime";
 import type { TimerStatus } from "../types/timer";
@@ -9,6 +9,30 @@ interface TimerProps {
   totalTime: number;
   isFullscreen?: boolean;
 }
+
+/* ─────────────────────────────
+   Tailwind class presets
+   ───────────────────────────── */
+
+const containerBase =
+  "flex flex-col items-center justify-center gap-8 transition-all duration-500";
+
+const timeBase = "font-bold tracking-tight transition-all duration-500";
+
+const timeFullscreen = "text-[25rem] leading-none";
+
+const timeNormal = "text-[15rem]";
+
+const statusLabel =
+  "tracking-widest text-[var(--color-border)] text-2xl transition-all duration-500";
+
+const progressTrack =
+  "h-0.5 w-80 bg-[var(--color-border)]/40 transition-all duration-500";
+
+const progressFill =
+  "h-full bg-[var(--color-fg)] transition-all duration-1000 ease-linear";
+
+/* ───────────────────────────── */
 
 export const Timer = ({
   status,
@@ -30,31 +54,20 @@ export const Timer = ({
   const progress = ((totalTime - timeLeft) / totalTime) * 100;
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center transition-all duration-500 ${isFullscreen ? "gap-8" : "gap-8"}`}
-    >
+    <div className={containerBase}>
       {/* Timer Display */}
       <div
-        className={`font-bold tracking-tight transition-all duration-500 ${isFullscreen ? "text-[25rem] leading-none" : "text-[15rem]"}`}
+        className={`${timeBase} ${isFullscreen ? timeFullscreen : timeNormal}`}
       >
         {formatTime(timeLeft)}
       </div>
 
       {/* Status Label */}
-      <div
-        className={`tracking-widest text-gray-400 transition-all duration-500 ${isFullscreen ? "text-2xl" : "text-2xl"}`}
-      >
-        {getStatusLabel(status)}
-      </div>
+      <div className={statusLabel}>{getStatusLabel(status)}</div>
 
       {/* Progress Bar */}
-      <div
-        className={`h-px bg-gray-200 transition-all duration-500 ${isFullscreen ? "w-80" : "w-80"}`}
-      >
-        <div
-          className="h-full bg-black dark:bg-white transition-all duration-1000 ease-linear"
-          style={{ width: `${progress}%` }}
-        />
+      <div className={progressTrack}>
+        <div className={progressFill} style={{ width: `${progress}%` }} />
       </div>
     </div>
   );
