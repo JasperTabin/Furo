@@ -132,14 +132,14 @@ function App() {
         <ThemeToggle />
       </div>
 
-      <div className="flex flex-col items-center gap-12 sm:gap-16 md:gap-20 lg:gap-24 w-full max-w-6xl">
+      <div className="flex flex-col items-center gap-6 sm:gap-12 md:gap-16 lg:gap-4 w-full max-w-6xl">
         {!isFullscreen && (
           <div ref={settingsRef} className="z-50 w-full">
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
 
-        <div className="relative flex flex-col items-center gap-12 sm:gap-16 md:gap-20 w-full">
+        <div className="relative flex flex-col items-center gap-8 sm:gap-12 md:gap-4 w-full">
           <div ref={timerRef} className="w-full">
             <Timer
               status={status}
