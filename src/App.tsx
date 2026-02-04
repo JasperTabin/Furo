@@ -106,10 +106,6 @@ function App() {
           </p>
         </div>
         <div ref={headerControlsRef} className="flex items-center gap-2">
-          <div ref={settingsRef}>
-            <SettingsButton onClick={() => setIsSettingsOpen(true)} />
-          </div>
-          <FullscreenMode onToggle={toggleFullscreen} isFullscreen={isFullscreen} />
           <div ref={themeToggleRef}>
             <ThemeToggle />
           </div>
@@ -117,22 +113,42 @@ function App() {
       </header>
 
       {/* Centered Content */}
-      <main className="flex flex-col items-center gap-8">
+      <main className="flex flex-col items-center">
         {!isFullscreen && (
           <div ref={modeSwitcherRef}>
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
+
         <div ref={timerRef}>
           <Timer timeLeft={timeLeft} isFullscreen={isFullscreen} />
         </div>
-        <div ref={controlsRef}>
+
+        {/* Controls + Utility Buttons together */}
+        <div
+          ref={controlsRef}
+          className="flex flex-row gap-2"
+        >
           <TimerControls status={status} onStart={start} onPause={pause} onReset={reset} />
+
+          <div className="flex flex-row gap-2">
+            <SettingsButton
+              onClick={() => setIsSettingsOpen(true)}
+              isOpen={isSettingsOpen}
+            />
+            <FullscreenMode
+              onToggle={toggleFullscreen}
+              isFullscreen={isFullscreen}
+            />
+          </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer ref={footerRef} className="text-[10px] sm:text-xs tracking-wide flex items-center gap-2">
+      <footer
+        ref={footerRef}
+        className="text-[10px] sm:text-xs tracking-wide flex items-center gap-2"
+      >
         <Copyright size={12} />
         2026 JasDev. All rights reserved.
       </footer>
