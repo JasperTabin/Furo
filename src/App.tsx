@@ -36,8 +36,6 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
   const [settingsVersion, setSettingsVersion] = useState(0);
-  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
-  const [isShortScreen, setIsShortScreen] = useState(window.innerHeight < 600);
 
   const appRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -61,15 +59,11 @@ function App() {
     footerRef,
   });
 
-  // Fix iOS Safari 100vh issue and detect orientation
+  // Fix iOS Safari 100vh issue
   useEffect(() => {
     const setVh = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty("--vh", `${vh}px`);
-      
-      // Update landscape and screen height detection
-      setIsLandscape(window.innerWidth > window.innerHeight);
-      setIsShortScreen(window.innerHeight < 600);
     };
     setVh();
     window.addEventListener("resize", setVh);
@@ -138,14 +132,14 @@ function App() {
         <ThemeToggle />
       </div>
 
-      <div className={`flex flex-col items-center w-full max-w-6xl ${isLandscape && isShortScreen ? 'gap-4' : 'gap-12 sm:gap-16 md:gap-20 lg:gap-24'}`}>
+      <div className="flex flex-col items-center gap-12 sm:gap-16 md:gap-20 lg:gap-24 w-full max-w-6xl">
         {!isFullscreen && (
           <div ref={settingsRef} className="z-50 w-full">
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
 
-        <div className={`relative flex flex-col items-center w-full ${isLandscape && isShortScreen ? 'gap-4' : 'gap-12 sm:gap-16 md:gap-20'}`}>
+        <div className="relative flex flex-col items-center gap-12 sm:gap-16 md:gap-20 w-full">
           <div ref={timerRef} className="w-full">
             <Timer
               status={status}
