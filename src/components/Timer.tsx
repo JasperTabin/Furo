@@ -7,7 +7,7 @@ interface TimerProps {
   status: TimerStatus;
   timeLeft: number;
   totalTime: number;
-  isFullscreen?: boolean;
+  isFocus?: boolean;
 }
 
 /* ─────────────────────────────
@@ -19,7 +19,7 @@ const containerBase =
 
 const timeBase = "font-bold tracking-tight transition-all duration-500 select-none";
 
-const timeFullscreen = "text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[22rem] leading-none";
+const timeFocus = "text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[22rem] leading-none";
 
 const timeNormal = "text-[5rem] sm:text-[8rem] md:text-[10rem] lg:text-[13rem]";
 
@@ -42,7 +42,7 @@ export const Timer = ({
   status,
   timeLeft,
   totalTime,
-  isFullscreen = false,
+  isFocus = false,
 }: TimerProps) => {
   const getStatusLabel = (status: TimerStatus): string => {
     switch (status) {
@@ -74,7 +74,7 @@ export const Timer = ({
     <div className={containerBase}>
 
       <div
-        className={`${timeBase} ${isFullscreen ? timeFullscreen : timeNormal}`}
+        className={`${timeBase} ${isFocus ? timeFocus : timeNormal}`}
         role="timer"
         aria-live="polite"
         aria-atomic="true"
