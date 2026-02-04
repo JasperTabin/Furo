@@ -103,7 +103,7 @@ function App() {
       {/* Header */}
       <div ref={headerRef} className="absolute top-4 sm:top-8 left-4 sm:left-8 z-50">
         <h1 className="text-xl sm:text-2xl font-bold tracking-widest">FURŌ</h1>
-        <p className="mt-1 text-xs font-semibold tracking-widest text-[var(--color-border)] opacity-60">
+        <p className="mt-1 text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
           FLOW
         </p>
       </div>
