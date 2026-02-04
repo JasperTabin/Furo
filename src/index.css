@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
-/* Tailwind v4 theme tokens */
-@theme {
+/* Light */
+:root {
   --color-bg: #ffffff;
   --color-fg: #0a0a0a;
   --color-border: #404040;
 }
 
-.dark {
+/* Dark */
+:root.dark {
   --color-bg: #0a0a0a;
   --color-fg: #ffffff;
   --color-border: #404040;

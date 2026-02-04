@@ -15,24 +15,28 @@ interface TimerProps {
    ───────────────────────────── */
 
 const containerBase =
-  "flex flex-col items-center justify-center gap-8 transition-all duration-500";
+  "flex flex-col items-center justify-center gap-12 transition-all duration-500";
 
-const timeBase = "font-bold tracking-tight transition-all duration-500";
+const timeBase = "font-bold tracking-tight transition-all duration-500 select-none";
 
-const timeFullscreen = "text-[25rem] leading-none";
+const timeFullscreen = "text-[22rem] leading-none";
 
-const timeNormal = "text-[15rem]";
+const timeNormal = "text-[13rem]";
 
 const statusLabel =
-  "tracking-widest text-[var(--color-border)] text-2xl transition-all duration-500";
+  "tracking-widest text-xl font-semibold transition-all duration-500";
+
+const statusIdle = "text-[var(--color-border)] opacity-60";
+
+const statusRunning = "text-[var(--color-fg)] opacity-90 animate-pulse";
+
+const statusPaused = "text-[var(--color-border)] opacity-80";
 
 const progressTrack =
-  "h-0.5 w-80 bg-[var(--color-border)]/40 transition-all duration-500";
+  "h-1 w-96 bg-[var(--color-border)]/30 rounded-full overflow-hidden transition-all duration-500";
 
 const progressFill =
-  "h-full bg-[var(--color-fg)] transition-all duration-1000 ease-linear";
-
-/* ───────────────────────────── */
+  "h-full bg-[var(--color-fg)] transition-all duration-1000 ease-linear shadow-lg shadow-[var(--color-fg)]/30";
 
 export const Timer = ({
   status,
@@ -51,22 +55,45 @@ export const Timer = ({
     }
   };
 
+  const getStatusClass = (status: TimerStatus): string => {
+    switch (status) {
+      case "idle":
+        return statusIdle;
+      case "running":
+        return statusRunning;
+      case "paused":
+        return statusPaused;
+    }
+  };
+
   const progress = ((totalTime - timeLeft) / totalTime) * 100;
+  const remainingMinutes = Math.ceil(timeLeft / 60);
+  const progressPercentage = Math.round(progress);
 
   return (
     <div className={containerBase}>
-      {/* Timer Display */}
+
       <div
         className={`${timeBase} ${isFullscreen ? timeFullscreen : timeNormal}`}
+        role="timer"
+        aria-live="polite"
+        aria-atomic="true"
       >
         {formatTime(timeLeft)}
       </div>
 
-      {/* Status Label */}
-      <div className={statusLabel}>{getStatusLabel(status)}</div>
+      <div className="flex flex-col items-center gap-2">
+        <div className={`${statusLabel} ${getStatusClass(status)}`}>
+          {getStatusLabel(status)}
+        </div>
+        {status === "running" && totalTime > 0 && (
+          <div className="text-sm text-(--color-border) opacity-70">
+            {remainingMinutes} min left · {progressPercentage}% complete
+          </div>
+        )}
+      </div>
 
-      {/* Progress Bar */}
-      <div className={progressTrack}>
+      <div className={progressTrack} role="progressbar" aria-valuenow={progressPercentage} aria-valuemin={0} aria-valuemax={100}>
         <div className={progressFill} style={{ width: `${progress}%` }} />
       </div>
     </div>

@@ -29,18 +29,43 @@ export const SettingsModal = ({
   currentSettings,
   onSave,
 }: SettingsModalProps) => {
-  const [workDuration, setWorkDuration] = useState(currentSettings.workDuration);
-  const [breakDuration, setBreakDuration] = useState(currentSettings.breakDuration);
-  const [longBreakDuration, setLongBreakDuration] = useState(currentSettings.longBreakDuration);
+  const [workDuration, setWorkDuration] = useState(
+    currentSettings.workDuration,
+  );
+  const [breakDuration, setBreakDuration] = useState(
+    currentSettings.breakDuration,
+  );
+  const [longBreakDuration, setLongBreakDuration] = useState(
+    currentSettings.longBreakDuration,
+  );
 
   if (!isOpen) return null;
 
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.min(Math.max(value, min), max);
+  };
+
+  const handleWorkDurationChange = (value: string) => {
+    const num = parseInt(value) || 0;
+    setWorkDuration(clamp(num, 1, 120));
+  };
+
+  const handleBreakDurationChange = (value: string) => {
+    const num = parseInt(value) || 0;
+    setBreakDuration(clamp(num, 1, 30));
+  };
+
+  const handleLongBreakDurationChange = (value: string) => {
+    const num = parseInt(value) || 0;
+    setLongBreakDuration(clamp(num, 1, 60));
+  };
+
   const handleSave = () => {
     onSave({
-      workDuration,
-      breakDuration,
-      longBreakDuration,
-      sessionsBeforeLongBreak: currentSettings.sessionsBeforeLongBreak, // Keep existing value
+      workDuration: clamp(workDuration, 1, 120),
+      breakDuration: clamp(breakDuration, 1, 30),
+      longBreakDuration: clamp(longBreakDuration, 1, 60),
+      sessionsBeforeLongBreak: currentSettings.sessionsBeforeLongBreak,
     });
     onClose();
   };
@@ -52,9 +77,8 @@ export const SettingsModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-bg border-2 border-border rounded-lg p-8 shadow-2xl">
-        {/* Close button */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-md bg-bg border-2 border-border bg-(--color-bg) rounded-lg p-8 shadow-2xl">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-fg hover:text-border transition-colors"
@@ -63,65 +87,68 @@ export const SettingsModal = ({
           <X size={20} />
         </button>
 
-        {/* Title */}
         <h2 className="text-2xl font-bold tracking-widest mb-8 text-fg">
           TIMER SETTINGS
         </h2>
 
-        {/* Settings form */}
         <div className="space-y-6">
-          {/* Focus Duration */}
           <div>
             <label className="block text-sm font-semibold tracking-widest mb-2 text-fg">
-              FOCUS DURATION (minutes)
+              FOCUS DURATION (Set Number 1-120)
             </label>
             <input
               type="number"
               min="1"
               max="120"
               value={workDuration}
-              onChange={(e) => setWorkDuration(Number(e.target.value))}
+              onChange={(e) => handleWorkDurationChange(e.target.value)}
+              onBlur={(e) => handleWorkDurationChange(e.target.value)}
               className={inputClass}
             />
           </div>
 
-          {/* Short Break Duration */}
           <div>
             <label className="block text-sm font-semibold tracking-widest mb-2 text-fg">
-              SHORT BREAK (minutes)
+              SHORT BREAK (Set Number 1-30)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="30"
+              value={breakDuration}
+              onChange={(e) => handleBreakDurationChange(e.target.value)}
+              onBlur={(e) => handleBreakDurationChange(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold tracking-widest mb-2 text-fg">
+              LONG BREAK (Set Number 1-60)
             </label>
             <input
               type="number"
               min="1"
               max="60"
-              value={breakDuration}
-              onChange={(e) => setBreakDuration(Number(e.target.value))}
-              className={inputClass}
-            />
-          </div>
-
-          {/* Long Break Duration */}
-          <div>
-            <label className="block text-sm font-semibold tracking-widest mb-2 text-fg">
-              LONG BREAK (minutes)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="120"
               value={longBreakDuration}
-              onChange={(e) => setLongBreakDuration(Number(e.target.value))}
+              onChange={(e) => handleLongBreakDurationChange(e.target.value)}
+              onBlur={(e) => handleLongBreakDurationChange(e.target.value)}
               className={inputClass}
             />
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex gap-4 mt-8">
-          <button onClick={handleReset} className={`${buttonBase} ${buttonSecondary} flex-1`}>
+          <button
+            onClick={handleReset}
+            className={`${buttonBase} ${buttonSecondary} flex-1`}
+          >
             RESET
           </button>
-          <button onClick={handleSave} className={`${buttonBase} ${buttonPrimary} flex-1`}>
+          <button
+            onClick={handleSave}
+            className={`${buttonBase} ${buttonPrimary} flex-1`}
+          >
             SAVE
           </button>
         </div>

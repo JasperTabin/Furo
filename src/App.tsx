@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useTimer } from "./hooks/useTimer";
+import { usePageLoadAnimation } from "./hooks/usePageLoadAnimation";
 import { Timer } from "./components/Timer";
 import { Controls } from "./components/Controls";
 import { Settings } from "./components/Settings";
@@ -36,30 +37,33 @@ function App() {
     useState<TimerSettings>(loadSettings());
   const [settingsVersion, setSettingsVersion] = useState(0);
 
-  const hideTimeout = useRef<number | null>(null);
   const appRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const themeToggleRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
 
   const { theme } = useTheme();
   const { mode, status, timeLeft, totalTime, start, pause, reset, switchMode } =
     useTimer(timerSettings);
+
+  usePageLoadAnimation({
+    appRef,
+    headerRef,
+    themeToggleRef,
+    settingsRef,
+    timerRef,
+    controlsRef,
+    footerRef,
+  });
 
   useEffect(() => {
     if (settingsVersion > 0 && status === "idle") {
       reset();
     }
   }, [settingsVersion, status, reset]);
-
-  const scheduleHide = () => {
-    if (!isFullscreen) return;
-
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-
-    hideTimeout.current = window.setTimeout(() => {
-      setShowControls(false);
-    }, 1000);
-  };
 
   const toggleFullscreen = () => {
     if (!isFullscreen && appRef.current) {
@@ -103,77 +107,82 @@ function App() {
         color: "var(--color-fg)",
       }}
     >
-      {/* Header */}
       {!isFullscreen && (
-        <div className="absolute top-8 left-8">
+        <div ref={headerRef} className="absolute top-8 left-8">
           <h1 className="text-2xl font-bold tracking-widest">FURŌ</h1>
-          <p className="mt-1 text-xs font-bold tracking-widest text-border">
+          <p className="mt-1 text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
             FLOW
           </p>
         </div>
       )}
 
       {!isFullscreen && (
-        <div className="absolute top-8 right-8">
+        <div ref={themeToggleRef} className="absolute top-8 right-8">
           <ThemeToggle />
         </div>
       )}
 
-      {/* Hover zone (fullscreen only) */}
-      {isFullscreen && (
-        <div
-          className="absolute bottom-0 left-0 w-full h-24 z-50"
-          onMouseEnter={() => setShowControls(true)}
-          onMouseLeave={scheduleHide}
-        />
-      )}
-
-      {/* Main content */}
-      <div
-        className={`flex flex-col items-center transition-all duration-500 ${
-          isFullscreen ? "gap-32" : "gap-16"
-        }`}
-      >
-        {/* Settings */}
+      <div className="flex flex-col items-center gap-24">
         {!isFullscreen && (
-          <div className="z-50">
+          <div ref={settingsRef} className="z-50">
             <Settings onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
 
-        {/* Timer */}
-        <div>
-          <Timer
-            status={status}
-            timeLeft={timeLeft}
-            totalTime={totalTime}
-            isFullscreen={isFullscreen}
-          />
-        </div>
-
-        {/* Controls */}
-        {(showControls || !isFullscreen) && (
-          <div
-            className={`z-50 transition-opacity duration-300 ${
-              isFullscreen && !showControls ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            <Controls
+        <div className="relative flex flex-col items-center gap-20">
+          <div ref={timerRef}>
+            <Timer
               status={status}
-              onStart={start}
-              onPause={pause}
-              onReset={reset}
-              onFullscreenChange={toggleFullscreen}
-              onSettingsClick={() => setIsSettingsOpen(true)}
+              timeLeft={timeLeft}
+              totalTime={totalTime}
+              isFullscreen={isFullscreen}
             />
           </div>
-        )}
+
+          {isFullscreen ? (
+            <div
+              className="relative"
+              onMouseEnter={() => setShowControls(true)}
+              onMouseLeave={() => setShowControls(false)}
+            >
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-full h-32" />
+
+              <div
+                className={`z-50 transition-opacity duration-500 ease-in-out ${
+                  !showControls ? "opacity-0" : "opacity-100"
+                }`}
+              >
+                <Controls
+                  status={status}
+                  onStart={start}
+                  onPause={pause}
+                  onReset={reset}
+                  onFullscreenChange={toggleFullscreen}
+                  onSettingsClick={() => setIsSettingsOpen(true)}
+                />
+              </div>
+            </div>
+          ) : (
+            <div ref={controlsRef} className="z-50">
+              <Controls
+                status={status}
+                onStart={start}
+                onPause={pause}
+                onReset={reset}
+                onFullscreenChange={toggleFullscreen}
+                onSettingsClick={() => setIsSettingsOpen(true)}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Footer */}
       {!isFullscreen && (
-        <div className="absolute bottom-8 flex items-center gap-2 text-sm font-semibold tracking-widest">
-          <Copyright size={12} />
+        <div
+          ref={footerRef}
+          className="absolute bottom-8 flex items-center gap-2 text-xs tracking-wide"
+        >
+          <Copyright size={10} />
           2026 JasDev. All rights reserved.
         </div>
       )}

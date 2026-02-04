@@ -13,24 +13,20 @@ interface ControlsProps {
   onSettingsClick?: () => void;
 }
 
-/* ─────────────────────────────
-   Tailwind class presets
-   ───────────────────────────── */
-
 const buttonBase =
-  "px-6 py-3 text-sm tracking-widest font-semibold rounded-md border-2 transition-all duration-200";
+  "px-6 py-3 text-sm tracking-widest font-semibold rounded-md border-2 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[var(--color-fg)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)]";
 
 const buttonActive =
-  "bg-[var(--color-fg)] text-[var(--color-bg)] border-[var(--color-fg)]";
+  "bg-[var(--color-fg)] text-[var(--color-bg)] border-[var(--color-fg)] hover:brightness-90";
 
 const buttonInactive =
-  "bg-transparent text-[var(--color-fg)] border-[var(--color-border)] hover:border-[var(--color-fg)]";
+  "bg-transparent text-[var(--color-fg)] border-[var(--color-border)] hover:border-[var(--color-fg)] hover:bg-[var(--color-fg)]/5";
 
 const buttonDanger =
-  "bg-red-600 text-white border-red-600 hover:bg-red-700";
+  "bg-transparent text-red-500 border-red-500/50 hover:border-red-500 hover:bg-red-500/10";
 
 const iconButton =
-  "p-3 rounded-md border-2 bg-transparent text-[var(--color-fg)] border-[var(--color-border)] transition-all duration-200 hover:border-[var(--color-fg)]";
+  "p-3 rounded-md border-2 bg-transparent text-[var(--color-fg)] border-[var(--color-border)] transition-all duration-200 hover:border-[var(--color-fg)] hover:bg-[var(--color-fg)]/5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[var(--color-fg)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)]";
 
 /* ───────────────────────────── */
 
@@ -54,20 +50,24 @@ export const Controls = ({
   };
 
   return (
-    <div className="flex items-center justify-center gap-4">
+    <div className="flex items-center justify-center gap-3">
       {isIdle ? (
         <>
           <button
             onClick={onStart}
             className={`${buttonBase} ${buttonActive}`}
+            aria-label="Start timer"
           >
             START
           </button>
+
+          <div className="mx-1" /> 
 
           <button
             onClick={onSettingsClick}
             className={iconButton}
             aria-label="Open settings"
+            title="Settings"
           >
             <SettingsIcon size={20} />
           </button>
@@ -76,6 +76,7 @@ export const Controls = ({
             onClick={toggleFullscreen}
             className={iconButton}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
@@ -87,13 +88,17 @@ export const Controls = ({
             className={`${buttonBase} ${
               isRunning ? buttonActive : buttonInactive
             }`}
+            aria-label={isRunning ? "Pause timer" : "Resume timer"}
+            title={isRunning ? "Pause (Space)" : "Resume (Space)"}
           >
-            {isRunning ? "PAUSE" : "START"}
+            {isRunning ? "PAUSE" : "RESUME"}
           </button>
 
           <button
             onClick={onReset}
             className={`${buttonBase} ${buttonDanger}`}
+            aria-label="Stop and reset timer"
+            title="Stop timer"
           >
             STOP
           </button>
@@ -101,14 +106,19 @@ export const Controls = ({
           <button
             onClick={onReset}
             className={`${buttonBase} ${buttonInactive}`}
+            aria-label="Reset timer"
+            title="Reset timer"
           >
             RESET
           </button>
+
+          <div className="mx-1" /> 
 
           <button
             onClick={onSettingsClick}
             className={iconButton}
             aria-label="Open settings"
+            title="Settings"
           >
             <SettingsIcon size={20} />
           </button>
@@ -117,6 +127,7 @@ export const Controls = ({
             onClick={toggleFullscreen}
             className={iconButton}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFullscreen ? "Exit fullscreen (F)" : "Enter fullscreen (F)"}
           >
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
