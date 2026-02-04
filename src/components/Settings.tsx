@@ -27,7 +27,7 @@ const clamp = (value: number, min: number, max: number) =>
 /* Styles */
 
 const inputClass =
-  "w-full px-3 sm:px-4 py-2 text-sm bg-transparent border-2 border-[var(--color-border)] rounded-md text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg)] transition-colors";
+  "w-full px-3 sm:px-4 py-2 text-base bg-transparent border-2 border-[var(--color-border)] rounded-md text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg)] transition-colors";
 
 const buttonBase =
   "px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm tracking-widest font-semibold rounded-md border-2 transition-all duration-200 active:scale-95";

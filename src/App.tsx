@@ -7,7 +7,7 @@ import { ModeSwitcher } from "./components/ModeSwitcher";
 import { Settings } from "./components/Settings";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { SettingsButton } from "./components/SettingsButton";
-import { FullscreenMode } from "./components/FullscreenMode"; 
+import { FullscreenMode } from "./components/FullscreenMode";
 import { useTheme } from "./hooks/useTheme";
 import { Copyright } from "lucide-react";
 import type { TimerSettings } from "./types/timer";
@@ -59,6 +59,21 @@ function App() {
     footerRef,
   });
 
+  // Fix iOS Safari 100vh issue
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+    setVh();
+    window.addEventListener("resize", setVh);
+    window.addEventListener("orientationchange", setVh);
+    return () => {
+      window.removeEventListener("resize", setVh);
+      window.removeEventListener("orientationchange", setVh);
+    };
+  }, []);
+
   useEffect(() => {
     if (settingsVersion > 0 && status === "idle") {
       reset();
@@ -94,13 +109,13 @@ function App() {
   return (
     <div
       ref={appRef}
-      className={`relative min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-300 ${theme}`}
+      className={`relative w-full flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-300 ${theme}`}
       style={{
         backgroundColor: "var(--color-bg)",
         color: "var(--color-fg)",
+        minHeight: "calc(var(--vh, 1vh) * 100)",
       }}
     >
-      {/* Header */}
       <div ref={headerRef} className="absolute top-4 sm:top-8 left-4 sm:left-8 z-50">
         <h1 className="text-xl sm:text-2xl font-bold tracking-widest">FURŌ</h1>
         <p className="mt-1 text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
@@ -108,7 +123,6 @@ function App() {
         </p>
       </div>
 
-      {/* Top Right Controls */}
       <div
         ref={themeToggleRef}
         className="absolute top-4 sm:top-8 right-4 sm:right-8 flex items-center gap-2 z-50"
@@ -119,7 +133,6 @@ function App() {
       </div>
 
       <div className="flex flex-col items-center gap-12 sm:gap-16 md:gap-20 lg:gap-24 w-full max-w-6xl">
-        {/* ModeSwitcher - hidden in fullscreen */}
         {!isFullscreen && (
           <div ref={settingsRef} className="z-50 w-full">
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
