@@ -7,7 +7,7 @@ import { ModeSwitcher } from "./components/ModeSwitcher";
 import { Settings } from "./components/Settings";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { SettingsButton } from "./components/SettingsButton";
-import { FocusToggle } from "./components/FocusMode";
+import { FullscreenMode } from "./components/FullscreenMode"; // renamed
 import { useTheme } from "./hooks/useTheme";
 import { Copyright } from "lucide-react";
 import type { TimerSettings } from "./types/timer";
@@ -37,13 +37,13 @@ const isIOS = () =>
 
 function App() {
   /* ───────── State ───────── */
-  const [isFocus, setIsFocus] = useState(false); // desktop
-  const [isMobileFocus, setIsMobileFocus] = useState(false); // iOS fallback
+  const [isFullscreen, setIsFullscreen] = useState(false); // desktop fullscreen
+  const [isMobileFullscreen, setIsMobileFullscreen] = useState(false); // iOS fallback
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
   const [settingsVersion, setSettingsVersion] = useState(0);
 
-  const isFocusActive = isFocus || isMobileFocus;
+  const isFullscreenActive = isFullscreen || isMobileFullscreen;
 
   /* ───────── Refs ───────── */
   const appRef = useRef<HTMLDivElement>(null);
@@ -73,16 +73,32 @@ function App() {
     if (settingsVersion > 0 && status === "idle") reset();
   }, [settingsVersion, status, reset]);
 
-  /* ───────── Toggle Focus Mode ───────── */
-  const toggleFocus = () => {
+  /* ───────── Toggle Fullscreen ───────── */
+  const toggleFullscreen = () => {
     if (isIOS()) {
-      // iOS → fake Focus
-      setIsMobileFocus((prev) => !prev);
+      // iOS Safari doesn’t support Fullscreen API → fake fullscreen
+      setIsMobileFullscreen((prev) => !prev);
+      return;
+    }
+
+    if (!document.fullscreenElement && appRef.current) {
+      appRef.current.requestFullscreen().catch(console.error);
     } else {
-      // Desktop → just toggle state
-      setIsFocus((prev) => !prev);
+      document.exitFullscreen().catch(console.error);
     }
   };
+
+  /* ───────── Listen for Fullscreen changes ───────── */
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   /* ───────── Save Settings ───────── */
   const handleSaveSettings = (newSettings: TimerSettings) => {
@@ -95,7 +111,7 @@ function App() {
     <div
       ref={appRef}
       className={`transition-all duration-300 ${
-        isMobileFocus ? "fixed inset-0 z-50" : "relative min-h-screen"
+        isMobileFullscreen ? "fixed inset-0 z-50" : "relative min-h-screen"
       } w-full flex flex-col items-center justify-center p-4 sm:p-8 ${theme}`}
       style={{
         backgroundColor: "var(--color-bg)",
@@ -116,13 +132,13 @@ function App() {
         className="absolute top-4 sm:top-8 right-4 sm:right-8 flex items-center gap-2 z-50"
       >
         <SettingsButton onClick={() => setIsSettingsOpen(true)} />
-        <FocusToggle onToggle={toggleFocus} isFocusMode={isFocusActive} />
+        <FullscreenMode onToggle={toggleFullscreen} isFullscreen={isFullscreenActive} />
         <ThemeToggle />
       </div>
 
       <div className="flex flex-col items-center gap-12 sm:gap-16 w-full max-w-6xl">
         {/* Mode Switcher */}
-        {!isFocusActive && (
+        {!isFullscreenActive && (
           <div ref={settingsRef} className="z-50 w-full">
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
@@ -134,7 +150,7 @@ function App() {
               status={status}
               timeLeft={timeLeft}
               totalTime={totalTime}
-              isFocus={isFocusActive}
+              isFullscreen={isFullscreenActive}
             />
           </div>
 
