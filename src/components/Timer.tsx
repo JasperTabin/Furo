@@ -1,4 +1,4 @@
-// components/Timer.tsx – Displays the countdown clock and progress bar
+// components/Timer.tsx – Displays the countdown clock and progress bar (Mobile-Responsive)
 
 import { formatTime } from "../utils/formatTime";
 import type { TimerStatus } from "../types/timer";
@@ -15,16 +15,16 @@ interface TimerProps {
    ───────────────────────────── */
 
 const containerBase =
-  "flex flex-col items-center justify-center gap-12 transition-all duration-500";
+  "flex flex-col items-center justify-center gap-8 sm:gap-12 transition-all duration-500 px-4";
 
 const timeBase = "font-bold tracking-tight transition-all duration-500 select-none";
 
-const timeFullscreen = "text-[22rem] leading-none";
+const timeFullscreen = "text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[22rem] leading-none";
 
-const timeNormal = "text-[13rem]";
+const timeNormal = "text-[5rem] sm:text-[8rem] md:text-[10rem] lg:text-[13rem]";
 
 const statusLabel =
-  "tracking-widest text-xl font-semibold transition-all duration-500";
+  "tracking-widest text-sm sm:text-lg md:text-xl font-semibold transition-all duration-500";
 
 const statusIdle = "text-[var(--color-border)] opacity-60";
 
@@ -33,7 +33,7 @@ const statusRunning = "text-[var(--color-fg)] opacity-90 animate-pulse";
 const statusPaused = "text-[var(--color-border)] opacity-80";
 
 const progressTrack =
-  "h-1 w-96 bg-[var(--color-border)]/30 rounded-full overflow-hidden transition-all duration-500";
+  "h-1 w-full max-w-[20rem] sm:max-w-sm md:max-w-md lg:max-w-lg bg-[var(--color-border)]/30 rounded-full overflow-hidden transition-all duration-500";
 
 const progressFill =
   "h-full bg-[var(--color-fg)] transition-all duration-1000 ease-linear shadow-lg shadow-[var(--color-fg)]/30";
@@ -87,8 +87,9 @@ export const Timer = ({
           {getStatusLabel(status)}
         </div>
         {status === "running" && totalTime > 0 && (
-          <div className="text-sm text-(--color-border) opacity-70">
-            {remainingMinutes} min left · {progressPercentage}% complete
+          <div className="text-xs sm:text-sm text-(--color-border) opacity-70 text-center">
+            <span className="hidden sm:inline">{remainingMinutes} min left · </span>
+            {progressPercentage}% complete
           </div>
         )}
       </div>

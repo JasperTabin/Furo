@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useTimer } from "./hooks/useTimer";
 import { usePageLoadAnimation } from "./hooks/usePageLoadAnimation";
 import { Timer } from "./components/Timer";
-import { Controls } from "./components/Controls";
+import { TimerControls } from "./components/TimerControls";
+import { ModeSwitcher } from "./components/ModeSwitcher";
 import { Settings } from "./components/Settings";
-import { SettingsModal } from "./components/SettingsModal";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { SettingsButton } from "./components/SettingsButton";
+import { FullscreenToggle } from "./components/FullscreenToggle";
 import { useTheme } from "./hooks/useTheme";
 import { Copyright } from "lucide-react";
 import type { TimerSettings } from "./types/timer";
@@ -31,10 +33,8 @@ const loadSettings = (): TimerSettings => {
 
 function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [timerSettings, setTimerSettings] =
-    useState<TimerSettings>(loadSettings());
+  const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
   const [settingsVersion, setSettingsVersion] = useState(0);
 
   const appRef = useRef<HTMLDivElement>(null);
@@ -71,7 +71,6 @@ function App() {
     } else {
       document.exitFullscreen().catch(console.error);
       setIsFullscreen(false);
-      setShowControls(true);
     }
   };
 
@@ -79,12 +78,6 @@ function App() {
     const handleFullscreenChange = () => {
       const active = !!document.fullscreenElement;
       setIsFullscreen(active);
-
-      if (active) {
-        setShowControls(false);
-      } else {
-        setShowControls(true);
-      }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -101,36 +94,37 @@ function App() {
   return (
     <div
       ref={appRef}
-      className={`relative min-h-screen w-full flex flex-col items-center justify-center p-8 transition-colors duration-300 ${theme}`}
+      className={`relative min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-300 ${theme}`}
       style={{
         backgroundColor: "var(--color-bg)",
         color: "var(--color-fg)",
       }}
     >
-      {!isFullscreen && (
-        <div ref={headerRef} className="absolute top-8 left-8">
-          <h1 className="text-2xl font-bold tracking-widest">FURŌ</h1>
-          <p className="mt-1 text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
-            FLOW
-          </p>
-        </div>
-      )}
+      {/* Header */}
+      <div ref={headerRef} className="absolute top-4 sm:top-8 left-4 sm:left-8 z-50">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-widest">FURŌ</h1>
+        <p className="mt-1 text-xs font-semibold tracking-widest text-[var(--color-border)] opacity-60">
+          FLOW
+        </p>
+      </div>
 
-      {!isFullscreen && (
-        <div ref={themeToggleRef} className="absolute top-8 right-8">
-          <ThemeToggle />
-        </div>
-      )}
+      {/* Top Right Controls */}
+      <div ref={themeToggleRef} className="absolute top-4 sm:top-8 right-4 sm:right-8 flex items-center gap-2 z-50">
+        <SettingsButton onClick={() => setIsSettingsOpen(true)} />
+        <FullscreenToggle onToggle={toggleFullscreen} isFullscreen={isFullscreen} />
+        <ThemeToggle />
+      </div>
 
-      <div className="flex flex-col items-center gap-24">
+      <div className="flex flex-col items-center gap-12 sm:gap-16 md:gap-20 lg:gap-24 w-full max-w-6xl">
+        {/* ModeSwitcher - hidden in fullscreen */}
         {!isFullscreen && (
-          <div ref={settingsRef} className="z-50">
-            <Settings onSwitchMode={switchMode} currentMode={mode} />
+          <div ref={settingsRef} className="z-50 w-full">
+            <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
 
-        <div className="relative flex flex-col items-center gap-20">
-          <div ref={timerRef}>
+        <div className="relative flex flex-col items-center gap-12 sm:gap-16 md:gap-20 w-full">
+          <div ref={timerRef} className="w-full">
             <Timer
               status={status}
               timeLeft={timeLeft}
@@ -139,57 +133,31 @@ function App() {
             />
           </div>
 
-          {isFullscreen ? (
-            <div
-              className="relative"
-              onMouseEnter={() => setShowControls(true)}
-              onMouseLeave={() => setShowControls(false)}
-            >
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-full h-32" />
-
-              <div
-                className={`z-50 transition-opacity duration-500 ease-in-out ${
-                  !showControls ? "opacity-0" : "opacity-100"
-                }`}
-              >
-                <Controls
-                  status={status}
-                  onStart={start}
-                  onPause={pause}
-                  onReset={reset}
-                  onFullscreenChange={toggleFullscreen}
-                  onSettingsClick={() => setIsSettingsOpen(true)}
-                />
-              </div>
-            </div>
-          ) : (
-            <div ref={controlsRef} className="z-50">
-              <Controls
-                status={status}
-                onStart={start}
-                onPause={pause}
-                onReset={reset}
-                onFullscreenChange={toggleFullscreen}
-                onSettingsClick={() => setIsSettingsOpen(true)}
-              />
-            </div>
-          )}
+          {/* Timer Controls - always visible */}
+          <div ref={controlsRef} className="z-50 w-full">
+            <TimerControls
+              status={status}
+              onStart={start}
+              onPause={pause}
+              onReset={reset}
+            />
+          </div>
         </div>
       </div>
 
-      {!isFullscreen && (
+      {/* Footer */}
+
         <div
           ref={footerRef}
-          className="absolute bottom-8 flex items-center gap-2 text-xs tracking-wide"
+          className="absolute bottom-4 sm:bottom-8 flex items-center gap-2 text-[10px] sm:text-xs tracking-wide"
         >
           <Copyright size={10} />
           2026 JasDev. All rights reserved.
         </div>
-      )}
 
       {/* Settings Modal */}
       {isSettingsOpen && (
-        <SettingsModal
+        <Settings
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           currentSettings={timerSettings}
