@@ -1,18 +1,14 @@
-// components/ThemeToggle.tsx
+// components/ThemeToggle.tsx – Dark/Light theme toggle only
 
 import { useState, useRef, useEffect } from "react";
-import { Monitor, Moon, Sun, ChevronDown } from "lucide-react";
+import { Moon, Sun, ChevronDown } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
-
-/* ─────────────────────────────
-   Tailwind class presets
-   ───────────────────────────── */
 
 const buttonClass =
   "flex items-center gap-2 p-2 rounded-md hover:bg-[var(--color-border)]/20 transition-colors";
 
 const dropdownClass =
-  "absolute top-12 right-0 w-48 bg-[var(--color-bg)] border-2 border-[var(--color-border)] rounded-lg shadow-xl overflow-hidden z-50";
+  "absolute top-12 right-0 w-40 bg-[var(--color-bg)] border-2 border-[var(--color-border)] rounded-lg shadow-xl overflow-hidden z-50";
 
 const menuItemClass =
   "flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-border)]/20 transition-colors cursor-pointer";
@@ -22,7 +18,7 @@ const menuItemActive =
 
 /* ───────────────────────────── */
 
-type ThemeOption = "light" | "dark" | "system";
+type ThemeOption = "light" | "dark";
 
 export const ThemeToggle = () => {
   const { theme, setThemeMode } = useTheme();
@@ -49,15 +45,11 @@ export const ThemeToggle = () => {
     setIsOpen(false);
   };
 
-  const getCurrentIcon = () => {
-    if (theme === "light") return <Sun size={20} />;
-    if (theme === "dark") return <Moon size={20} />;
-    return <Monitor size={20} />;
-  };
+  const getCurrentIcon = () =>
+    theme === "light" ? <Sun size={20} /> : <Moon size={20} />;
 
   return (
     <div ref={dropdownRef} className="relative">
-      {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={buttonClass}
@@ -81,12 +73,9 @@ export const ThemeToggle = () => {
             className={theme === "light" ? menuItemActive : menuItemClass}
           >
             <Sun size={18} />
-            <div className="flex-1">
-              <div className="text-sm font-semibold">Light</div>
-              <div className="text-xs text-(--color-border)">Light mode</div>
-            </div>
+            <span className="text-sm font-semibold">Light</span>
             {theme === "light" && (
-              <div className="w-2 h-2 rounded-full bg-(--color-fg)" />
+              <div className="ml-auto w-2 h-2 rounded-full bg-(--color-fg)" />
             )}
           </div>
 
@@ -96,27 +85,9 @@ export const ThemeToggle = () => {
             className={theme === "dark" ? menuItemActive : menuItemClass}
           >
             <Moon size={18} />
-            <div className="flex-1">
-              <div className="text-sm font-semibold">Dark</div>
-              <div className="text-xs text-(--color-border)">Dark mode</div>
-            </div>
+            <span className="text-sm font-semibold">Dark</span>
             {theme === "dark" && (
-              <div className="w-2 h-2 rounded-full bg-(--color-fg)" />
-            )}
-          </div>
-
-          {/* System Option */}
-          <div
-            onClick={() => handleThemeSelect("system")}
-            className={theme === "system" ? menuItemActive : menuItemClass}
-          >
-            <Monitor size={18} />
-            <div className="flex-1">
-              <div className="text-sm font-semibold">System</div>
-              <div className="text-xs text-(--color-border)">Follow system</div>
-            </div>
-            {theme === "system" && (
-              <div className="w-2 h-2 rounded-full bg-(--color-fg)" />
+              <div className="ml-auto w-2 h-2 rounded-full bg-(--color-fg)" />
             )}
           </div>
         </div>

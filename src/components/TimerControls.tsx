@@ -10,7 +10,7 @@ interface TimerControlsProps {
 }
 
 const buttonBase =
-  "px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm tracking-widest font-semibold rounded-md border-2 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[var(--color-fg)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] active:scale-95";
+  "w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm tracking-widest font-semibold rounded-md border-2 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[var(--color-fg)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] active:scale-95";
 
 const buttonActive =
   "bg-[var(--color-fg)] text-[var(--color-bg)] border-[var(--color-fg)] hover:brightness-90";
@@ -26,37 +26,35 @@ export const TimerControls = ({ status, onStart, onPause, onReset }: TimerContro
   const isRunning = status === "running";
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full px-4">
+    <div className="flex flex-row gap-4 sm:gap-4">
       {isIdle ? (
         <button
           onClick={onStart}
-          className={`${buttonBase} ${buttonActive} w-full sm:w-auto`}
+          className={`${buttonBase} ${buttonActive}`}
           aria-label="Start timer"
         >
           START
         </button>
       ) : (
-        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          {/* Pause / Resume */}
+        <>
           <button
             onClick={isRunning ? onPause : onStart}
-            className={`${buttonBase} ${isRunning ? buttonActive : buttonInactive} w-full sm:w-auto`}
+            className={`${buttonBase} ${isRunning ? buttonActive : buttonInactive}`}
             aria-label={isRunning ? "Pause timer" : "Resume timer"}
             title={isRunning ? "Pause (Space)" : "Resume (Space)"}
           >
             {isRunning ? "PAUSE" : "RESUME"}
           </button>
 
-          {/* Stop */}
           <button
             onClick={onReset}
-            className={`${buttonBase} ${buttonDanger} w-full sm:w-auto`}
+            className={`${buttonBase} ${buttonDanger}`}
             aria-label="Stop timer"
             title="Stop timer"
           >
             STOP
           </button>
-        </div>
+        </>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-// components/Settings.tsx - Modal for configuring timer durations (Optimized)
+// components/Settings.tsx – Modal for configuring timer durations (Cleaned & Centralized)
 
 import { X } from "lucide-react";
 import { useState } from "react";
@@ -15,9 +15,15 @@ interface SettingsProps {
 /* Constants & Helpers */
 
 const LIMITS = {
-  workDuration: { min: 1, max: 120 },
-  breakDuration: { min: 1, max: 30 },
-  longBreakDuration: { min: 1, max: 60 },
+  workDuration: { min: 1, max: 120, label: "FOCUS DURATION (1–120 min)" },
+  breakDuration: { min: 1, max: 30, label: "SHORT BREAK (1–30 min)" },
+  longBreakDuration: { min: 1, max: 60, label: "LONG BREAK (1–60 min)" },
+} as const;
+
+const DEFAULTS = {
+  workDuration: 25,
+  breakDuration: 5,
+  longBreakDuration: 15,
 } as const;
 
 const clamp = (value: number, min: number, max: number) =>
@@ -54,17 +60,11 @@ export const Settings = ({
 
   if (!isOpen) return null;
 
-  /* Generic handler */
-  const handleChange =
-    (key: keyof typeof values) => (value: string) => {
-      const num = parseInt(value, 10) || 0;
-      const { min, max } = LIMITS[key];
-
-      setValues((prev) => ({
-        ...prev,
-        [key]: clamp(num, min, max),
-      }));
-    };
+  const handleChange = (key: keyof typeof values, value: string) => {
+    const num = parseInt(value, 10) || 0;
+    const { min, max } = LIMITS[key];
+    setValues((prev) => ({ ...prev, [key]: clamp(num, min, max) }));
+  };
 
   const handleSave = () => {
     onSave({
@@ -86,92 +86,52 @@ export const Settings = ({
       ),
       sessionsBeforeLongBreak: currentSettings.sessionsBeforeLongBreak,
     });
-
     onClose();
   };
 
   const handleReset = () => {
-    setValues({
-      workDuration: 25,
-      breakDuration: 5,
-      longBreakDuration: 15,
-    });
+    setValues({ ...DEFAULTS });
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-md bg-(--color-bg) border-2 border-(--color-border) rounded-lg p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-(--color-fg) hover:text-(--color-border) transition-colors"
-          aria-label="Close settings"
-        >
-          <X size={20} />
-        </button>
-
-        <h2 className="text-xl sm:text-2xl font-bold tracking-widest mb-6 sm:mb-8">
-          TIMER SETTINGS
-        </h2>
-
-        <div className="space-y-5 sm:space-y-6">
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              FOCUS DURATION (1–120 min)
-            </label>
-            <input
-              type="number"
-              min={LIMITS.workDuration.min}
-              max={LIMITS.workDuration.max}
-              value={values.workDuration}
-              onChange={(e) =>
-                handleChange("workDuration")(e.target.value)
-              }
-              onBlur={(e) =>
-                handleChange("workDuration")(e.target.value)
-              }
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              SHORT BREAK (1–30 min)
-            </label>
-            <input
-              type="number"
-              min={LIMITS.breakDuration.min}
-              max={LIMITS.breakDuration.max}
-              value={values.breakDuration}
-              onChange={(e) =>
-                handleChange("breakDuration")(e.target.value)
-              }
-              onBlur={(e) =>
-                handleChange("breakDuration")(e.target.value)
-              }
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              LONG BREAK (1–60 min)
-            </label>
-            <input
-              type="number"
-              min={LIMITS.longBreakDuration.min}
-              max={LIMITS.longBreakDuration.max}
-              value={values.longBreakDuration}
-              onChange={(e) =>
-                handleChange("longBreakDuration")(e.target.value)
-              }
-              onBlur={(e) =>
-                handleChange("longBreakDuration")(e.target.value)
-              }
-              className={inputClass}
-            />
-          </div>
+        {/* Modal Header */}
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-widest">
+            TIMER SETTINGS
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 text-(--color-fg) hover:text-(--color-border) transition-colors"
+            aria-label="Close settings"
+          >
+            <X size={20} />
+          </button>
         </div>
 
+        {/* Input Fields */}
+        <div className="space-y-5 sm:space-y-6">
+          {Object.entries(LIMITS).map(([key, { min, max, label }]) => (
+            <div key={key}>
+              <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
+                {label}
+              </label>
+              <input
+                type="number"
+                min={min}
+                max={max}
+                value={values[key as keyof typeof values]}
+                onChange={(e) =>
+                  handleChange(key as keyof typeof values, e.target.value)
+                }
+                className={inputClass}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Action Buttons */}
         <div className="flex gap-3 sm:gap-4 mt-6 sm:mt-8">
           <button
             onClick={handleReset}
