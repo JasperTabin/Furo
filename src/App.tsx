@@ -80,7 +80,7 @@ function App() {
   return (
     <div
       ref={appRef}
-      className={`h-screen overflow-hidden flex flex-col transition-colors duration-500 ${theme} bg-(--color-bg) text-(--color-fg) ${
+      className={`h-dvh overflow-hidden flex flex-col transition-colors duration-500 ${theme} bg-(--color-bg) text-(--color-fg) ${
         isFullscreen ? "" : "p-6 sm:p-8"
       }`}
     >
