@@ -34,11 +34,13 @@ const loadSettings = (): TimerSettings => {
 
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
+  const [timerSettings, setTimerSettings] =
+    useState<TimerSettings>(loadSettings());
   const [settingsVersion, setSettingsVersion] = useState(0);
 
   const { theme } = useTheme();
-  const { mode, status, timeLeft, start, pause, reset, switchMode } = useTimer(timerSettings);
+  const { mode, status, timeLeft, start, pause, reset, switchMode } =
+    useTimer(timerSettings);
   const { isFullscreen } = useFullscreen();
 
   const appRef = useRef<HTMLDivElement>(null);
@@ -78,17 +80,17 @@ function App() {
   return (
     <div
       ref={appRef}
-      className={`flex flex-col transition-colors duration-500 ${theme} bg-(--color-bg) text-(--color-fg) ${
-        isFullscreen
-          ? "h-screen overflow-hidden" // fullscreen: lock viewport, no scroll
-          : "min-h-screen p-6 sm:p-8"   // normal: allow growth + scroll
+      className={`h-screen overflow-hidden flex flex-col transition-colors duration-500 ${theme} bg-(--color-bg) text-(--color-fg) ${
+        isFullscreen ? "" : "p-6 sm:p-8"
       }`}
     >
       {/* HEADER */}
       {!isFullscreen && (
         <header className="flex items-center justify-between w-full mb-auto">
           <div ref={headerTitleRef}>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-widest">FURŌ</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-widest">
+              FURŌ
+            </h1>
             <p className="text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
               FLOW
             </p>
@@ -102,13 +104,9 @@ function App() {
       )}
 
       {/* MAIN CONTENT */}
-      <main
-        className={`flex flex-col items-center ${
-          isFullscreen ? "h-screen justify-between py-12" : "flex-1 justify-center"
-        }`}
-      >
+      <main className="flex-1 flex flex-col items-center justify-center">
         {!isFullscreen && (
-          <div ref={modeSwitcherRef} className="mb-6 sm:mb-12">
+          <div ref={modeSwitcherRef} className="mb-12">
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
@@ -119,13 +117,19 @@ function App() {
 
         <div
           ref={controlsRef}
-          className={`flex items-center gap-3 ${
-            isFullscreen ? "mt-0" : "mt-6 sm:mt-12"
-          }`}
+          className={`flex items-center gap-3 ${isFullscreen ? "mt-8" : "mt-12"}`}
         >
-          <TimerControls status={status} onStart={start} onPause={pause} onReset={reset} />
+          <TimerControls
+            status={status}
+            onStart={start}
+            onPause={pause}
+            onReset={reset}
+          />
           <div className="w-px h-8 bg-(--color-border) opacity-30" />
-          <SettingsButton onClick={() => setIsSettingsOpen(true)} isOpen={isSettingsOpen} />
+          <SettingsButton
+            onClick={() => setIsSettingsOpen(true)}
+            isOpen={isSettingsOpen}
+          />
           <FullscreenMode />
         </div>
       </main>
