@@ -1,9 +1,12 @@
-// Timer - Settings
+// Main container that holds both UI components
 
 import { X } from "lucide-react";
+import { useRef, useEffect } from "react";
 import type { TimerSettings } from "../../types/timer";
 import { useSettings } from "../../hooks/useSettings";
 import { Button } from "../Shared/Button";
+import { DurationSettings } from "./DurationSettings";
+import { SoundSettings } from "./SoundSettings";
 
 interface SettingsProps {
   isOpen: boolean;
@@ -12,135 +15,49 @@ interface SettingsProps {
   onSave: (settings: TimerSettings) => void;
 }
 
-const inputClass = `
-  w-full
-  px-3 sm:px-4 py-2
-  text-sm
-  bg-[var(--color-bg)]
-  text-[var(--color-fg)]
-  border border-[var(--color-border)]
-  rounded-md
-`;
+export const Settings = ({ isOpen, onClose, currentSettings, onSave }: SettingsProps) => {
+  const { duration, sound, reset, save } = useSettings(currentSettings);
+  const stopPreviewRef = useRef<(() => void) | undefined>(undefined);
 
-export const Settings = ({
-  isOpen,
-  onClose,
-  currentSettings,
-  onSave,
-}: SettingsProps) => {
-  const { values, update, reset, save } = useSettings(currentSettings);
+  useEffect(() => {
+    if (!isOpen) {
+      stopPreviewRef.current?.();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  // 🔊 manual preview button
-  const playPreview = () => {
-    if (!values.sound || values.sound === "none") return;
+  const handleClose = () => {
+    stopPreviewRef.current?.();
+    onClose();
+  };
 
-    const audio = new Audio(`/sounds/${values.sound}`);
-    audio.play().catch((err) => console.log("Preview failed:", err));
+  const handleSave = () => {
+    stopPreviewRef.current?.();
+    save(onSave, currentSettings.sessionsBeforeLongBreak);
+    onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-md bg-(--color-bg) border-2 border-(--color-border) rounded-lg p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+        
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-widest">
-            TIMER SETTINGS
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-(--color-fg) hover:text-(--color-border) transition-colors"
-            aria-label="Close settings"
-          >
+          <h2 className="text-xl sm:text-2xl font-bold tracking-widest">TIMER SETTINGS</h2>
+          <button onClick={handleClose} className="p-2 text-(--color-fg) hover:text-(--color-border) transition-colors" aria-label="Close settings">
             <X size={20} />
           </button>
         </div>
 
-        {/* Inputs */}
-        <div className="space-y-5 sm:space-y-6">
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              FOCUS DURATION (1–120 min)
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={120}
-              value={values.workDuration}
-              onChange={(e) => update("workDuration", e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              SHORT BREAK (1–30 min)
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={30}
-              value={values.breakDuration}
-              onChange={(e) => update("breakDuration", e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              LONG BREAK (1–60 min)
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={60}
-              value={values.longBreakDuration}
-              onChange={(e) => update("longBreakDuration", e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          {/* 🔊 SOUND SELECTOR */}
-          {/* SOUND SELECTOR */}
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
-              TIMER SOUND
-            </label>
-
-            <div className="flex gap-2">
-              <select
-                value={values.sound}
-                onChange={(e) => update("sound", e.target.value)}
-                className={`${inputClass} appearance-none`}
-              >
-                <option value="Cat.mp3">Cat Meow</option>
-                <option value="none">No sound</option>
-              </select>
-
-              <Button onClick={playPreview} variant="inactive">
-                PREVIEW
-              </Button>
-            </div>
-          </div>
+        <div className="space-y-8">
+          <DurationSettings duration={duration} />
+          <div className="border-t border-(--color-border) opacity-30" />
+          <SoundSettings sound={sound} onStopPreview={(stop) => (stopPreviewRef.current = stop)} />
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-3 sm:gap-4 mt-6 sm:mt-8">
-          <Button onClick={reset} variant="inactive" className="flex-1">
-            RESET
-          </Button>
-
-          <Button
-            onClick={() => {
-              save(onSave, currentSettings.sessionsBeforeLongBreak);
-              onClose();
-            }}
-            variant="active"
-            className="flex-1"
-          >
-            SAVE
-          </Button>
+        <div className="flex gap-3 sm:gap-4 mt-8">
+          <Button onClick={reset} variant="inactive" className="flex-1">RESET</Button>
+          <Button onClick={handleSave} variant="active" className="flex-1">SAVE</Button>
         </div>
       </div>
     </div>

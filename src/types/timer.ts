@@ -12,9 +12,11 @@ export interface TimerState {
 }
 
 export interface TimerSettings {
-  workDuration: number;              
-  breakDuration: number;             
-  longBreakDuration: number;         
-  sessionsBeforeLongBreak: number; 
-  sound?: string; // NEW: sound file name or "none" 
+  workDuration: number;
+  breakDuration: number;
+  longBreakDuration: number;
+  sessionsBeforeLongBreak: number;
+  sound?: string;
+  volume?: number;
+  isMuted?: boolean;
 }

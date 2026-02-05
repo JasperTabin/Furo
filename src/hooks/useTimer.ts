@@ -7,7 +7,7 @@ export const useTimer = (settings: TimerSettings) => {
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
 
   const intervalRef = useRef<number | null>(null);
-
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -18,10 +18,11 @@ export const useTimer = (settings: TimerSettings) => {
 
     const audio = new Audio(`/sounds/${settings.sound}`);
     audio.preload = "auto";
+    audio.volume = settings.isMuted ? 0 : (settings.volume ?? 50) / 100;
     audio.load();
 
     audioRef.current = audio;
-  }, [settings.sound]);
+  }, [settings.sound, settings.volume, settings.isMuted]);
 
   const getTotalTime = useCallback(
     (currentMode: TimerMode): number => {
@@ -67,6 +68,7 @@ export const useTimer = (settings: TimerSettings) => {
     try {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      audioRef.current.volume = settings.isMuted ? 0 : (settings.volume ?? 50) / 100;
 
       audioRef.current.play().catch((err) => {
         console.log("Timer sound blocked:", err);
@@ -74,7 +76,7 @@ export const useTimer = (settings: TimerSettings) => {
     } catch (err) {
       console.log("Timer sound error:", err);
     }
-  }, []);
+  }, [settings.volume, settings.isMuted]);
 
   useEffect(() => {
     if (status !== "running") {

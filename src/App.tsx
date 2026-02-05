@@ -18,13 +18,21 @@ const DEFAULT_SETTINGS: TimerSettings = {
   breakDuration: 5,
   longBreakDuration: 15,
   sessionsBeforeLongBreak: 4,
+  volume: 50,
+  isMuted: false,
 };
 
 const loadSettings = (): TimerSettings => {
   const saved = localStorage.getItem("timerSettings");
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        volume: parsed.volume ?? DEFAULT_SETTINGS.volume,
+        isMuted: parsed.isMuted ?? DEFAULT_SETTINGS.isMuted,
+      };
     } catch {
       return DEFAULT_SETTINGS;
     }

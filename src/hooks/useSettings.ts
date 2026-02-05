@@ -1,60 +1,56 @@
-import { useState } from "react";
+// Orchestrator/Coordinator that combines both hooks
+
 import type { TimerSettings } from "../types/timer";
+import { useDurationSettings } from "../hooks/useDuration";
+import { useSoundSettings } from "../hooks/useSound";
 
-const LIMITS = {
-  workDuration: { min: 1, max: 120 },
-  breakDuration: { min: 1, max: 30 },
-  longBreakDuration: { min: 1, max: 60 },
-} as const;
-
-const DEFAULTS = {
-  workDuration: 25,
-  breakDuration: 5,
-  longBreakDuration: 15,
-  sound: "Cat.mp3",
-} as const;
-
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
+type DurationKeys = "workDuration" | "breakDuration" | "longBreakDuration";
+type SoundKeys = "sound" | "volume" | "isMuted";
+type SettingsKeys = DurationKeys | SoundKeys;
 
 export const useSettings = (currentSettings: TimerSettings) => {
-  const [values, setValues] = useState({
+  const duration = useDurationSettings({
     workDuration: currentSettings.workDuration,
     breakDuration: currentSettings.breakDuration,
     longBreakDuration: currentSettings.longBreakDuration,
-    sound: currentSettings.sound || DEFAULTS.sound,
   });
 
-  const update = (key: keyof typeof values, value: string) => {
-    if (key === "sound") {
-      setValues((prev) => ({ ...prev, sound: value }));
-      return;
+  const sound = useSoundSettings({
+    sound: currentSettings.sound || "Sound_1.mp3",
+    volume: currentSettings.volume ?? 50,
+    isMuted: currentSettings.isMuted ?? false,
+  });
+
+  const update = (key: SettingsKeys, value: string) => {
+    if (key === "sound" || key === "volume" || key === "isMuted") {
+      sound.update(key, value);
+    } else {
+      duration.update(key, value);
     }
-
-    const num = parseInt(value, 10) || 0;
-    const { min, max } = LIMITS[key as keyof typeof LIMITS];
-
-    setValues((prev) => ({
-      ...prev,
-      [key]: clamp(num, min, max),
-    }));
   };
 
-  const reset = () => setValues({ ...DEFAULTS });
+  const reset = () => {
+    duration.reset();
+    sound.reset();
+  };
 
   const save = (
     onSave: (settings: TimerSettings) => void,
     sessionsBeforeLongBreak: number,
   ) => {
     onSave({
-      ...values,
-      workDuration: clamp(values.workDuration, LIMITS.workDuration.min, LIMITS.workDuration.max),
-      breakDuration: clamp(values.breakDuration, LIMITS.breakDuration.min, LIMITS.breakDuration.max),
-      longBreakDuration: clamp(values.longBreakDuration, LIMITS.longBreakDuration.min, LIMITS.longBreakDuration.max),
+      ...duration.values,
+      ...sound.values,
       sessionsBeforeLongBreak,
-      sound: values.sound,
     });
   };
 
-  return { values, update, reset, save };
+  return {
+    values: { ...duration.values, ...sound.values },
+    duration,
+    sound,
+    update,
+    reset,
+    save,
+  };
 };
