@@ -1,4 +1,4 @@
-// hooks/useAnimation.ts – GSAP animations on first load
+// GSAP animations on first load
 
 import { useEffect, type RefObject } from "react";
 import { gsap } from "gsap";

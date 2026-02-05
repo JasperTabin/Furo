@@ -1,4 +1,4 @@
-// utils/formatTime.ts - Converts seconds to MM:SS format
+// Time Format
 
 /**
  * Formats seconds into MM:SS format

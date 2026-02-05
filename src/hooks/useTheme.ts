@@ -1,4 +1,4 @@
-// hooks/useTheme.ts – simplified for Light/Dark only
+// Dark & Light mode logic
 import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";

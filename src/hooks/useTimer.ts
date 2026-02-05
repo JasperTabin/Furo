@@ -1,4 +1,4 @@
-// hooks/useTimer.ts – Cleaned & Simplified Pomodoro Timer Hook
+// Timer Logic
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { TimerMode, TimerStatus, TimerSettings } from "../types/timer";

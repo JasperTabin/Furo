@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useTimer } from "./hooks/useTimer";
-import { Timer } from "./components/Timer";
-import { TimerControls } from "./components/TimerControls";
-import { ModeSwitcher } from "./components/ModeSwitcher";
-import { Settings } from "./components/Settings";
-import { ThemeToggle } from "./components/ThemeToggle";
-import { SettingsButton } from "./components/SettingsButton";
-import { FullscreenMode } from "./components/FullscreenMode";
+import { Timer } from "./components/timer/Timer";
+import { TimerControls } from "./components/timer/TimerControls";
+import { ModeSwitcher } from "./components/timer/ModeSwitcher";
+import { Settings } from "./components/settings/Settings";
+import { ThemeToggle } from "./components/theme/ThemeToggle";
+import { SettingsButton } from "./components/settings/SettingsButton";
+import { FullscreenMode } from "./components/fullscreen/FullscreenMode";
 import { useTheme } from "./hooks/useTheme";
 import { useAnimation } from "./hooks/useAnimation";
+import { useFullscreen } from "./hooks/useFullscreen";
 import { Copyright } from "lucide-react";
 import type { TimerSettings } from "./types/timer";
 
@@ -32,15 +33,14 @@ const loadSettings = (): TimerSettings => {
 };
 
 function App() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
   const [settingsVersion, setSettingsVersion] = useState(0);
 
   const { theme } = useTheme();
   const { mode, status, timeLeft, start, pause, reset, switchMode } = useTimer(timerSettings);
+  const { isFullscreen } = useFullscreen();
 
-  // Animation refs
   const appRef = useRef<HTMLDivElement>(null);
   const headerTitleRef = useRef<HTMLDivElement>(null);
   const headerControlsRef = useRef<HTMLDivElement>(null);
@@ -69,23 +69,6 @@ function App() {
     }
   }, [settingsVersion, status, reset]);
 
-  const toggleFullscreen = () => {
-    if (!isFullscreen) {
-      document.documentElement.requestFullscreen().catch(console.error);
-    } else {
-      document.exitFullscreen().catch(console.error);
-      setIsFullscreen(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
   const handleSaveSettings = (newSettings: TimerSettings) => {
     localStorage.setItem("timerSettings", JSON.stringify(newSettings));
     setTimerSettings(newSettings);
@@ -95,65 +78,59 @@ function App() {
   return (
     <div
       ref={appRef}
-      className={`min-h-screen flex flex-col items-center justify-between p-4 sm:p-8 transition-colors duration-300 ${theme} bg-(--color-bg) text-(--color-fg)`}
-    >
-      {/* Header */}
-      <header className="flex items-center justify-between w-full mb-6">
-        <div ref={headerTitleRef}>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-widest">FURŌ</h1>
-          <p className="text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
-            FLOW
-          </p>
-        </div>
-        <div ref={headerControlsRef} className="flex items-center gap-2">
-          <div ref={themeToggleRef}>
-            <ThemeToggle />
+      className={`min-h-screen flex flex-col transition-colors duration-500 ${theme} bg-(--color-bg) text-(--color-fg) ${
+        isFullscreen ? "" : "p-6 sm:p-8"
+      }`}
+    > 
+      {/* HEADER */}
+      {!isFullscreen && (
+        <header className="flex items-center justify-between w-full mb-auto">
+          <div ref={headerTitleRef}>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-widest">FURŌ</h1>
+            <p className="text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
+              FLOW
+            </p>
           </div>
-        </div>
-      </header>
+          <div ref={headerControlsRef}>
+            <div ref={themeToggleRef}>
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
+      )}
 
-      {/* Centered Content */}
-      <main className="flex flex-col items-center">
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col items-center justify-center">
         {!isFullscreen && (
-          <div ref={modeSwitcherRef}>
+          <div ref={modeSwitcherRef} className="mb-12">
             <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
           </div>
         )}
 
         <div ref={timerRef}>
-          <Timer timeLeft={timeLeft} isFullscreen={isFullscreen} />
+          <Timer timeLeft={timeLeft} />
         </div>
 
-        {/* Controls + Utility Buttons together */}
-        <div
-          ref={controlsRef}
-          className="flex flex-row gap-2"
-        >
+        <div ref={controlsRef} className={`flex items-center gap-3 ${isFullscreen ? "mt-8" : "mt-12"}`}>
           <TimerControls status={status} onStart={start} onPause={pause} onReset={reset} />
-
-          <div className="flex flex-row gap-2">
-            <SettingsButton
-              onClick={() => setIsSettingsOpen(true)}
-              isOpen={isSettingsOpen}
-            />
-            <FullscreenMode
-              onToggle={toggleFullscreen}
-              isFullscreen={isFullscreen}
-            />
-          </div>
+          <div className="w-px h-8 bg-(--color-border) opacity-30" />
+          <SettingsButton onClick={() => setIsSettingsOpen(true)} isOpen={isSettingsOpen} />
+          <FullscreenMode />
         </div>
       </main>
+      
+      {/* FOOTER */}
+      {!isFullscreen && (
+        <footer
+          ref={footerRef}
+          className="text-[10px] sm:text-xs tracking-wide flex items-center justify-center gap-2 mt-auto"
+        >
+          <Copyright size={12} />
+          2026 JasDev. All rights reserved.
+        </footer>
+      )}
 
-      {/* Footer */}
-      <footer
-        ref={footerRef}
-        className="text-[10px] sm:text-xs tracking-wide flex items-center gap-2"
-      >
-        <Copyright size={12} />
-        2026 JasDev. All rights reserved.
-      </footer>
-
-      {/* Settings Modal */}
+      {/* SETTINGS */}
       {isSettingsOpen && (
         <Settings
           isOpen={isSettingsOpen}
