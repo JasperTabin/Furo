@@ -16,14 +16,10 @@ const inputClass = `
   w-full
   px-3 sm:px-4 py-2
   text-sm
-  bg-transparent
+  bg-[var(--color-bg)]
   text-[var(--color-fg)]
   border border-[var(--color-border)]
   rounded-md
-  transition
-  focus:outline-none
-  focus:border-[var(--color-fg)]
-  focus:ring-2 focus:ring-[var(--color-fg)]/30
 `;
 
 export const Settings = ({
@@ -35,6 +31,14 @@ export const Settings = ({
   const { values, update, reset, save } = useSettings(currentSettings);
 
   if (!isOpen) return null;
+
+  // 🔊 manual preview button
+  const playPreview = () => {
+    if (!values.sound || values.sound === "none") return;
+
+    const audio = new Audio(`/sounds/${values.sound}`);
+    audio.play().catch((err) => console.log("Preview failed:", err));
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -53,7 +57,7 @@ export const Settings = ({
           </button>
         </div>
 
-        {/* Input Fields */}
+        {/* Inputs */}
         <div className="space-y-5 sm:space-y-6">
           <div>
             <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
@@ -96,12 +100,37 @@ export const Settings = ({
               className={inputClass}
             />
           </div>
+
+          {/* 🔊 SOUND SELECTOR */}
+          {/* SOUND SELECTOR */}
+          <div>
+            <label className="block text-xs sm:text-sm font-semibold tracking-widest mb-2">
+              TIMER SOUND
+            </label>
+
+            <div className="flex gap-2">
+              <select
+                value={values.sound}
+                onChange={(e) => update("sound", e.target.value)}
+                className={`${inputClass} appearance-none`}
+              >
+                <option value="Cat.mp3">Cat Meow</option>
+                <option value="none">No sound</option>
+              </select>
+
+              <Button onClick={playPreview} variant="inactive">
+                PREVIEW
+              </Button>
+            </div>
+          </div>
         </div>
 
+        {/* Buttons */}
         <div className="flex gap-3 sm:gap-4 mt-6 sm:mt-8">
           <Button onClick={reset} variant="inactive" className="flex-1">
             RESET
           </Button>
+
           <Button
             onClick={() => {
               save(onSave, currentSettings.sessionsBeforeLongBreak);

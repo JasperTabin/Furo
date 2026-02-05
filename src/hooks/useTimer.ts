@@ -1,5 +1,3 @@
-// Timer Logic
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { TimerMode, TimerStatus, TimerSettings } from "../types/timer";
 
@@ -10,7 +8,21 @@ export const useTimer = (settings: TimerSettings) => {
 
   const intervalRef = useRef<number | null>(null);
 
-  /** Helper: calculate total time for a given mode */
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!settings.sound || settings.sound === "none") {
+      audioRef.current = null;
+      return;
+    }
+
+    const audio = new Audio(`/sounds/${settings.sound}`);
+    audio.preload = "auto";
+    audio.load();
+
+    audioRef.current = audio;
+  }, [settings.sound]);
+
   const getTotalTime = useCallback(
     (currentMode: TimerMode): number => {
       switch (currentMode) {
@@ -27,11 +39,9 @@ export const useTimer = (settings: TimerSettings) => {
     [settings]
   );
 
-  /** State for time tracking */
   const [timeLeft, setTimeLeft] = useState(() => getTotalTime("focus"));
   const [totalTime, setTotalTime] = useState(() => getTotalTime("focus"));
 
-  /** Centralized mode updater */
   const updateMode = useCallback(
     (newMode: TimerMode) => {
       const newTotal = getTotalTime(newMode);
@@ -43,13 +53,29 @@ export const useTimer = (settings: TimerSettings) => {
     [getTotalTime]
   );
 
-  /** Controls */
   const start = useCallback(() => setStatus("running"), []);
   const pause = useCallback(() => setStatus("paused"), []);
   const reset = useCallback(() => updateMode(mode), [mode, updateMode]);
-  const switchMode = useCallback((newMode: TimerMode) => updateMode(newMode), [updateMode]);
+  const switchMode = useCallback(
+    (newMode: TimerMode) => updateMode(newMode),
+    [updateMode]
+  );
 
-  /** Timer effect */
+  const playTimerSound = useCallback(() => {
+    if (!audioRef.current) return;
+
+    try {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+
+      audioRef.current.play().catch((err) => {
+        console.log("Timer sound blocked:", err);
+      });
+    } catch (err) {
+      console.log("Timer sound error:", err);
+    }
+  }, []);
+
   useEffect(() => {
     if (status !== "running") {
       if (intervalRef.current) {
@@ -65,6 +91,8 @@ export const useTimer = (settings: TimerSettings) => {
 
         if (prev <= 1) {
           setStatus("idle");
+
+          playTimerSound();
 
           if (mode === "focus") {
             const newSessions = sessionsCompleted + 1;
@@ -93,7 +121,14 @@ export const useTimer = (settings: TimerSettings) => {
         intervalRef.current = null;
       }
     };
-  }, [status, mode, sessionsCompleted, settings, updateMode]);
+  }, [
+    status,
+    mode,
+    sessionsCompleted,
+    settings,
+    updateMode,
+    playTimerSound,
+  ]);
 
   return {
     mode,

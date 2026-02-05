@@ -15,5 +15,6 @@ export interface TimerSettings {
   workDuration: number;              
   breakDuration: number;             
   longBreakDuration: number;         
-  sessionsBeforeLongBreak: number;   
+  sessionsBeforeLongBreak: number; 
+  sound?: string; // NEW: sound file name or "none" 
 }
