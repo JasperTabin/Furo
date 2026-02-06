@@ -67,12 +67,12 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
   }, [isDropdownOpen]);
 
   const playPreview = () => {
-    if (!values.sound || values.sound === "none") return;
+    if (!values.sound || values.sound === "none" || values.isMuted) return;
 
     stopPreview();
 
     const audio = new Audio(`/sounds/${values.sound}`);
-    audio.volume = values.isMuted ? 0 : values.volume / 100;
+    audio.volume = values.volume / 100;
     previewAudioRef.current = audio;
 
     audio.play().catch((err) => console.log("Preview failed:", err));
@@ -123,7 +123,7 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
 
           <button
             onClick={playPreview}
-            disabled={!values.sound || values.sound === "none"}
+            disabled={!values.sound || values.sound === "none" || values.isMuted}
             className="px-3 sm:px-4 py-2 text-sm font-semibold tracking-widest flex items-center gap-2 bg-[var(--color-bg)] text-[var(--color-fg)] border border-[var(--color-border)] rounded-md transition-all hover:bg-[var(--color-border)] hover:text-[var(--color-bg)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg)] disabled:hover:text-[var(--color-fg)] whitespace-nowrap"
           >
             <AudioLines size={16} />
