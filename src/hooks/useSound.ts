@@ -1,4 +1,4 @@
-// Manages sound state & logic (sound file, volume, mute)
+// hooks/useSoundSettings.ts
 
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ interface SoundSettings {
 }
 
 const SOUND_DEFAULTS = {
-  sound: "Sound_1.mp3",
+  sound: "Cat.mp3",
   volume: 50,
   isMuted: false,
 } as const;
@@ -25,24 +25,42 @@ export const useSoundSettings = (initialSettings: SoundSettings) => {
   });
 
   const update = (key: keyof typeof values, value: string) => {
+    console.log('useSoundSettings update called:', { key, value, currentValues: values });
+    
     if (key === "sound") {
-      setValues((prev) => ({ ...prev, sound: value }));
+      setValues((prev) => {
+        const newValues = { ...prev, sound: value };
+        console.log('Sound updated:', newValues);
+        return newValues;
+      });
       return;
     }
 
     if (key === "isMuted") {
-      setValues((prev) => ({ ...prev, isMuted: value === "true" }));
+      const newMuted = value === "true";
+      setValues((prev) => {
+        const newValues = { ...prev, isMuted: newMuted };
+        console.log('Mute updated:', newValues);
+        return newValues;
+      });
       return;
     }
 
     if (key === "volume") {
       const num = parseInt(value, 10) || 0;
-      setValues((prev) => ({ ...prev, volume: clamp(num, 0, 100) }));
+      const clampedVolume = clamp(num, 0, 100);
+      setValues((prev) => {
+        const newValues = { ...prev, volume: clampedVolume };
+        console.log('Volume updated:', newValues);
+        return newValues;
+      });
       return;
     }
   };
 
   const reset = () => setValues({ ...SOUND_DEFAULTS });
+
+  console.log('useSoundSettings current state:', values);
 
   return { values, update, reset };
 };
