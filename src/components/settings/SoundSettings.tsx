@@ -150,17 +150,40 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
           >
             {values.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={values.volume}
-            onChange={(e) => update("volume", e.target.value)}
-            onInput={(e) => update("volume", (e.target as HTMLInputElement).value)}
-            disabled={values.isMuted}
-            className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-[var(--color-border)] opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-fg)] [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--color-fg)] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer ${values.isMuted ? "opacity-20 cursor-not-allowed" : ""}`}
-            style={{ touchAction: 'none' }}
-          />
+          <div className="flex-1 relative h-10 flex items-center">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={values.volume}
+              onChange={(e) => update("volume", e.target.value)}
+              onInput={(e) => update("volume", (e.target as HTMLInputElement).value)}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+              disabled={values.isMuted}
+              className={`w-full h-2 rounded-lg appearance-none cursor-pointer bg-[var(--color-border)] opacity-30 
+                [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:w-5 
+                [&::-webkit-slider-thumb]:h-5 
+                [&::-webkit-slider-thumb]:rounded-full 
+                [&::-webkit-slider-thumb]:bg-[var(--color-fg)] 
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:shadow-md
+                [&::-moz-range-thumb]:w-5 
+                [&::-moz-range-thumb]:h-5 
+                [&::-moz-range-thumb]:rounded-full 
+                [&::-moz-range-thumb]:bg-[var(--color-fg)] 
+                [&::-moz-range-thumb]:border-0 
+                [&::-moz-range-thumb]:cursor-pointer
+                [&::-moz-range-thumb]:shadow-md
+                ${values.isMuted ? "opacity-20 cursor-not-allowed" : ""}`}
+              style={{ 
+                touchAction: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none'
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
