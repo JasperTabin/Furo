@@ -25,24 +25,19 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
     }
   };
 
-  // Expose stopPreview to parent
   useEffect(() => {
     if (onStopPreview) {
       onStopPreview(stopPreview);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onStopPreview]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       stopPreview();
       previewAudioRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Detect clicks outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
@@ -72,6 +67,20 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
         audio.currentTime = 0;
       }
     }, 2000);
+  };
+
+  const handleMuteToggle = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    update("isMuted", (!values.isMuted).toString());
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    update("volume", e.target.value);
+  };
+
+  const handleVolumeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    update("volume", e.currentTarget.value);
   };
 
   return (
@@ -110,7 +119,7 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
           <button
             onClick={playPreview}
             disabled={!values.sound || values.sound === "none"}
-            className="px-3 sm:px-4 py-2 text-sm font-semibold tracking-widest flex items-center gap-2 bg-[var(--color-bg)] text-[var(--color-fg)] border border-[var(--color-border)] rounded-md transition-all hover:bg-[var(--color-border)] hover:text-[var(--color-bg)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg)] disabled:hover:text-[var(--color-fg)] whitespace-nowrap active:bg-[var(--color-border)] active:text-[var(--color-bg)]"
+            className="px-3 sm:px-4 py-2 text-sm font-semibold tracking-widest flex items-center gap-2 bg-[var(--color-bg)] text-[var(--color-fg)] border border-[var(--color-border)] rounded-md transition-all hover:bg-[var(--color-border)] hover:text-[var(--color-bg)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg)] disabled:hover:text-[var(--color-fg)] whitespace-nowrap active:bg-[var(--color-border)] active:text-[var(--color-bg)] touch-manipulation"
           >
             <AudioLines size={16} />
             PREVIEW
@@ -128,46 +137,97 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
         </div>
         <div className="flex gap-2 items-center">
           <button
-            onClick={() => update("isMuted", (!values.isMuted).toString())}
-            className="p-2 text-[var(--color-fg)] hover:text-[var(--color-border)] transition-colors border border-[var(--color-border)] rounded-md shrink-0 active:bg-[var(--color-border)] active:text-[var(--color-bg)] touch-manipulation"
+            onClick={handleMuteToggle}
+            onTouchEnd={handleMuteToggle}
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--color-fg)] hover:text-[var(--color-border)] transition-colors border border-[var(--color-border)] rounded-md shrink-0 active:bg-[var(--color-border)] active:text-[var(--color-bg)] touch-manipulation"
             aria-label={values.isMuted ? "Unmute" : "Mute"}
           >
             {values.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={values.volume}
-            onChange={(e) => update("volume", e.target.value)}
-            disabled={values.isMuted}
-            className={`
-              flex-1 h-2 rounded-lg appearance-none cursor-pointer
-              bg-[var(--color-border)] opacity-30
-              touch-manipulation
-              [&::-webkit-slider-thumb]:appearance-none
-              [&::-webkit-slider-thumb]:w-5
-              [&::-webkit-slider-thumb]:h-5
-              [&::-webkit-slider-thumb]:rounded-full
-              [&::-webkit-slider-thumb]:bg-[var(--color-fg)]
-              [&::-webkit-slider-thumb]:cursor-pointer
-              [&::-webkit-slider-thumb]:shadow-md
-              [&::-webkit-slider-thumb]:active:scale-110
-              [&::-webkit-slider-thumb]:transition-transform
-              [&::-moz-range-thumb]:w-5
-              [&::-moz-range-thumb]:h-5
-              [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-[var(--color-fg)]
-              [&::-moz-range-thumb]:border-0
-              [&::-moz-range-thumb]:cursor-pointer
-              [&::-moz-range-thumb]:shadow-md
-              [&::-moz-range-thumb]:active:scale-110
-              [&::-moz-range-thumb]:transition-transform
-              ${values.isMuted ? "opacity-20 cursor-not-allowed" : ""}
-            `}
-          />
+          
+          <div className="flex-1 relative py-2">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={values.volume}
+              onChange={handleVolumeChange}
+              onInput={handleVolumeInput}
+              disabled={values.isMuted}
+              className="volume-slider"
+              style={{
+                width: '100%',
+                WebkitAppearance: 'none',
+                appearance: 'none',
+                height: '8px',
+                borderRadius: '4px',
+                background: values.isMuted 
+                  ? 'var(--color-border)' 
+                  : `linear-gradient(to right, var(--color-fg) 0%, var(--color-fg) ${values.volume}%, var(--color-border) ${values.volume}%, var(--color-border) 100%)`,
+                opacity: values.isMuted ? 0.3 : 1,
+                outline: 'none',
+                cursor: values.isMuted ? 'not-allowed' : 'pointer',
+              }}
+            />
+          </div>
         </div>
       </div>
+
+      <style>{`
+        .volume-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: var(--color-fg);
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: 2px solid var(--color-bg);
+          transition: transform 0.1s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:active {
+          transform: scale(1.2);
+        }
+
+        .volume-slider::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: var(--color-fg);
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border: 2px solid var(--color-bg);
+          transition: transform 0.1s ease;
+        }
+
+        .volume-slider::-moz-range-thumb:active {
+          transform: scale(1.2);
+        }
+
+        .volume-slider:disabled::-webkit-slider-thumb {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+
+        .volume-slider:disabled::-moz-range-thumb {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+
+        /* Better track for Firefox */
+        .volume-slider::-moz-range-track {
+          height: 8px;
+          border-radius: 4px;
+        }
+
+        /* Remove tap highlight on mobile */
+        .volume-slider {
+          -webkit-tap-highlight-color: transparent;
+        }
+      `}</style>
     </div>
   );
 };
