@@ -21,11 +21,11 @@ export const useSettings = (currentSettings: TimerSettings) => {
     isMuted: currentSettings.isMuted ?? false,
   });
 
-  const update = (key: SettingsKeys, value: string) => {
+  const update = (key: SettingsKeys, value: string | boolean) => {
     if (key === "sound" || key === "volume" || key === "isMuted") {
       sound.update(key, value);
     } else {
-      duration.update(key, value);
+      duration.update(key, value as string);
     }
   };
 
