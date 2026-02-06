@@ -40,18 +40,18 @@ export const Settings = ({ isOpen, onClose, currentSettings, onSave }: SettingsP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-[var(--color-bg)] border-2 border-[var(--color-border)] rounded-lg p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-(--color-bg) border-2 border-(--color-border) rounded-lg p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
         
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold tracking-widest">TIMER SETTINGS</h2>
-          <button onClick={handleClose} className="p-2 text-[var(--color-fg)] hover:text-[var(--color-border)] transition-colors" aria-label="Close settings">
+          <button onClick={handleClose} className="p-2 text-(--color-fg) hover:text-(--color-border) transition-colors" aria-label="Close settings">
             <X size={20} />
           </button>
         </div>
 
         <div className="space-y-8">
           <DurationSettings duration={duration} />
-          <div className="border-t border-[var(--color-border)] opacity-30" />
+          <div className="border-t border-(--color-border) opacity-30" />
           <SoundSettings sound={sound} onStopPreview={(stop) => (stopPreviewRef.current = stop)} />
         </div>
 

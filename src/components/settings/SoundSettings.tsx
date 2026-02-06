@@ -111,10 +111,10 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-200">
               {isDropdownOpen ? (
-                <ChevronUp className="text-[var(--color-fg)] opacity-50" size={16} />
+                <ChevronUp className="text-(--color-fg) opacity-50" size={16} />
               ) : (
                 <ChevronDown
-                  className="text-[var(--color-fg)] opacity-50"
+                  className="text-(--color-fg) opacity-50"
                   size={16}
                 />
               )}
@@ -124,7 +124,7 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
           <button
             onClick={playPreview}
             disabled={!values.sound || values.sound === "none" || values.isMuted}
-            className="px-3 sm:px-4 py-2 text-sm font-semibold tracking-widest flex items-center gap-2 bg-[var(--color-bg)] text-[var(--color-fg)] border border-[var(--color-border)] rounded-md transition-all hover:bg-[var(--color-border)] hover:text-[var(--color-bg)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg)] disabled:hover:text-[var(--color-fg)] whitespace-nowrap"
+            className="px-3 sm:px-4 py-2 text-sm font-semibold tracking-widest flex items-center gap-2 bg-(--color-bg) text-(--color-fg) border border-(--color-border) rounded-md transition-all hover:bg-(--color-border) hover:text-(--color-bg) disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-(--color-bg) disabled:hover:text-(--color-fg) whitespace-nowrap"
           >
             <AudioLines size={16} />
             PREVIEW
@@ -138,52 +138,27 @@ export const SoundSettings = ({ sound, onStopPreview }: SoundSettingsProps) => {
           <label className="block text-xs sm:text-sm font-semibold tracking-widest">
             VOLUME
           </label>
-          <span className="text-xs font-semibold tracking-widest text-[var(--color-border)]">
+          <span className="text-xs font-semibold tracking-widest text-(--color-border)">
             {values.isMuted ? "MUTED" : `${values.volume}%`}
           </span>
         </div>
         <div className="flex gap-2 items-center">
           <button
-            onClick={() => update("isMuted", !values.isMuted)}
-            className="p-2 text-[var(--color-fg)] hover:text-[var(--color-border)] transition-colors border border-[var(--color-border)] rounded-md shrink-0"
+            onClick={() => update("isMuted", (!values.isMuted).toString())}
+            className="p-2 text-(--color-fg) hover:text-(--color-border) transition-colors border border-(--color-border) rounded-md shrink-0"
             aria-label={values.isMuted ? "Unmute" : "Mute"}
           >
             {values.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
-          <div className="flex-1 relative h-10 flex items-center">
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={values.volume}
-              onChange={(e) => update("volume", e.target.value)}
-              onInput={(e) => update("volume", (e.target as HTMLInputElement).value)}
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
-              disabled={values.isMuted}
-              className={`w-full h-2 rounded-lg appearance-none cursor-pointer bg-[var(--color-border)] opacity-30 
-                [&::-webkit-slider-thumb]:appearance-none 
-                [&::-webkit-slider-thumb]:w-5 
-                [&::-webkit-slider-thumb]:h-5 
-                [&::-webkit-slider-thumb]:rounded-full 
-                [&::-webkit-slider-thumb]:bg-[var(--color-fg)] 
-                [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:shadow-md
-                [&::-moz-range-thumb]:w-5 
-                [&::-moz-range-thumb]:h-5 
-                [&::-moz-range-thumb]:rounded-full 
-                [&::-moz-range-thumb]:bg-[var(--color-fg)] 
-                [&::-moz-range-thumb]:border-0 
-                [&::-moz-range-thumb]:cursor-pointer
-                [&::-moz-range-thumb]:shadow-md
-                ${values.isMuted ? "opacity-20 cursor-not-allowed" : ""}`}
-              style={{ 
-                touchAction: 'none',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none'
-              }}
-            />
-          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={values.volume}
+            onChange={(e) => update("volume", e.target.value)}
+            disabled={values.isMuted}
+            className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-(--color-border) opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-(--color-fg) [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-(--color-fg) [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer ${values.isMuted ? "opacity-20 cursor-not-allowed" : ""}`}
+          />
         </div>
       </div>
     </div>

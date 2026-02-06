@@ -24,20 +24,19 @@ export const useSoundSettings = (initialSettings: SoundSettings) => {
     isMuted: initialSettings.isMuted ?? SOUND_DEFAULTS.isMuted,
   });
 
-  const update = (key: keyof typeof values, value: string | boolean) => {
+  const update = (key: keyof typeof values, value: string) => {
     if (key === "sound") {
-      setValues((prev) => ({ ...prev, sound: String(value) }));
+      setValues((prev) => ({ ...prev, sound: value }));
       return;
     }
 
     if (key === "isMuted") {
-      const boolValue = typeof value === "boolean" ? value : value === "true";
-      setValues((prev) => ({ ...prev, isMuted: boolValue }));
+      setValues((prev) => ({ ...prev, isMuted: value === "true" }));
       return;
     }
 
     if (key === "volume") {
-      const num = typeof value === "string" ? parseInt(value, 10) || 0 : Number(value);
+      const num = parseInt(value, 10) || 0;
       setValues((prev) => ({ ...prev, volume: clamp(num, 0, 100) }));
       return;
     }

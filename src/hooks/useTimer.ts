@@ -10,6 +10,7 @@ export const useTimer = (settings: TimerSettings) => {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Create/update audio when sound changes
   useEffect(() => {
     if (!settings.sound || settings.sound === "none") {
       audioRef.current = null;
@@ -18,11 +19,17 @@ export const useTimer = (settings: TimerSettings) => {
 
     const audio = new Audio(`/sounds/${settings.sound}`);
     audio.preload = "auto";
-    audio.volume = (settings.volume ?? 50) / 100;
     audio.load();
 
     audioRef.current = audio;
-  }, [settings.sound, settings.volume]);
+  }, [settings.sound]);
+
+  // Update volume on existing audio when volume changes
+  useEffect(() => {
+    if (audioRef.current && !settings.isMuted) {
+      audioRef.current.volume = (settings.volume ?? 50) / 100;
+    }
+  }, [settings.volume, settings.isMuted]);
 
   const getTotalTime = useCallback(
     (currentMode: TimerMode): number => {
