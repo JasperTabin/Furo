@@ -18,11 +18,11 @@ export const useTimer = (settings: TimerSettings) => {
 
     const audio = new Audio(`/sounds/${settings.sound}`);
     audio.preload = "auto";
-    audio.volume = settings.isMuted ? 0 : (settings.volume ?? 50) / 100;
+    audio.volume = (settings.volume ?? 50) / 100;
     audio.load();
 
     audioRef.current = audio;
-  }, [settings.sound, settings.volume, settings.isMuted]);
+  }, [settings.sound, settings.volume]);
 
   const getTotalTime = useCallback(
     (currentMode: TimerMode): number => {
@@ -63,12 +63,13 @@ export const useTimer = (settings: TimerSettings) => {
   );
 
   const playTimerSound = useCallback(() => {
-    if (!audioRef.current) return;
+    // Don't play if muted, no sound selected, or audio not loaded
+    if (settings.isMuted || !audioRef.current) return;
 
     try {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current.volume = settings.isMuted ? 0 : (settings.volume ?? 50) / 100;
+      audioRef.current.volume = (settings.volume ?? 50) / 100;
 
       audioRef.current.play().catch((err) => {
         console.log("Timer sound blocked:", err);

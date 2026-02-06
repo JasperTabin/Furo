@@ -9,7 +9,7 @@ interface DurationSettings {
 }
 
 const LIMITS = {
-  workDuration: { min: 1, max: 120 },
+  workDuration: { min: 0, max: 120 },
   breakDuration: { min: 1, max: 30 },
   longBreakDuration: { min: 1, max: 60 },
 } as const;
