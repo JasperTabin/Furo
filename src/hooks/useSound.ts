@@ -1,4 +1,4 @@
-// hooks/useSoundSettings.ts
+// Manages sound state & logic (sound file, volume, mute)
 
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ interface SoundSettings {
 }
 
 const SOUND_DEFAULTS = {
-  sound: "Cat.mp3",
+  sound: "Sound_1.mp3",
   volume: 50,
   isMuted: false,
 } as const;
@@ -24,43 +24,26 @@ export const useSoundSettings = (initialSettings: SoundSettings) => {
     isMuted: initialSettings.isMuted ?? SOUND_DEFAULTS.isMuted,
   });
 
-  const update = (key: keyof typeof values, value: string) => {
-    console.log('useSoundSettings update called:', { key, value, currentValues: values });
-    
+  const update = (key: keyof typeof values, value: string | boolean) => {
     if (key === "sound") {
-      setValues((prev) => {
-        const newValues = { ...prev, sound: value };
-        console.log('Sound updated:', newValues);
-        return newValues;
-      });
+      setValues((prev) => ({ ...prev, sound: String(value) }));
       return;
     }
 
     if (key === "isMuted") {
-      const newMuted = value === "true";
-      setValues((prev) => {
-        const newValues = { ...prev, isMuted: newMuted };
-        console.log('Mute updated:', newValues);
-        return newValues;
-      });
+      const boolValue = typeof value === "boolean" ? value : value === "true";
+      setValues((prev) => ({ ...prev, isMuted: boolValue }));
       return;
     }
 
     if (key === "volume") {
-      const num = parseInt(value, 10) || 0;
-      const clampedVolume = clamp(num, 0, 100);
-      setValues((prev) => {
-        const newValues = { ...prev, volume: clampedVolume };
-        console.log('Volume updated:', newValues);
-        return newValues;
-      });
+      const num = typeof value === "string" ? parseInt(value, 10) || 0 : Number(value);
+      setValues((prev) => ({ ...prev, volume: clamp(num, 0, 100) }));
       return;
     }
   };
 
   const reset = () => setValues({ ...SOUND_DEFAULTS });
-
-  console.log('useSoundSettings current state:', values);
 
   return { values, update, reset };
 };
