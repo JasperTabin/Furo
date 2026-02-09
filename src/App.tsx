@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS: TimerSettings = {
   sessionsBeforeLongBreak: 4,
   volume: 50,
   isMuted: false,
+  repeatCount: 1, // <-- add this
 };
 
 const loadSettings = (): TimerSettings => {

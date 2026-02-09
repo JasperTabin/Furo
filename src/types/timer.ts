@@ -19,4 +19,7 @@ export interface TimerSettings {
   sound?: string;
   volume?: number;
   isMuted?: boolean;
+
+    repeatCount: number;
+
 }

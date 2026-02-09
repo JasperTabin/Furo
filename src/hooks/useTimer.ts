@@ -7,7 +7,6 @@ export const useTimer = (settings: TimerSettings) => {
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
 
   const intervalRef = useRef<number | null>(null);
-  
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Create/update audio when sound changes
@@ -24,7 +23,7 @@ export const useTimer = (settings: TimerSettings) => {
     audioRef.current = audio;
   }, [settings.sound]);
 
-  // Update volume on existing audio when volume changes
+  // Update volume when changed
   useEffect(() => {
     if (audioRef.current && !settings.isMuted) {
       audioRef.current.volume = (settings.volume ?? 50) / 100;
@@ -44,7 +43,7 @@ export const useTimer = (settings: TimerSettings) => {
           return 0;
       }
     },
-    [settings]
+    [settings],
   );
 
   const [timeLeft, setTimeLeft] = useState(() => getTotalTime("focus"));
@@ -58,7 +57,7 @@ export const useTimer = (settings: TimerSettings) => {
       setTimeLeft(newMode === "infinite" ? 0 : newTotal);
       setStatus("idle");
     },
-    [getTotalTime]
+    [getTotalTime],
   );
 
   const start = useCallback(() => setStatus("running"), []);
@@ -66,25 +65,43 @@ export const useTimer = (settings: TimerSettings) => {
   const reset = useCallback(() => updateMode(mode), [mode, updateMode]);
   const switchMode = useCallback(
     (newMode: TimerMode) => updateMode(newMode),
-    [updateMode]
+    [updateMode],
   );
 
-  const playTimerSound = useCallback(() => {
-    // Don't play if muted, no sound selected, or audio not loaded
-    if (settings.isMuted || !audioRef.current) return;
+const playTimerSound = useCallback(() => {
+  if (settings.isMuted || !audioRef.current) return;
 
-    try {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.volume = (settings.volume ?? 50) / 100;
+  const audio = audioRef.current;
+  audio.pause();
+  audio.currentTime = 0;
+  audio.volume = (settings.volume ?? 50) / 100;
 
-      audioRef.current.play().catch((err) => {
-        console.log("Timer sound blocked:", err);
-      });
-    } catch (err) {
-      console.log("Timer sound error:", err);
-    }
-  }, [settings.volume, settings.isMuted]);
+  let played = 0;
+  const intervalMs = 500; // delay between repeats
+
+  const playNext = () => {
+    if (played >= settings.repeatCount) return;
+
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+
+    const onEnded = () => {
+      audio.removeEventListener("ended", onEnded);
+      played++;
+      if (played < settings.repeatCount) {
+        // Wait before playing next repeat
+        setTimeout(() => {
+          playNext();
+        }, intervalMs);
+      }
+    };
+
+    audio.addEventListener("ended", onEnded);
+  };
+
+  playNext();
+}, [settings.volume, settings.isMuted, settings.repeatCount]);
+
 
   useEffect(() => {
     if (status !== "running") {
@@ -102,6 +119,7 @@ export const useTimer = (settings: TimerSettings) => {
         if (prev <= 1) {
           setStatus("idle");
 
+          // 🔊 play repeatable sound
           playTimerSound();
 
           if (mode === "focus") {
@@ -131,14 +149,7 @@ export const useTimer = (settings: TimerSettings) => {
         intervalRef.current = null;
       }
     };
-  }, [
-    status,
-    mode,
-    sessionsCompleted,
-    settings,
-    updateMode,
-    playTimerSound,
-  ]);
+  }, [status, mode, sessionsCompleted, settings, updateMode, playTimerSound]);
 
   return {
     mode,
