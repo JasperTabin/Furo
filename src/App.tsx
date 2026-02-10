@@ -1,17 +1,18 @@
-import { useState, useEffect, useRef } from "react";
-import { useTimer } from "./hooks/useTimer";
-import { Timer } from "./components/timer/Timer";
-import { TimerControls } from "./components/timer/TimerControls";
-import { ModeSwitcher } from "./components/timer/ModeSwitcher";
-import { Settings } from "./components/settings/Settings";
-import { ThemeToggle } from "./components/theme/ThemeToggle";
-import { SettingsButton } from "./components/settings/SettingsButton";
-import { FullscreenMode } from "./components/fullscreen/FullscreenMode";
-import { useTheme } from "./hooks/useTheme";
-import { useAnimation } from "./hooks/useAnimation";
-import { useFullscreen } from "./hooks/useFullscreen";
-import { Copyright } from "lucide-react";
-import type { TimerSettings } from "./types/timer";
+import { useState, useEffect } from "react";
+import { useTimer } from "./features/timer/hooks/useTimer";
+import { useFullscreen } from "./features/timer/hooks/useFullscreen";
+import { useGSAPAnimation } from "./hooks/useGSAPAnimation";
+
+import { Header } from "./components/layout/Header";
+import { Footer } from "./components/layout/Footer";
+
+import { TimerPanel, ModeSwitcher, FullscreenMode, TimerControls } from "./features/timer/components/TimerPanel";
+
+import { TodoList } from "./features/todo/components/TodoList";
+
+import { Settings, SettingsButton } from "./features/timer/components/Settings";
+
+import type { TimerSettings } from "./features/timer/types/timer";
 
 const DEFAULT_SETTINGS: TimerSettings = {
   workDuration: 25,
@@ -20,7 +21,7 @@ const DEFAULT_SETTINGS: TimerSettings = {
   sessionsBeforeLongBreak: 4,
   volume: 50,
   isMuted: false,
-  repeatCount: 1, // <-- add this
+  repeatCount: 1,
 };
 
 const loadSettings = (): TimerSettings => {
@@ -42,125 +43,82 @@ const loadSettings = (): TimerSettings => {
 };
 
 function App() {
+  const [currentView, setCurrentView] = useState<"timer" | "todo">("timer");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [timerSettings, setTimerSettings] =
-    useState<TimerSettings>(loadSettings());
-  const [settingsVersion, setSettingsVersion] = useState(0);
 
-  const { theme } = useTheme();
-  const { mode, status, timeLeft, start, pause, reset, switchMode } =
-    useTimer(timerSettings);
-  const { isFullscreen } = useFullscreen();
+  const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
 
-  const appRef = useRef<HTMLDivElement>(null);
-  const headerTitleRef = useRef<HTMLDivElement>(null);
-  const headerControlsRef = useRef<HTMLDivElement>(null);
-  const themeToggleRef = useRef<HTMLDivElement>(null);
-  const settingsRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<HTMLDivElement>(null);
-  const controlsRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
-  const modeSwitcherRef = useRef<HTMLDivElement>(null);
-
-  useAnimation({
-    appRef,
-    headerTitleRef,
-    headerControlsRef,
-    themeToggleRef,
-    settingsRef,
-    timerRef,
-    controlsRef,
-    footerRef,
-    modeSwitcherRef,
-  });
+  const { mode, status, timeLeft, start, pause, reset, switchMode } = useTimer(timerSettings);
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const { timerContainerRef, todoContainerRef } = useGSAPAnimation(currentView);
 
   useEffect(() => {
-    if (settingsVersion > 0 && status === "idle") {
-      reset();
-    }
-  }, [settingsVersion, status, reset]);
+    const handleStorageChange = () => {
+      const newSettings = loadSettings();
+      setTimerSettings(newSettings);
+    };
 
-  const handleSaveSettings = (newSettings: TimerSettings) => {
-    localStorage.setItem("timerSettings", JSON.stringify(newSettings));
-    setTimerSettings(newSettings);
-    setSettingsVersion((prev) => prev + 1);
-  };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+
 
   return (
     <div
-      ref={appRef}
-      className={`h-dvh overflow-hidden flex flex-col transition-colors duration-500 ${theme} bg-(--color-bg) text-(--color-fg) ${
+      className={`h-dvh overflow-hidden flex flex-col transition-colors duration-500 bg-(--color-bg) text-(--color-fg) ${
         isFullscreen ? "" : "p-6 sm:p-8"
       }`}
     >
-      {/* HEADER */}
       {!isFullscreen && (
-        <header className="flex items-center justify-between w-full mb-auto">
-          <div ref={headerTitleRef}>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-widest">
-              FURŌ
-            </h1>
-            <p className="text-xs font-semibold tracking-widest text-(--color-border) opacity-60">
-              FLOW
-            </p>
-          </div>
-          <div ref={headerControlsRef}>
-            <div ref={themeToggleRef}>
-              <ThemeToggle />
+        <Header
+          currentView={currentView}
+          onViewChange={setCurrentView}
+        />
+      )}
+
+      <main className="flex-1 flex flex-col items-center justify-center overflow-y-auto">
+        {currentView === "timer" ? (
+          <div ref={timerContainerRef} className="flex flex-col items-center">
+            {!isFullscreen && (
+              <div className="mb-8 mode-switcher">
+                <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
+              </div>
+            )}
+
+            <div className="timer-display">
+              <TimerPanel
+                timeLeft={timeLeft}
+              />
+            </div>
+
+            <div className="flex items-center gap-3 mt-8 timer-controls">
+              <TimerControls status={status} onStart={start} onPause={pause} onReset={reset} />
+              <div className="w-px h-8 bg-(--color-border) opacity-30" />
+              <SettingsButton onClick={() => setIsSettingsOpen(true)} isOpen={isSettingsOpen} />
+              <FullscreenMode isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
             </div>
           </div>
-        </header>
-      )}
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col items-center justify-center">
-        {!isFullscreen && (
-          <div ref={modeSwitcherRef} className="mb-12">
-            <ModeSwitcher onSwitchMode={switchMode} currentMode={mode} />
+        ) : (
+          <div ref={todoContainerRef} className="w-full px-4 py-8">
+            <TodoList />
           </div>
         )}
-
-        <div ref={timerRef}>
-          <Timer timeLeft={timeLeft} />
-        </div>
-
-        <div
-          ref={controlsRef}
-          className={`flex items-center gap-3 ${isFullscreen ? "mt-8" : "mt-12"}`}
-        >
-          <TimerControls
-            status={status}
-            onStart={start}
-            onPause={pause}
-            onReset={reset}
-          />
-          <div className="w-px h-8 bg-(--color-border) opacity-30" />
-          <SettingsButton
-            onClick={() => setIsSettingsOpen(true)}
-            isOpen={isSettingsOpen}
-          />
-          <FullscreenMode />
-        </div>
       </main>
 
-      {/* FOOTER */}
-      {!isFullscreen && (
-        <footer
-          ref={footerRef}
-          className="text-[10px] sm:text-xs tracking-wide flex items-center justify-center gap-2 mt-auto"
-        >
-          <Copyright size={12} />
-          2026 JasDev. All rights reserved.
-        </footer>
-      )}
+      {!isFullscreen && <Footer />}
 
-      {/* SETTINGS */}
       {isSettingsOpen && (
         <Settings
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
-          currentSettings={timerSettings}
-          onSave={handleSaveSettings}
+          onSettingsChange={() => {
+            const newSettings = loadSettings();
+            setTimerSettings(newSettings);
+            if (status === "idle") {
+              switchMode(mode);
+            }
+          }}
         />
       )}
     </div>

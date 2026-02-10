@@ -22,3 +22,52 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@layer utilities {
+  .btn-base {
+    @apply px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium tracking-wide rounded-md border transition focus:outline-none focus:ring-2 focus:ring-(--color-fg)/40;
+  }
+
+  .btn-active {
+    @apply bg-(--color-fg) text-(--color-bg) border-(--color-fg) hover:brightness-90;
+  }
+
+  .btn-inactive {
+    @apply bg-transparent text-(--color-fg)/70 border-(--color-border) hover:text-(--color-fg) hover:border-(--color-fg)/60 hover:bg-(--color-fg)/5;
+  }
+
+  .btn-danger {
+    @apply text-red-500 border border-red-500/40 hover:bg-red-500/10;
+  }
+
+  .btn-theme-item {
+    @apply flex items-center gap-3 px-4 py-3 hover:bg-(--color-border)/20 cursor-pointer w-full;
+  }
+
+  .btn-theme-item-active {
+    @apply flex items-center gap-3 px-4 py-3 bg-(--color-border)/30 cursor-pointer w-full;
+  }
+
+  /* Tab button utility classes */
+  .btn-tab-base {
+    @apply flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .btn-tab-active {
+    @apply bg-(--color-fg) text-(--color-bg) shadow-sm;
+  }
+
+  .btn-tab-inactive {
+    @apply bg-(--color-bg) text-(--color-fg) opacity-100 hover:bg-(--color-fg)/5;
+  }
+
+  /* Timer & Task Tab Container */
+  .tab-container {
+    @apply flex gap-2 p-1 bg-(--color-bg) border border-(--color-border) rounded-xl;
+  }
+
+  /* Theme toggle trigger button */
+  .btn-theme-trigger {
+    @apply flex items-center gap-2 p-2 rounded-md hover:bg-(--color-border)/20 transition-colors;
+  }
+}

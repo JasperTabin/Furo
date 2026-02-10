@@ -1,14 +1,51 @@
-// Dark & Light mode - Button
+// Dark & Light mode - Button with integrated theme logic
 
 import { useState, useRef, useEffect } from "react";
 import { Moon, Sun, ChevronDown } from "lucide-react";
-import { useTheme } from "../../hooks/useTheme";
-import { Button } from "../Shared/Button";
+
+type Theme = "light" | "dark";
+
+interface ThemeToggleProps {
+  theme?: Theme;
+  onThemeChange?: (theme: Theme) => void;
+}
 
 type ThemeOption = "light" | "dark";
 
-export const ThemeToggle = () => {
+// Theme hook logic integrated into the component
+const useTheme = () => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("theme") as Theme;
+      return stored || "light";
+    }
+    return "light";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  const setThemeMode = (newTheme: Theme) => {
+    setTheme(newTheme);
+  };
+
+  return { theme, toggleTheme, setThemeMode };
+};
+
+export const ThemeToggle = ({ theme: controlledTheme, onThemeChange }: ThemeToggleProps) => {
   const { theme, setThemeMode } = useTheme();
+  const currentTheme = controlledTheme ?? theme;
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -24,49 +61,50 @@ export const ThemeToggle = () => {
 
   const handleThemeSelect = (themeOption: ThemeOption) => {
     setThemeMode(themeOption);
+    onThemeChange?.(themeOption);
     setIsOpen(false);
   };
 
   const getCurrentIcon = () =>
-    theme === "light" ? <Sun size={20} /> : <Moon size={20} />;
+    currentTheme === "light" ? <Sun size={20} /> : <Moon size={20} />;
 
   return (
     <div ref={dropdownRef} className="relative">
-      <Button
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        variant="themeTrigger"
-        ariaLabel="Theme options"
+        className="btn-theme-trigger"
+        aria-label="Theme options"
       >
         {getCurrentIcon()}
         <ChevronDown
           size={16}
           className={`transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"}`}
         />
-      </Button>
+      </button>
 
       {isOpen && (
-        <div className="absolute top-12 right-0 w-40 bg-(--color-bg) border-2 border-(--color-border) rounded-lg shadow-xl overflow-hidden z-50">
-          <Button
+        <div className="absolute top-full right-0 mt-2 bg-(--color-bg) border-2 border-(--color-border) rounded-lg shadow-xl z-50">
+          <button
             onClick={() => handleThemeSelect("light")}
-            variant={theme === "light" ? "themeItemActive" : "themeItem"}
+            className={`btn-theme-item ${currentTheme === "light" ? 'btn-theme-item-active' : ''}`}
           >
             <Sun size={18} />
             <span className="text-sm font-semibold">Light</span>
-            {theme === "light" && (
+            {currentTheme === "light" && (
               <div className="ml-auto w-2 h-2 rounded-full bg-(--color-fg)" />
             )}
-          </Button>
+          </button>
 
-          <Button
+          <button
             onClick={() => handleThemeSelect("dark")}
-            variant={theme === "dark" ? "themeItemActive" : "themeItem"}
+            className={`btn-theme-item ${currentTheme === "dark" ? 'btn-theme-item-active' : ''}`}
           >
             <Moon size={18} />
             <span className="text-sm font-semibold">Dark</span>
-            {theme === "dark" && (
+            {currentTheme === "dark" && (
               <div className="ml-auto w-2 h-2 rounded-full bg-(--color-fg)" />
             )}
-          </Button>
+          </button>
         </div>
       )}
     </div>
