@@ -1,31 +1,63 @@
-// Consolidated Timer Panel - combines Timer, TimerControls, ModeSwitcher, and FullscreenMode
+// TIMER UI COMPONENTS ONLY 
 
 import { formatTime } from "../utils/formatTime";
-import { useFullscreen } from "../hooks/useFullscreen";
+import { Maximize, Minimize } from "lucide-react";
+import type { TimerMode, TimerStatus } from "../configs/types";
 
-// Types
-type TimerMode = 'focus' | 'shortbreak' | 'longBreak' | 'infinite';
-type TimerStatus = 'idle' | 'running' | 'paused';
-
-interface TimerPanelProps {
-  timeLeft: number;
-  status: TimerStatus;
-  mode: TimerMode;
-  isFullscreen: boolean;
-  onStart: () => void;
-  onPause: () => void;
-  onReset: () => void;
+// TIMER MODE
+export const ModeSwitcher = ({ 
+  onSwitchMode, 
+  currentMode 
+}: {
   onSwitchMode: (mode: TimerMode) => void;
-  toggleFullscreen: () => void;
-}
+  currentMode: TimerMode;
+}) => {
+  return (
+    <div className="flex flex-row gap-4 sm:gap-4 items-center">
+      <button
+        onClick={() => onSwitchMode("focus")}
+        className={`btn-base ${currentMode === "focus" ? 'btn-active' : 'btn-inactive'}`}
+        aria-label="Switch to focus mode"
+      >
+        FOCUS
+      </button>
 
-// Timer Component
-const Timer = ({ timeLeft }: { timeLeft: number }) => {
-  const { isFullscreen } = useFullscreen();
+      <button
+        onClick={() => onSwitchMode("shortbreak")}
+        className={`btn-base ${currentMode === "shortbreak" ? 'btn-active' : 'btn-inactive'}`}
+        aria-label="Switch to short break mode"
+      >
+        <span className="hidden sm:inline">SHORT BREAK</span>
+        <span className="sm:hidden">SHORT</span>
+      </button>
 
+      <button
+        onClick={() => onSwitchMode("longBreak")}
+        className={`btn-base ${currentMode === "longBreak" ? 'btn-active' : 'btn-inactive'}`}
+        aria-label="Switch to long break mode"
+      >
+        <span className="hidden sm:inline">LONG BREAK</span>
+        <span className="sm:hidden">LONG</span>
+      </button>
+
+      <div className="w-px h-8 bg-(--color-border) opacity-30 self-center" />
+
+      <button
+        onClick={() => onSwitchMode("infinite")}
+        className={`btn-base ${currentMode === "infinite" ? 'btn-active' : 'btn-inactive'}`}
+        aria-label="Switch to infinite mode"
+      >
+        INFINITE
+      </button>
+    </div>
+  );
+};
+
+// TIMER
+export const Timer = ({ timeLeft, isFullscreen }: { timeLeft: number; isFullscreen: boolean }) => {
   const timeClasses = isFullscreen
-    ? "text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[22rem]" // Fullscreen
-    : "text-[6rem] sm:text-[8rem] md:text-[10rem] lg:text-[13rem]"; // Normal
+    ? "text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[22rem]" 
+    : "text-[6rem] sm:text-[8rem] md:text-[10rem] lg:text-[13rem]"; 
 
   return (
     <div
@@ -39,8 +71,13 @@ const Timer = ({ timeLeft }: { timeLeft: number }) => {
   );
 };
 
-// TimerControls Component
-export const TimerControls = ({ status, onStart, onPause, onReset }: {
+// TIMER CONTROLS
+export const TimerControls = ({ 
+  status, 
+  onStart, 
+  onPause, 
+  onReset 
+}: {
   status: TimerStatus;
   onStart: () => void;
   onPause: () => void;
@@ -84,57 +121,11 @@ export const TimerControls = ({ status, onStart, onPause, onReset }: {
   );
 };
 
-// ModeSwitcher Component
-export const ModeSwitcher = ({ onSwitchMode, currentMode }: {
-  onSwitchMode: (mode: TimerMode) => void;
-  currentMode: TimerMode;
-}) => {
-  return (
-    <div className="flex flex-row gap-4 sm:gap-4 items-center">
-      <button
-        onClick={() => onSwitchMode("focus")}
-        className={`btn-base ${currentMode === "focus" ? 'btn-active' : 'btn-inactive'}`}
-        aria-label="Switch to focus mode"
-      >
-        FOCUS
-      </button>
-
-      <button
-        onClick={() => onSwitchMode("shortbreak")}
-        className={`btn-base ${currentMode === "shortbreak" ? 'btn-active' : 'btn-inactive'}`}
-        aria-label="Switch to short break mode"
-      >
-        <span className="hidden sm:inline">SHORT BREAK</span>
-        <span className="sm:hidden">SHORT</span>
-      </button>
-
-      <button
-        onClick={() => onSwitchMode("longBreak")}
-        className={`btn-base ${currentMode === "longBreak" ? 'btn-active' : 'btn-inactive'}`}
-        aria-label="Switch to long break mode"
-      >
-        <span className="hidden sm:inline">LONG BREAK</span>
-        <span className="sm:hidden">LONG</span>
-      </button>
-
-      {/* Divider */}
-      <div className="w-px h-8 bg-(--color-border) opacity-30 self-center" />
-
-      <button
-        onClick={() => onSwitchMode("infinite")}
-        className={`btn-base ${currentMode === "infinite" ? 'btn-active' : 'btn-inactive'}`}
-        aria-label="Switch to infinite mode"
-      >
-        INFINITE
-      </button>
-    </div>
-  );
-};
-
-// FullscreenMode Component
-import { Maximize, Minimize } from "lucide-react";
-
-export const FullscreenMode = ({ isFullscreen, toggleFullscreen }: {
+// FULLSCREEN
+export const FullscreenMode = ({ 
+  isFullscreen, 
+  toggleFullscreen 
+}: {
   isFullscreen: boolean;
   toggleFullscreen: () => void;
 }) => {
@@ -147,19 +138,5 @@ export const FullscreenMode = ({ isFullscreen, toggleFullscreen }: {
     >
       {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
     </button>
-  );
-};
-
-// Main TimerPanel Component
-export const TimerPanel = ({ 
-  timeLeft 
-}: Omit<TimerPanelProps, 'mode' | 'isFullscreen' | 'onSwitchMode' | 'toggleFullscreen' | 'status' | 'onStart' | 'onPause' | 'onReset'>) => {
-  return (
-    <div className="flex flex-col items-center">
-      {/* Timer Display */}
-      <div>
-        <Timer timeLeft={timeLeft} />
-      </div>
-    </div>
   );
 };
