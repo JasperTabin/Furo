@@ -42,31 +42,39 @@ export const useTimer = (settings?: TimerSettings) => {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [mode, status, getTotalTime]); 
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [mode, status, getTotalTime]);
 
+  // ✅ FIX: Update audio when settings change
   useEffect(() => {
-    if (!currentSettings.sound || currentSettings.sound === "none") {
+    // Clean up old audio
+    if (audioRef.current) {
+      audioRef.current.pause();
       audioRef.current = null;
+    }
+
+    // Don't create audio if no sound or "none"
+    if (!currentSettings.sound || currentSettings.sound === "none") {
       return;
     }
 
+    // Create new audio with current settings
     const audio = new Audio(`/sounds/${currentSettings.sound}`);
     audio.preload = "auto";
+    audio.volume = currentSettings.isMuted
+      ? 0
+      : (currentSettings.volume ?? 50) / 100;
     audio.load();
     audioRef.current = audio;
 
     return () => {
-      audioRef.current = null;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
-  }, [currentSettings.sound]);
-
-  useEffect(() => {
-    if (audioRef.current && !currentSettings.isMuted) {
-      audioRef.current.volume = (currentSettings.volume ?? 50) / 100;
-    }
-  }, [currentSettings.volume, currentSettings.isMuted]);
+  }, [currentSettings.sound, currentSettings.volume, currentSettings.isMuted]);
 
   const updateMode = useCallback(
     (newMode: TimerMode) => {
@@ -87,33 +95,45 @@ export const useTimer = (settings?: TimerSettings) => {
     [updateMode],
   );
 
-  const soundVolume = currentSettings.volume ?? 50;
-  const soundMuted = currentSettings.isMuted;
-  const soundRepeat = currentSettings.repeatCount;
-
   const playTimerSound = useCallback(() => {
-    if (soundMuted || !audioRef.current) return;
+    // Get fresh settings values
+    if (currentSettings.isMuted || !audioRef.current) {
+      console.log("Sound muted or no audio ref");
+      return;
+    }
 
     const audio = audioRef.current;
-    audio.pause();
+
+    // ✅ FIX: Only reset currentTime, don't pause if already paused
     audio.currentTime = 0;
-    audio.volume = soundVolume / 100;
+    audio.volume = (currentSettings.volume ?? 50) / 100;
 
     let played = 0;
     const intervalMs = 500;
+    const repeatCount = currentSettings.repeatCount ?? 1;
 
     const playNext = () => {
-      if (played >= soundRepeat) return;
+      if (played >= repeatCount) return;
 
       audio.currentTime = 0;
-      audio.play().catch((err) => {
-        console.warn("Audio playback failed:", err);
-      });
+
+      // ✅ FIX: Use a promise chain to handle errors properly
+      const playPromise = audio.play();
+
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Audio is playing successfully
+          })
+          .catch((err) => {
+            console.warn("Audio playback failed:", err);
+          });
+      }
 
       const onEnded = () => {
         audio.removeEventListener("ended", onEnded);
         played++;
-        if (played < soundRepeat) {
+        if (played < repeatCount) {
           setTimeout(playNext, intervalMs);
         }
       };
@@ -122,7 +142,11 @@ export const useTimer = (settings?: TimerSettings) => {
     };
 
     playNext();
-  }, [soundVolume, soundMuted, soundRepeat]);
+  }, [
+    currentSettings.volume,
+    currentSettings.isMuted,
+    currentSettings.repeatCount,
+  ]);
 
   useEffect(() => {
     if (status !== "running") {
@@ -144,9 +168,12 @@ export const useTimer = (settings?: TimerSettings) => {
           if (mode === "focus") {
             setSessionsCompleted((prevSessions) => {
               const newSessions = prevSessions + 1;
-              
+
               setTimeout(() => {
-                if (newSessions % currentSettings.sessionsBeforeLongBreak === 0) {
+                if (
+                  newSessions % currentSettings.sessionsBeforeLongBreak ===
+                  0
+                ) {
                   updateMode("longBreak");
                 } else {
                   updateMode("shortbreak");
@@ -155,7 +182,7 @@ export const useTimer = (settings?: TimerSettings) => {
 
               return newSessions;
             });
-            
+
             return prev - 1;
           } else {
             setTimeout(() => {
@@ -175,7 +202,13 @@ export const useTimer = (settings?: TimerSettings) => {
         intervalRef.current = null;
       }
     };
-  }, [status, mode, currentSettings.sessionsBeforeLongBreak, updateMode, playTimerSound]);
+  }, [
+    status,
+    mode,
+    currentSettings.sessionsBeforeLongBreak,
+    updateMode,
+    playTimerSound,
+  ]);
 
   return {
     mode,

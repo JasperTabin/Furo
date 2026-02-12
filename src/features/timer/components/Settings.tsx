@@ -171,7 +171,7 @@ export const VolumeControls = ({
   );
 };
 
-// SETTINGS MODAL HEADER
+// HEADER
 export const SettingsHeader = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="flex items-center justify-between px-6 py-5 border-b border-(--color-border)">
@@ -183,7 +183,7 @@ export const SettingsHeader = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-// SETTINGS MODAL FOOTER
+// FOOTER
 export const SettingsFooter = ({ onReset, onSave }: { onReset: () => void; onSave: () => void }) => {
   return (
     <div className="flex gap-3 px-6 py-4 border-t border-(--color-border)">
