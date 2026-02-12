@@ -48,7 +48,6 @@ body {
     @apply flex items-center gap-3 px-4 py-3 bg-(--color-border)/30 cursor-pointer w-full;
   }
 
-  /* Tab button utility classes */
   .btn-tab-base {
     @apply flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200;
   }
@@ -61,13 +60,40 @@ body {
     @apply bg-(--color-bg) text-(--color-fg) opacity-100 hover:bg-(--color-fg)/5;
   }
 
-  /* Timer & Task Tab Container */
   .tab-container {
     @apply flex gap-2 p-1 bg-(--color-bg) border border-(--color-border) rounded-xl;
   }
 
-  /* Theme toggle trigger button */
   .btn-theme-trigger {
     @apply flex items-center gap-2 p-2 rounded-md hover:bg-(--color-border)/20 transition-colors;
+  }
+
+  
+  .card-base {
+    @apply bg-(--color-bg) border border-(--color-border) rounded-xl transition-all;
+  }
+
+  .card-hover {
+    @apply hover:border-(--color-border)/70;
+  }
+
+  .input-base {
+    @apply px-4 py-3 bg-(--color-bg) border border-(--color-border) rounded-xl focus:outline-none focus:border-(--color-border)/70 transition-colors;
+  }
+
+  .badge-base {
+    @apply text-xs px-2 py-1 rounded-full;
+  }
+
+  .badge-priority-low {
+    @apply bg-blue-500/20 text-blue-400;
+  }
+
+  .badge-priority-medium {
+    @apply bg-yellow-500/20 text-yellow-400;
+  }
+
+  .badge-priority-high {
+    @apply bg-red-500/20 text-red-400;
   }
 }
