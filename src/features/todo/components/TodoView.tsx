@@ -1,10 +1,10 @@
-// TODO CONTAINER - Kanban board with drag & drop
+// TODO CONTAINER - Orchestrator & Container
 
 import { useState, useRef } from "react";
-import { useTodos } from "../hooks/useTodos";
-import { KanbanBoard } from "./Todo";
-import { TodoModal } from "./TodoModal";
-import type { Todo, TodoStatus, TodoPriority } from "../types/todo";
+import { useTodos } from "../hooks/useTodo";
+import { Column } from "./Todo";
+import { AddEditView } from "./AddEditView";
+import type { Todo, TodoStatus } from "../types/todo";
 
 export const TodoView = () => {
   const {
@@ -28,38 +28,36 @@ export const TodoView = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | undefined>(undefined);
-  const [modalTargetStatus, setModalTargetStatus] = useState<TodoStatus>("todo");
+  const [targetStatus, setTargetStatus] = useState<TodoStatus>("todo");
+  const [modalKey, setModalKey] = useState(0);
+  const [dragOverColumn, setDragOverColumn] = useState<TodoStatus | null>(null);
   const draggedTodo = useRef<Todo | null>(null);
 
-  const handleAddToColumn = (status: TodoStatus) => {
+  // ========================================
+  // Modal handlers
+  // ========================================
+  
+  const openAddModal = (status: TodoStatus) => {
     setEditingTodo(undefined);
-    setModalTargetStatus(status);
+    setTargetStatus(status);
+    setModalKey((prev) => prev + 1);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (todo: Todo) => {
+  const openEditModal = (todo: Todo) => {
     setEditingTodo(todo);
+    setModalKey((prev) => prev + 1);
     setIsModalOpen(true);
   };
 
-  const handleSaveTodo = (data: {
-    text: string;
-    description?: string;
-    priority: TodoPriority;
-    dueDate?: number;
-  }) => {
-    if (editingTodo) {
-      updateTodo(editingTodo.id, data);
-    } else {
-      addTodo(
-        data.text, 
-        data.description, 
-        data.priority, 
-        data.dueDate,
-        modalTargetStatus
-      );
-    }
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingTodo(undefined);
   };
+
+  // ========================================
+  // Drag handlers
+  // ========================================
 
   const handleDragStart = (e: React.DragEvent, todo: Todo) => {
     draggedTodo.current = todo;
@@ -68,48 +66,100 @@ export const TodoView = () => {
 
   const handleDragEnd = () => {
     draggedTodo.current = null;
+    setDragOverColumn(null);
   };
 
-  const handleDrop = (status: TodoStatus) => {
-    if (draggedTodo.current && draggedTodo.current.status !== status) {
-      updateTodoStatus(draggedTodo.current.id, status);
-    }
-  };
+  const createColumnDragHandlers = (status: TodoStatus) => ({
+    onDragOver: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOverColumn(status);
+    },
+    onDragLeave: () => {
+      setDragOverColumn(null);
+    },
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOverColumn(null);
+      
+      if (draggedTodo.current && draggedTodo.current.status !== status) {
+        updateTodoStatus(draggedTodo.current.id, status);
+      }
+    },
+  });
+
+  // ========================================
+  // Render
+  // ========================================
 
   return (
     <>
       <div className="max-w-7xl mx-auto w-full">
-        <KanbanBoard
-          todoItems={todoItems}
-          inProgressItems={inProgressItems}
-          doneItems={doneItems}
-          todoPage={todoPage}
-          inProgressPage={inProgressPage}
-          donePage={donePage}
-          todoTotalPages={todoTotalPages}
-          inProgressTotalPages={inProgressTotalPages}
-          doneTotalPages={doneTotalPages}
-          onTodoPageChange={setTodoPage}
-          onInProgressPageChange={setInProgressPage}
-          onDonePageChange={setDonePage}
-          onAddToColumn={handleAddToColumn}
-          onEdit={handleEdit}
-          onDelete={deleteTodo}
-          onDrop={handleDrop}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        />
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          <Column
+            title="To Do"
+            todos={todoItems}
+            currentPage={todoPage}
+            totalPages={todoTotalPages}
+            isDragOver={dragOverColumn === "todo"}
+            onPageChange={setTodoPage}
+            onAdd={() => openAddModal("todo")}
+            onEdit={openEditModal}
+            onDelete={deleteTodo}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            {...createColumnDragHandlers("todo")}
+          />
+
+          <Column
+            title="In Progress"
+            todos={inProgressItems}
+            currentPage={inProgressPage}
+            totalPages={inProgressTotalPages}
+            isDragOver={dragOverColumn === "in-progress"}
+            onPageChange={setInProgressPage}
+            onAdd={() => openAddModal("in-progress")}
+            onEdit={openEditModal}
+            onDelete={deleteTodo}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            {...createColumnDragHandlers("in-progress")}
+          />
+
+          <Column
+            title="Done"
+            todos={doneItems}
+            currentPage={donePage}
+            totalPages={doneTotalPages}
+            isDragOver={dragOverColumn === "done"}
+            onPageChange={setDonePage}
+            onAdd={() => openAddModal("done")}
+            onEdit={openEditModal}
+            onDelete={deleteTodo}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            {...createColumnDragHandlers("done")}
+          />
+        </div>
       </div>
 
-      <TodoModal
+      <AddEditView
+        key={modalKey}
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingTodo(undefined);
-        }}
-        onSave={handleSaveTodo}
         todo={editingTodo}
-        title={editingTodo ? "Edit Task" : "Add Task"}
+        onClose={closeModal}
+        onSave={(id, data) => {
+          if (id) {
+            updateTodo(id, data);
+          } else {
+            addTodo(
+              data.text,
+              data.description,
+              data.priority,
+              data.dueDate,
+              targetStatus
+            );
+          }
+        }}
       />
     </>
   );

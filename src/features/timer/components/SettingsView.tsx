@@ -1,13 +1,7 @@
 // Container & orchestration logic
 
 import { Modal } from "../../../components/ui/Modal";
-import {
-  SettingsHeader,
-  SettingsFooter,
-  DurationInputs,
-  SoundControls,
-  VolumeControls,
-} from "./Settings";
+import { SettingsHeader, SettingsFooter, DurationInputs, SoundControls, VolumeControls,} from "./Settings";
 import { useSettings } from "../hooks/useSettings";
 
 interface SettingsModalProps {

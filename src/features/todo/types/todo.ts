@@ -1,3 +1,5 @@
+// TODO TYPES
+
 export type TodoStatus = "todo" | "in-progress" | "done";
 export type TodoPriority = "low" | "medium" | "high";
 
@@ -5,9 +7,15 @@ export interface Todo {
   id: string;
   text: string;
   description?: string;
-  status: TodoStatus;
   priority: TodoPriority;
-  createdAt: number;
+  status: TodoStatus;
   dueDate?: number;
-  pomodorosCompleted?: number;
+  createdAt: number;
+}
+
+export interface TodoFormData {
+  text: string;
+  description?: string;
+  priority: TodoPriority;
+  dueDate?: number;
 }
