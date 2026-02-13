@@ -94,7 +94,10 @@ export const TodoView = () => {
   return (
     <>
       <div className="max-w-7xl mx-auto w-full">
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        {/* Kanban Board Title */}
+        <h2 className="text-2xl flex justify-center font-bold mb-6 todo-title">Kanban Board</h2>
+
+        <div className="flex gap-4 items-start pb-4">
           <Column
             title="To Do"
             todos={todoItems}
@@ -111,18 +114,18 @@ export const TodoView = () => {
           />
 
           <Column
-            title="In Progress"
+            title="Doing"
             todos={inProgressItems}
             currentPage={inProgressPage}
             totalPages={inProgressTotalPages}
-            isDragOver={dragOverColumn === "in-progress"}
+            isDragOver={dragOverColumn === "doing"}
             onPageChange={setInProgressPage}
-            onAdd={() => openAddModal("in-progress")}
+            onAdd={() => openAddModal("doing")}
             onEdit={openEditModal}
             onDelete={deleteTodo}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            {...createColumnDragHandlers("in-progress")}
+            {...createColumnDragHandlers("doing")}
           />
 
           <Column
@@ -156,7 +159,9 @@ export const TodoView = () => {
               data.description,
               data.priority,
               data.dueDate,
-              targetStatus
+              targetStatus,
+              data.tags,
+              data.notes
             );
           }
         }}

@@ -1,17 +1,18 @@
 // ADD/EDIT MODAL UI ONLY
 
-import { X, Calendar } from "lucide-react";
+import React from "react";
+import { X, Calendar, StickyNote, Plus } from "lucide-react";
 import type { TodoPriority } from "../types/todo";
 
 // ============================================================================
 // HEADER
 // ============================================================================
 
-export const Header = ({
-  title,
-  onClose,
-}: {
-  title: string;
+export const Header = ({ 
+  title, 
+  onClose 
+}: { 
+  title: string; 
   onClose: () => void;
 }) => (
   <div className="flex items-center justify-between p-6 border-b border-(--color-border)">
@@ -40,7 +41,9 @@ export const TitleInput = ({
   onKeyPress: (e: React.KeyboardEvent) => void;
 }) => (
   <div>
-    <label className="block text-sm font-medium mb-2 opacity-60">Title *</label>
+    <label className="block text-sm font-medium mb-2 opacity-60">
+      Title *
+    </label>
     <input
       type="text"
       value={value}
@@ -79,6 +82,110 @@ export const DescriptionInput = ({
 );
 
 // ============================================================================
+// TAGS INPUT
+// ============================================================================
+
+export const TagsInput = ({
+  tags,
+  onAdd,
+  onRemove,
+}: {
+  tags: string[];
+  onAdd: (tag: string) => void;
+  onRemove: (index: number) => void;
+}) => {
+  const [inputValue, setInputValue] = React.useState("");
+
+  const handleAdd = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed) {
+      onAdd(trimmed);
+      setInputValue("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAdd();
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-2 opacity-60">
+        TAGS
+      </label>
+      <div className="flex gap-2 mb-3">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Add tag..."
+          className="input-base flex-1"
+        />
+        <button
+          onClick={handleAdd}
+          className="btn-base btn-active p-2"
+          type="button"
+          aria-label="Add tag"
+        >
+          <Plus size={18} />
+        </button>
+      </div>
+      
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag, index) => (
+            <span
+              key={index}
+              className="badge-base bg-(--color-border)/30 flex items-center gap-1.5"
+            >
+              #{tag}
+              <button
+                onClick={() => onRemove(index)}
+                className="hover:opacity-70 transition-opacity"
+                aria-label="Remove tag"
+                type="button"
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// NOTES INPUT
+// ============================================================================
+
+export const NotesInput = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) => (
+  <div>
+    <label className="text-sm font-medium mb-2 opacity-60 flex items-center gap-2">
+      <StickyNote size={16} />
+      NOTES
+    </label>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Private notes (won't show on card)..."
+      className="input-base w-full resize-none"
+      rows={3}
+    />
+  </div>
+);
+
+// ============================================================================
 // PRIORITY & DUE DATE ROW
 // ============================================================================
 
@@ -94,6 +201,7 @@ export const PriorityAndDueDateRow = ({
   onDueDateChange: (date: string) => void;
 }) => (
   <div className="grid grid-cols-2 gap-3">
+    {/* Priority Dropdown */}
     <div>
       <label className="block text-sm font-medium mb-2 opacity-60">
         Priority
@@ -109,6 +217,7 @@ export const PriorityAndDueDateRow = ({
       </select>
     </div>
 
+    {/* Due Date */}
     <div>
       <label className="block text-sm font-medium mb-2 opacity-60">
         Due Date
@@ -144,16 +253,16 @@ export const Footer = ({
   onCancel: () => void;
   onSave: () => void;
 }) => (
-  <div className="flex justify-end gap-3 p-6 border-t border-(--color-border)">
-    <button onClick={onCancel} className="btn-base btn-inactive">
-      Cancel
+  <div className="flex gap-3 p-6 border-t border-(--color-border)">
+    <button onClick={onCancel} className="btn-base btn-inactive flex-1">
+      CANCEL
     </button>
     <button
       onClick={onSave}
       disabled={!isValid}
-      className="btn-base btn-active disabled:opacity-30 disabled:cursor-not-allowed"
+      className="btn-base btn-active flex-1 disabled:opacity-30 disabled:cursor-not-allowed"
     >
-      {isEditing ? "Update" : "Save"}
+      {isEditing ? "UPDATE" : "SAVE"}
     </button>
   </div>
 );

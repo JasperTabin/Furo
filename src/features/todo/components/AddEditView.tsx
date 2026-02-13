@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "../../../components/ui/Modal";
-import { Header, TitleInput, DescriptionInput, PriorityAndDueDateRow, Footer } from "./AddEdit";
+import { Header, TitleInput, DescriptionInput, TagsInput, NotesInput, PriorityAndDueDateRow, Footer } from "./AddEdit";
 import type { Todo, TodoPriority } from "../types/todo";
 
 // ============================================================================
@@ -26,6 +26,8 @@ interface TodoFormData {
   description?: string;
   priority: TodoPriority;
   dueDate?: number;
+  tags?: string[];
+  notes?: string;
 }
 
 interface AddEditViewProps {
@@ -50,6 +52,8 @@ export const AddEditView = ({
 }: AddEditViewProps) => {
   const [text, setText] = useState(todo?.text || "");
   const [description, setDescription] = useState(todo?.description || "");
+  const [tags, setTags] = useState<string[]>(todo?.tags || []);
+  const [notes, setNotes] = useState(todo?.notes || "");
   const [priority, setPriority] = useState<TodoPriority>(todo?.priority || "medium");
   const [dueDate, setDueDate] = useState(
     todo?.dueDate ? formatDateForInput(todo.dueDate) : ""
@@ -57,6 +61,16 @@ export const AddEditView = ({
 
   const isValid = text.trim().length > 0;
   const isEditing = !!todo;
+
+  const handleAddTag = (tag: string) => {
+    if (!tags.includes(tag)) {
+      setTags([...tags, tag]);
+    }
+  };
+
+  const handleRemoveTag = (index: number) => {
+    setTags(tags.filter((_, i) => i !== index));
+  };
 
   const handleSave = () => {
     if (!isValid) return;
@@ -66,8 +80,11 @@ export const AddEditView = ({
       description: description.trim() || undefined,
       priority,
       dueDate: parseDateInput(dueDate),
+      tags: tags.length > 0 ? tags : undefined,
+      notes: notes.trim() || undefined,
     };
 
+    // Pass id (or empty string for new) and data
     onSave(todo?.id || "", formData);
     onClose();
   };
@@ -99,11 +116,22 @@ export const AddEditView = ({
           onChange={setDescription}
         />
 
+        <TagsInput
+          tags={tags}
+          onAdd={handleAddTag}
+          onRemove={handleRemoveTag}
+        />
+
         <PriorityAndDueDateRow
           priority={priority}
           dueDate={dueDate}
           onPriorityChange={setPriority}
           onDueDateChange={setDueDate}
+        />
+
+        <NotesInput
+          value={notes}
+          onChange={setNotes}
         />
       </div>
 

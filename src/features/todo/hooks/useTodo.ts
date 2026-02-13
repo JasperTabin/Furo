@@ -1,13 +1,18 @@
 // TODO HOOK - All todo logic here
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Todo, TodoStatus, TodoPriority } from "../types/todo";
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const ITEMS_PER_PAGE = 4;
+const STORAGE_KEY = "furo-todos";
 
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-
-const ITEMS_PER_PAGE = 4;
 
 const generateId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -22,19 +27,42 @@ const paginateItems = (items: Todo[], page: number): Todo[] => {
   return items.slice(start, start + ITEMS_PER_PAGE);
 };
 
+const loadTodosFromStorage = (): Todo[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error("Failed to load todos from storage:", error);
+    return [];
+  }
+};
+
+const saveTodosToStorage = (todos: Todo[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+  } catch (error) {
+    console.error("Failed to save todos to storage:", error);
+  }
+};
+
 // ============================================================================
 // HOOK
 // ============================================================================
 
 export const useTodos = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [todos, setTodos] = useState<Todo[]>(loadTodosFromStorage);
   const [todoPage, setTodoPage] = useState(1);
   const [inProgressPage, setInProgressPage] = useState(1);
   const [donePage, setDonePage] = useState(1);
 
+  // Save to localStorage whenever todos change
+  useEffect(() => {
+    saveTodosToStorage(todos);
+  }, [todos]);
+
   // Filter todos by status
   const todoList = todos.filter((t) => t.status === "todo");
-  const inProgressList = todos.filter((t) => t.status === "in-progress");
+  const inProgressList = todos.filter((t) => t.status === "doing");
   const doneList = todos.filter((t) => t.status === "done");
 
   // Calculate pagination
@@ -56,7 +84,9 @@ export const useTodos = () => {
     description?: string,
     priority: TodoPriority = "medium",
     dueDate?: number,
-    status: TodoStatus = "todo"
+    status: TodoStatus = "todo",
+    tags?: string[],
+    notes?: string
   ) => {
     const newTodo: Todo = {
       id: generateId(),
@@ -65,6 +95,8 @@ export const useTodos = () => {
       priority,
       status,
       dueDate,
+      tags,
+      notes,
       createdAt: Date.now(),
     };
     setTodos((prev) => [newTodo, ...prev]);
@@ -77,6 +109,8 @@ export const useTodos = () => {
       description?: string;
       priority?: TodoPriority;
       dueDate?: number;
+      tags?: string[];
+      notes?: string;
     }
   ) => {
     setTodos((prev) =>
