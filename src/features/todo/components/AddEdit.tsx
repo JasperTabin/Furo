@@ -1,5 +1,4 @@
-// ADD/EDIT MODAL UI ONLY
-
+// ADD/EDIT MODAL UI COMPONENTS
 import React from "react";
 import { X, Calendar, StickyNote, Plus } from "lucide-react";
 import type { TodoPriority } from "../types/todo";
@@ -7,15 +6,14 @@ import type { TodoPriority } from "../types/todo";
 // ============================================================================
 // HEADER
 // ============================================================================
-
-export const Header = ({ 
-  title, 
-  onClose 
-}: { 
-  title: string; 
+export const Header = ({
+  title,
+  onClose,
+}: {
+  title: string;
   onClose: () => void;
 }) => (
-  <div className="flex items-center justify-between p-6 border-b border-(--color-border)">
+  <div className="flex items-center justify-between p-4 sm:p-6 border-b border-(--color-border)">
     <h3 className="text-lg font-bold">{title}</h3>
     <button
       onClick={onClose}
@@ -30,15 +28,12 @@ export const Header = ({
 // ============================================================================
 // TITLE INPUT
 // ============================================================================
-
 export const TitleInput = ({
   value,
   onChange,
-  onKeyPress,
 }: {
   value: string;
   onChange: (value: string) => void;
-  onKeyPress: (e: React.KeyboardEvent) => void;
 }) => (
   <div>
     <label className="block text-sm font-medium mb-2 opacity-60">
@@ -48,10 +43,8 @@ export const TitleInput = ({
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      onKeyPress={onKeyPress}
       placeholder="Task title..."
       className="input-base w-full"
-      autoFocus
     />
   </div>
 );
@@ -59,7 +52,6 @@ export const TitleInput = ({
 // ============================================================================
 // DESCRIPTION INPUT
 // ============================================================================
-
 export const DescriptionInput = ({
   value,
   onChange,
@@ -84,7 +76,6 @@ export const DescriptionInput = ({
 // ============================================================================
 // TAGS INPUT
 // ============================================================================
-
 export const TagsInput = ({
   tags,
   onAdd,
@@ -98,13 +89,13 @@ export const TagsInput = ({
 
   const handleAdd = () => {
     const trimmed = inputValue.trim();
-    if (trimmed) {
+    if (trimmed && !tags.includes(trimmed)) {
       onAdd(trimmed);
       setInputValue("");
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleAdd();
@@ -113,17 +104,17 @@ export const TagsInput = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2 opacity-60">
-        TAGS
-      </label>
+      <label className="block text-sm font-medium mb-2 opacity-60">Tags</label>
       <div className="flex gap-2 mb-3">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder="Add tag..."
           className="input-base flex-1"
+          // Avoid iOS zoom on focus (font-size ≥ 16px)
+          style={{ fontSize: "16px" }}
         />
         <button
           onClick={handleAdd}
@@ -134,19 +125,18 @@ export const TagsInput = ({
           <Plus size={18} />
         </button>
       </div>
-      
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {tags.map((tag, index) => (
             <span
-              key={index}
+              key={tag}
               className="badge-base bg-(--color-border)/30 flex items-center gap-1.5"
             >
               #{tag}
               <button
                 onClick={() => onRemove(index)}
                 className="hover:opacity-70 transition-opacity"
-                aria-label="Remove tag"
+                aria-label={`Remove ${tag} tag`}
                 type="button"
               >
                 <X size={12} />
@@ -162,7 +152,6 @@ export const TagsInput = ({
 // ============================================================================
 // NOTES INPUT
 // ============================================================================
-
 export const NotesInput = ({
   value,
   onChange,
@@ -173,7 +162,7 @@ export const NotesInput = ({
   <div>
     <label className="text-sm font-medium mb-2 opacity-60 flex items-center gap-2">
       <StickyNote size={16} />
-      NOTES
+      Notes
     </label>
     <textarea
       value={value}
@@ -188,7 +177,6 @@ export const NotesInput = ({
 // ============================================================================
 // PRIORITY & DUE DATE ROW
 // ============================================================================
-
 export const PriorityAndDueDateRow = ({
   priority,
   dueDate,
@@ -200,7 +188,11 @@ export const PriorityAndDueDateRow = ({
   onPriorityChange: (priority: TodoPriority) => void;
   onDueDateChange: (date: string) => void;
 }) => (
-  <div className="grid grid-cols-2 gap-3">
+  /*
+    On very narrow screens the two fields stack vertically (grid-cols-1),
+    on sm+ they sit side-by-side (grid-cols-2).
+  */
+  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-3">
     {/* Priority Dropdown */}
     <div>
       <label className="block text-sm font-medium mb-2 opacity-60">
@@ -210,10 +202,31 @@ export const PriorityAndDueDateRow = ({
         value={priority}
         onChange={(e) => onPriorityChange(e.target.value as TodoPriority)}
         className="input-base w-full"
+        style={{
+          color: "var(--color-fg)",
+          backgroundColor: "var(--color-bg)",
+          // Prevent iOS font-size zoom
+          fontSize: "16px",
+        }}
       >
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
+        <option
+          value="low"
+          style={{ color: "var(--color-fg)", backgroundColor: "var(--color-bg)" }}
+        >
+          Low
+        </option>
+        <option
+          value="medium"
+          style={{ color: "var(--color-fg)", backgroundColor: "var(--color-bg)" }}
+        >
+          Medium
+        </option>
+        <option
+          value="high"
+          style={{ color: "var(--color-fg)", backgroundColor: "var(--color-bg)" }}
+        >
+          High
+        </option>
       </select>
     </div>
 
@@ -222,12 +235,20 @@ export const PriorityAndDueDateRow = ({
       <label className="block text-sm font-medium mb-2 opacity-60">
         Due Date
       </label>
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <input
           type="date"
           value={dueDate}
           onChange={(e) => onDueDateChange(e.target.value)}
-          className="input-base w-full"
+          className="input-base w-full max-w-full min-w-0"
+          style={{
+            width: "100%",
+            minWidth: 0,
+            fontSize: "16px",
+            boxSizing: "border-box",
+            WebkitAppearance: "none",
+            appearance: "none",
+          }}
         />
         <Calendar
           size={18}
@@ -241,7 +262,6 @@ export const PriorityAndDueDateRow = ({
 // ============================================================================
 // FOOTER
 // ============================================================================
-
 export const Footer = ({
   isValid,
   isEditing,
@@ -253,16 +273,34 @@ export const Footer = ({
   onCancel: () => void;
   onSave: () => void;
 }) => (
-  <div className="flex gap-3 p-6 border-t border-(--color-border)">
-    <button onClick={onCancel} className="btn-base btn-inactive flex-1">
-      CANCEL
-    </button>
+  <div className="flex gap-3 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 border-t border-(--color-border)">
     <button
+      type="button"
+      onPointerDown={() => {
+        // Dismiss keyboard before activation so mobile Safari does not consume tap.
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      }}
+      onTouchEnd={(e) => {
+        // Fire immediately on touch devices and suppress delayed synthetic click.
+        e.preventDefault();
+        if (isValid) onSave();
+      }}
       onClick={onSave}
       disabled={!isValid}
-      className="btn-base btn-active flex-1 disabled:opacity-30 disabled:cursor-not-allowed"
+      style={{ touchAction: "manipulation" }}
+      className="btn-base btn-active flex-1 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
     >
-      {isEditing ? "UPDATE" : "SAVE"}
+      {isEditing ? "Update" : "Save"}
+    </button>
+    <button
+      type="button"
+      onClick={onCancel}
+      style={{ touchAction: "manipulation" }}
+      className="btn-base btn-inactive flex-1"
+    >
+      Cancel
     </button>
   </div>
 );

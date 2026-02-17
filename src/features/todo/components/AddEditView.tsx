@@ -1,96 +1,101 @@
 // ADD/EDIT MODAL CONTAINER - Orchestrator & Container
-
 import { useState } from "react";
 import { Modal } from "../../../components/ui/Modal";
-import { Header, TitleInput, DescriptionInput, TagsInput, NotesInput, PriorityAndDueDateRow, Footer } from "./AddEdit";
-import type { Todo, TodoPriority } from "../types/todo";
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-const formatDateForInput = (timestamp: number): string => {
-  return new Date(timestamp).toISOString().split("T")[0];
-};
-
-const parseDateInput = (dateString: string): number | undefined => {
-  return dateString ? new Date(dateString).getTime() : undefined;
-};
+import {
+  Header,
+  TitleInput,
+  DescriptionInput,
+  TagsInput,
+  NotesInput,
+  PriorityAndDueDateRow,
+  Footer,
+} from "./AddEdit";
+import type { Todo, TodoPriority, TodoFormData } from "../types/todo";
+import { formatDateForInput, parseDateInput } from "../utils/todoUtils";
 
 // ============================================================================
 // TYPES
 // ============================================================================
-
-interface TodoFormData {
-  text: string;
-  description?: string;
-  priority: TodoPriority;
-  dueDate?: number;
-  tags?: string[];
-  notes?: string;
-}
-
 interface AddEditViewProps {
   isOpen: boolean;
   todo?: Todo;
   onClose: () => void;
-  onSave: (
-    id: string,
-    data: TodoFormData
-  ) => void;
+  onSave: (id: string, data: TodoFormData) => void;
 }
+
+// ============================================================================
+// FORM STATE SHAPE
+// ============================================================================
+interface FormState {
+  text: string;
+  description: string;
+  tags: string[];
+  notes: string;
+  priority: TodoPriority;
+  dueDate: string;
+}
+
+const buildFormState = (todo?: Todo): FormState => ({
+  text: todo?.text || "",
+  description: todo?.description || "",
+  tags: todo?.tags || [],
+  notes: todo?.notes || "",
+  priority: todo?.priority || "medium",
+  dueDate: todo?.dueDate ? formatDateForInput(todo.dueDate) : "",
+});
 
 // ============================================================================
 // COMPONENT
 // ============================================================================
-
 export const AddEditView = ({
   isOpen,
   todo,
   onClose,
   onSave,
 }: AddEditViewProps) => {
-  const [text, setText] = useState(todo?.text || "");
-  const [description, setDescription] = useState(todo?.description || "");
-  const [tags, setTags] = useState<string[]>(todo?.tags || []);
-  const [notes, setNotes] = useState(todo?.notes || "");
-  const [priority, setPriority] = useState<TodoPriority>(todo?.priority || "medium");
-  const [dueDate, setDueDate] = useState(
-    todo?.dueDate ? formatDateForInput(todo.dueDate) : ""
-  );
+  const [form, setForm] = useState<FormState>(() => buildFormState(todo));
 
-  const isValid = text.trim().length > 0;
+  const setField = <K extends keyof FormState>(key: K, value: FormState[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const isValid = form.text.trim().length > 0;
   const isEditing = !!todo;
 
   const handleAddTag = (tag: string) => {
-    if (!tags.includes(tag)) {
-      setTags([...tags, tag]);
+    if (!form.tags.includes(tag)) {
+      setField("tags", [...form.tags, tag]);
     }
   };
 
   const handleRemoveTag = (index: number) => {
-    setTags(tags.filter((_, i) => i !== index));
+    setField("tags", form.tags.filter((_, i) => i !== index));
   };
 
   const handleSave = () => {
     if (!isValid) return;
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
 
     const formData: TodoFormData = {
-      text: text.trim(),
-      description: description.trim() || undefined,
-      priority,
-      dueDate: parseDateInput(dueDate),
-      tags: tags.length > 0 ? tags : undefined,
-      notes: notes.trim() || undefined,
+      text: form.text.trim(),
+      description: form.description.trim() || undefined,
+      priority: form.priority,
+      dueDate: parseDateInput(form.dueDate),
+      tags: form.tags.length > 0 ? form.tags : undefined,
+      notes: form.notes.trim() || undefined,
     };
 
-    // Pass id (or empty string for new) and data
-    onSave(todo?.id || "", formData);
-    onClose();
+    try {
+      onSave(todo?.id || "", formData);
+      onClose();
+    } catch (error) {
+      console.error("Failed to save todo:", error);
+    }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && e.metaKey && isValid) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && isValid) {
       handleSave();
     }
   };
@@ -98,43 +103,33 @@ export const AddEditView = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} maxWidth="max-w-md">
-      <Header 
-        title={isEditing ? "Edit Task" : "Add Task"} 
-        onClose={onClose} 
+    <Modal isOpen={isOpen} maxWidth="w-full sm:max-w-md mx-auto">
+      <Header
+        title={isEditing ? "Edit Task" : "Add Task"}
+        onClose={onClose}
       />
-
-      <div className="p-6 space-y-4">
-        <TitleInput
-          value={text}
-          onChange={setText}
-          onKeyPress={handleKeyPress}
-        />
-
+      <div
+        className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0"
+        onKeyDown={handleKeyDown}
+      >
+        <TitleInput value={form.text} onChange={(v) => setField("text", v)} />
         <DescriptionInput
-          value={description}
-          onChange={setDescription}
+          value={form.description}
+          onChange={(v) => setField("description", v)}
         />
-
         <TagsInput
-          tags={tags}
+          tags={form.tags}
           onAdd={handleAddTag}
           onRemove={handleRemoveTag}
         />
-
         <PriorityAndDueDateRow
-          priority={priority}
-          dueDate={dueDate}
-          onPriorityChange={setPriority}
-          onDueDateChange={setDueDate}
+          priority={form.priority}
+          dueDate={form.dueDate}
+          onPriorityChange={(v) => setField("priority", v)}
+          onDueDateChange={(v) => setField("dueDate", v)}
         />
-
-        <NotesInput
-          value={notes}
-          onChange={setNotes}
-        />
+        <NotesInput value={form.notes} onChange={(v) => setField("notes", v)} />
       </div>
-
       <Footer
         isValid={isValid}
         isEditing={isEditing}

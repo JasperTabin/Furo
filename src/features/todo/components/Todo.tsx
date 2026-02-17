@@ -1,35 +1,26 @@
-// TODO UI COMPONENTS ONLY
-
-import { Plus, Trash2, Edit2, Calendar, ChevronLeft, ChevronRight, StickyNote } from "lucide-react";
+// TODO UI COMPONENTS - Original interface with accessibility fixes
+import {
+  Plus,
+  Trash2,
+  Edit2,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  StickyNote,
+} from "lucide-react";
 import type { Todo, TodoStatus } from "../types/todo";
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-const formatDate = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
-
-const isPastDue = (dueDate: number | undefined, status: TodoStatus): boolean => {
-  if (!dueDate || status === "done") return false;
-  const dueDateObj = new Date(dueDate);
-  const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
-  return dueDateObj < todayStart;
-};
+import { formatDate, isPastDue } from "../utils/todoUtils";
 
 // ============================================================================
 // COLUMN HEADER
 // ============================================================================
-
-export const ColumnHeader = ({ 
-  title, 
-  count, 
-  onAdd 
-}: { 
-  title: string; 
-  count: number; 
+export const ColumnHeader = ({
+  title,
+  count,
+  onAdd,
+}: {
+  title: string;
+  count: number;
   onAdd: () => void;
 }) => (
   <div>
@@ -55,17 +46,18 @@ export const ColumnHeader = ({
 // ============================================================================
 // CARD
 // ============================================================================
-
 export const Card = ({
   todo,
   onEdit,
   onDelete,
+  onStatusChange,
   onDragStart,
   onDragEnd,
 }: {
   todo: Todo;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
+  onStatusChange: (id: string, status: TodoStatus) => void;
   onDragStart: (e: React.DragEvent, todo: Todo) => void;
   onDragEnd: (e: React.DragEvent) => void;
 }) => {
@@ -78,46 +70,71 @@ export const Card = ({
   const priorityColor = priorityColors[todo.priority];
   const isOverdue = isPastDue(todo.dueDate, todo.status);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onEdit(todo);
+    }
+    if (e.key === "Delete") {
+      e.preventDefault();
+      onDelete(todo.id);
+    }
+  };
+
   return (
     <div
       draggable
       onDragStart={(e) => onDragStart(e, todo)}
       onDragEnd={onDragEnd}
-      className="card-base card-hover group cursor-grab active:cursor-grabbing p-4 todo-card"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`${todo.text}, ${todo.priority} priority, status: ${todo.status}. Press Enter to edit, Delete to remove.`}
+      className="card-base card-hover group cursor-grab active:cursor-grabbing p-4 todo-card focus:outline-none focus:ring-2 focus:ring-(--color-fg)/40"
     >
-      {/* Priority bar and actions aligned */}
       <div className="flex items-center justify-between mb-3">
         <div className={`h-1 w-12 rounded-full ${priorityColor}`} />
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/*
+          Mobile:  always visible (no hover on touch).
+          Desktop: hidden until hover/focus — original behaviour.
+        */}
+        <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
           <button
-            onClick={() => onEdit(todo)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(todo);
+            }}
             className="p-1 hover:bg-(--color-border)/30 rounded-lg transition-colors"
             aria-label="Edit task"
+            tabIndex={-1}
           >
             <Edit2 size={14} />
           </button>
           <button
-            onClick={() => onDelete(todo.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(todo.id);
+            }}
             className="p-1 hover:bg-(--color-border)/30 rounded-lg transition-colors"
             aria-label="Delete task"
+            tabIndex={-1}
           >
             <Trash2 size={14} />
           </button>
         </div>
       </div>
 
-      {/* Title */}
       <h4 className="text-sm font-medium leading-relaxed mb-2">{todo.text}</h4>
 
-      {/* Description */}
       {todo.description && (
         <p className="text-xs opacity-60 mb-2 line-clamp-2">
           {todo.description}
         </p>
       )}
 
-      {/* Footer: Date, Tags & Note indicator */}
-      {(todo.dueDate || (todo.tags && todo.tags.length > 0) || (todo.notes && todo.notes.trim())) && (
+      {(todo.dueDate ||
+        (todo.tags && todo.tags.length > 0) ||
+        (todo.notes && todo.notes.trim())) && (
         <div className="flex flex-wrap items-center gap-2 mt-3">
           {todo.dueDate && (
             <span
@@ -131,20 +148,13 @@ export const Card = ({
               {formatDate(todo.dueDate)}
             </span>
           )}
-          
-          {todo.tags && todo.tags.length > 0 && (
-            <>
-              {todo.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="badge-base bg-(--color-border)/30"
-                >
-                  {tag}
-                </span>
-              ))}
-            </>
-          )}
-
+          {todo.tags &&
+            todo.tags.length > 0 &&
+            todo.tags.map((tag, index) => (
+              <span key={index} className="badge-base bg-(--color-border)/30">
+                #{tag}
+              </span>
+            ))}
           {todo.notes && todo.notes.trim() && (
             <span className="badge-base bg-(--color-border)/30 flex items-center gap-1">
               <StickyNote size={10} />
@@ -153,6 +163,24 @@ export const Card = ({
           )}
         </div>
       )}
+
+      {/* Mobile-only status dropdown — hidden on sm+ */}
+      <select
+        value={todo.status}
+        onChange={(e) => onStatusChange(todo.id, e.target.value as TodoStatus)}
+        onClick={(e) => e.stopPropagation()}
+        className="mt-3 w-full input-base text-xs py-1 sm:hidden"
+        aria-label="Move task to column"
+        style={{
+          color: "var(--color-fg)",
+          backgroundColor: "var(--color-bg)",
+          fontSize: "16px", // prevents iOS auto-zoom on focus
+        }}
+      >
+        <option value="todo">To Do</option>
+        <option value="doing">Doing</option>
+        <option value="done">Done</option>
+      </select>
     </div>
   );
 };
@@ -160,7 +188,6 @@ export const Card = ({
 // ============================================================================
 // PAGINATION
 // ============================================================================
-
 export const Pagination = ({
   currentPage,
   totalPages,
@@ -182,11 +209,9 @@ export const Pagination = ({
       >
         <ChevronLeft size={16} />
       </button>
-
       <span className="text-xs font-medium px-2">
         PAGE {currentPage} / {totalPages}
       </span>
-
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -202,9 +227,9 @@ export const Pagination = ({
 // ============================================================================
 // COLUMN
 // ============================================================================
-
 export const Column = ({
   title,
+  totalCount,
   todos,
   currentPage,
   totalPages,
@@ -213,6 +238,7 @@ export const Column = ({
   onAdd,
   onEdit,
   onDelete,
+  onStatusChange,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -220,6 +246,7 @@ export const Column = ({
   onDrop,
 }: {
   title: string;
+  totalCount: number;
   todos: Todo[];
   currentPage: number;
   totalPages: number;
@@ -228,6 +255,7 @@ export const Column = ({
   onAdd: () => void;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
+  onStatusChange: (id: string, status: TodoStatus) => void;
   onDragStart: (e: React.DragEvent, todo: Todo) => void;
   onDragEnd: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -235,9 +263,11 @@ export const Column = ({
   onDrop: (e: React.DragEvent) => void;
 }) => {
   return (
-    <div className="flex-1 min-w-0 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column" style={{ minWidth: '320px' }}>
+    <div
+      className="w-full flex-shrink-0 sm:w-auto sm:flex-1 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column snap-start"
+    >
       <div className="p-4">
-        <ColumnHeader title={title} count={todos.length} onAdd={onAdd} />
+        <ColumnHeader title={title} count={totalCount} onAdd={onAdd} />
       </div>
 
       <div className="p-3">
@@ -245,10 +275,10 @@ export const Column = ({
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
+          role="region"
+          aria-label={`${title} column`}
           className={`flex flex-col rounded-xl transition-all ${
-            todos.length === 0 
-              ? "border-2 border-dashed" 
-              : ""
+            todos.length === 0 ? "border-2 border-dashed" : ""
           } ${
             isDragOver
               ? "border-(--color-border) bg-(--color-border)/10"
@@ -269,13 +299,13 @@ export const Column = ({
                   todo={todo}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onStatusChange={onStatusChange}
                   onDragStart={onDragStart}
                   onDragEnd={onDragEnd}
                 />
               ))
             )}
           </div>
-
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

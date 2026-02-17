@@ -23,16 +23,19 @@ function App() {
         <Header currentView={currentView} onViewChange={setCurrentView} />
       )}
 
-      <main className="flex-1 flex flex-col items-center justify-center overflow-y-auto">
+      <main className="flex-1 flex flex-col overflow-y-auto">
         {currentView === "timer" ? (
-          <div ref={timerContainerRef}>
+          <div
+            ref={timerContainerRef}
+            className="flex-1 flex items-center justify-center"
+          >
             <TimerView
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
             />
           </div>
         ) : (
-          <div ref={todoContainerRef} className="w-full px-4 py-8">
+          <div ref={todoContainerRef} className="w-full px-4 pt-4 pb-8">
             <TodoView />
           </div>
         )}

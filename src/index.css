@@ -96,4 +96,5 @@ body {
   .badge-priority-high {
     @apply bg-red-500/20 text-red-400;
   }
+
 }
