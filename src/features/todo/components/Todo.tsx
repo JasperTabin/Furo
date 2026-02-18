@@ -94,10 +94,6 @@ export const Card = ({
     >
       <div className="flex items-center justify-between mb-3">
         <div className={`h-1 w-12 rounded-full ${priorityColor}`} />
-        {/*
-          Mobile:  always visible (no hover on touch).
-          Desktop: hidden until hover/focus — original behaviour.
-        */}
         <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
           <button
             onClick={(e) => {
@@ -169,13 +165,8 @@ export const Card = ({
         value={todo.status}
         onChange={(e) => onStatusChange(todo.id, e.target.value as TodoStatus)}
         onClick={(e) => e.stopPropagation()}
-        className="mt-3 w-full input-base text-xs py-1 sm:hidden"
+        className="mt-3 w-full input-base control-themed py-1 sm:hidden"
         aria-label="Move task to column"
-        style={{
-          color: "var(--color-fg)",
-          backgroundColor: "var(--color-bg)",
-          fontSize: "16px", // prevents iOS auto-zoom on focus
-        }}
       >
         <option value="todo">To Do</option>
         <option value="doing">Doing</option>
@@ -264,7 +255,7 @@ export const Column = ({
 }) => {
   return (
     <div
-      className="w-full flex-shrink-0 sm:w-auto sm:flex-1 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column snap-start"
+      className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column snap-start"
     >
       <div className="p-4">
         <ColumnHeader title={title} count={totalCount} onAdd={onAdd} />

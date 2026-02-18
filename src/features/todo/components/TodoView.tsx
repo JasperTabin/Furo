@@ -69,65 +69,62 @@ export const TodoView = () => {
     [addTodo, updateTodo, targetStatus],
   );
 
+  const columns = [
+    {
+      key: "todo" as const,
+      title: "To Do",
+      totalCount: todoList.length,
+      todos: todoPagination.paginatedItems,
+      currentPage: todoPagination.currentPage,
+      totalPages: todoPagination.totalPages,
+      onPageChange: todoPagination.setPage,
+    },
+    {
+      key: "doing" as const,
+      title: "Doing",
+      totalCount: doingList.length,
+      todos: doingPagination.paginatedItems,
+      currentPage: doingPagination.currentPage,
+      totalPages: doingPagination.totalPages,
+      onPageChange: doingPagination.setPage,
+    },
+    {
+      key: "done" as const,
+      title: "Done",
+      totalCount: doneList.length,
+      todos: donePagination.paginatedItems,
+      currentPage: donePagination.currentPage,
+      totalPages: donePagination.totalPages,
+      onPageChange: donePagination.setPage,
+    },
+  ];
+
   return (
     <>
       <div className="max-w-7xl mx-auto w-full">
         <h2 className="text-2xl flex justify-center font-bold mb-6 todo-title">
           Kanban Board
         </h2>
-        {/*
-          Mobile:  overflow-x-auto + snap for horizontal scrolling between columns.
-          Desktop: flex row as before.
-        */}
-        <div className="flex gap-4 items-start pb-4 overflow-x-auto snap-x snap-mandatory [-webkit-overflow-scrolling:touch] px-4 sm:px-0 [scroll-padding-left:1rem]">
-          <Column
-            title="To Do"
-            totalCount={todoList.length}
-            todos={todoPagination.paginatedItems}
-            currentPage={todoPagination.currentPage}
-            totalPages={todoPagination.totalPages}
-            isDragOver={dragOverColumn === "todo"}
-            onPageChange={todoPagination.setPage}
-            onAdd={() => openAddModal("todo")}
-            onEdit={openEditModal}
-            onDelete={deleteTodo}
-            onStatusChange={updateTodoStatus}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            {...createColumnHandlers("todo")}
-          />
-          <Column
-            title="Doing"
-            totalCount={doingList.length}
-            todos={doingPagination.paginatedItems}
-            currentPage={doingPagination.currentPage}
-            totalPages={doingPagination.totalPages}
-            isDragOver={dragOverColumn === "doing"}
-            onPageChange={doingPagination.setPage}
-            onAdd={() => openAddModal("doing")}
-            onEdit={openEditModal}
-            onDelete={deleteTodo}
-            onStatusChange={updateTodoStatus}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            {...createColumnHandlers("doing")}
-          />
-          <Column
-            title="Done"
-            totalCount={doneList.length}
-            todos={donePagination.paginatedItems}
-            currentPage={donePagination.currentPage}
-            totalPages={donePagination.totalPages}
-            isDragOver={dragOverColumn === "done"}
-            onPageChange={donePagination.setPage}
-            onAdd={() => openAddModal("done")}
-            onEdit={openEditModal}
-            onDelete={deleteTodo}
-            onStatusChange={updateTodoStatus}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            {...createColumnHandlers("done")}
-          />
+        <div className="flex gap-4 items-start pb-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] px-4 sm:px-0 scroll-pl-4">
+          {columns.map((column) => (
+            <Column
+              key={column.key}
+              title={column.title}
+              totalCount={column.totalCount}
+              todos={column.todos}
+              currentPage={column.currentPage}
+              totalPages={column.totalPages}
+              isDragOver={dragOverColumn === column.key}
+              onPageChange={column.onPageChange}
+              onAdd={() => openAddModal(column.key)}
+              onEdit={openEditModal}
+              onDelete={deleteTodo}
+              onStatusChange={updateTodoStatus}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              {...createColumnHandlers(column.key)}
+            />
+          ))}
         </div>
       </div>
 

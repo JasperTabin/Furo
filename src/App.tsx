@@ -23,7 +23,11 @@ function App() {
         <Header currentView={currentView} onViewChange={setCurrentView} />
       )}
 
-      <main className="flex-1 flex flex-col overflow-y-auto">
+      <main
+        className={`flex-1 flex flex-col ${
+          currentView === "todo" ? "overflow-y-hidden" : "overflow-y-auto"
+        }`}
+      >
         {currentView === "timer" ? (
           <div
             ref={timerContainerRef}

@@ -14,7 +14,6 @@ export const generateId = (): string => {
     }
 
     if (typeof crypto.getRandomValues === "function") {
-      // RFC4122-ish UUID v4 fallback for environments without crypto.randomUUID.
       const bytes = new Uint8Array(16);
       crypto.getRandomValues(bytes);
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
@@ -52,7 +51,6 @@ export const parseDateInput = (dateString: string): number | undefined => {
   const [year, month, day] = dateString.split("-").map(Number);
   if (!year || !month || !day) return undefined;
 
-  // Interpret YYYY-MM-DD as local calendar date at local midnight.
   return new Date(year, month - 1, day).getTime();
 };
 

@@ -1,6 +1,6 @@
 // KANBAN DRAG HOOK - Handles drag and drop logic
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import type { Todo, TodoStatus } from "../types/todo";
 
 export const useDrag = (onDrop: (todoId: string, newStatus: TodoStatus) => void) => {
@@ -37,13 +37,6 @@ export const useDrag = (onDrop: (todoId: string, newStatus: TodoStatus) => void)
     }),
     [onDrop]
   );
-
-  useEffect(() => {
-    return () => {
-      draggedTodo.current = null;
-      setDragOverColumn(null);
-    };
-  }, []);
 
   return {
     dragOverColumn,

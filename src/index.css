@@ -15,6 +15,7 @@
 }
 
 body {
+  margin: 0;
   font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background-color: var(--color-bg);
   color: var(--color-fg);
@@ -79,6 +80,21 @@ body {
 
   .input-base {
     @apply px-4 py-3 bg-(--color-bg) border border-(--color-border) rounded-xl focus:outline-none focus:border-(--color-border)/70 transition-colors;
+  }
+
+  .control-themed {
+    color: var(--color-fg);
+    background-color: var(--color-bg);
+    font-size: 16px;
+  }
+
+  .date-input-fix {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    font-size: 16px;
   }
 
   .badge-base {

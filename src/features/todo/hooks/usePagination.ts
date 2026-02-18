@@ -10,8 +10,6 @@ interface UsePaginationReturn<T> {
   totalPages: number;
   paginatedItems: T[];
   setPage: (page: number) => void;
-  nextPage: () => void;
-  prevPage: () => void;
 }
 
 export const usePagination = <T>(
@@ -42,20 +40,10 @@ export const usePagination = <T>(
     [totalPages]
   );
 
-  const nextPage = useCallback(() => {
-    setCurrentPage((prev) => boundPage(prev + 1, totalPages));
-  }, [totalPages]);
-
-  const prevPage = useCallback(() => {
-    setCurrentPage((prev) => boundPage(prev - 1, totalPages));
-  }, [totalPages]);
-
   return {
     currentPage: boundedPage,
     totalPages,
     paginatedItems,
     setPage,
-    nextPage,
-    prevPage,
   };
 };

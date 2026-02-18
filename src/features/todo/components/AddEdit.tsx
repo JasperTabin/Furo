@@ -112,9 +112,7 @@ export const TagsInput = ({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Add tag..."
-          className="input-base flex-1"
-          // Avoid iOS zoom on focus (font-size ≥ 16px)
-          style={{ fontSize: "16px" }}
+          className="input-base flex-1 [font-size:16px]"
         />
         <button
           onClick={handleAdd}
@@ -188,12 +186,7 @@ export const PriorityAndDueDateRow = ({
   onPriorityChange: (priority: TodoPriority) => void;
   onDueDateChange: (date: string) => void;
 }) => (
-  /*
-    On very narrow screens the two fields stack vertically (grid-cols-1),
-    on sm+ they sit side-by-side (grid-cols-2).
-  */
   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-3">
-    {/* Priority Dropdown */}
     <div>
       <label className="block text-sm font-medium mb-2 opacity-60">
         Priority
@@ -201,36 +194,20 @@ export const PriorityAndDueDateRow = ({
       <select
         value={priority}
         onChange={(e) => onPriorityChange(e.target.value as TodoPriority)}
-        className="input-base w-full"
-        style={{
-          color: "var(--color-fg)",
-          backgroundColor: "var(--color-bg)",
-          // Prevent iOS font-size zoom
-          fontSize: "16px",
-        }}
+        className="input-base w-full control-themed"
       >
-        <option
-          value="low"
-          style={{ color: "var(--color-fg)", backgroundColor: "var(--color-bg)" }}
-        >
+        <option value="low">
           Low
         </option>
-        <option
-          value="medium"
-          style={{ color: "var(--color-fg)", backgroundColor: "var(--color-bg)" }}
-        >
+        <option value="medium">
           Medium
         </option>
-        <option
-          value="high"
-          style={{ color: "var(--color-fg)", backgroundColor: "var(--color-bg)" }}
-        >
+        <option value="high">
           High
         </option>
       </select>
     </div>
 
-    {/* Due Date */}
     <div>
       <label className="block text-sm font-medium mb-2 opacity-60">
         Due Date
@@ -240,15 +217,7 @@ export const PriorityAndDueDateRow = ({
           type="date"
           value={dueDate}
           onChange={(e) => onDueDateChange(e.target.value)}
-          className="input-base w-full max-w-full min-w-0"
-          style={{
-            width: "100%",
-            minWidth: 0,
-            fontSize: "16px",
-            boxSizing: "border-box",
-            WebkitAppearance: "none",
-            appearance: "none",
-          }}
+          className="input-base w-full max-w-full min-w-0 date-input-fix"
         />
         <Calendar
           size={18}
@@ -277,28 +246,24 @@ export const Footer = ({
     <button
       type="button"
       onPointerDown={() => {
-        // Dismiss keyboard before activation so mobile Safari does not consume tap.
         if (document.activeElement instanceof HTMLElement) {
           document.activeElement.blur();
         }
       }}
       onTouchEnd={(e) => {
-        // Fire immediately on touch devices and suppress delayed synthetic click.
         e.preventDefault();
         if (isValid) onSave();
       }}
       onClick={onSave}
       disabled={!isValid}
-      style={{ touchAction: "manipulation" }}
-      className="btn-base btn-active flex-1 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      className="btn-base btn-active flex-1 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed [touch-action:manipulation]"
     >
       {isEditing ? "Update" : "Save"}
     </button>
     <button
       type="button"
       onClick={onCancel}
-      style={{ touchAction: "manipulation" }}
-      className="btn-base btn-inactive flex-1"
+      className="btn-base btn-inactive flex-1 [touch-action:manipulation]"
     >
       Cancel
     </button>
