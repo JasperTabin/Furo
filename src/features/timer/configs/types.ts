@@ -15,9 +15,4 @@ export interface TimerSettings {
   workDuration: number;
   breakDuration: number;
   longBreakDuration: number;
-  sessionsBeforeLongBreak: number;
-  sound: string; 
-  volume: number; 
-  isMuted: boolean;
-  repeatCount: number;
 }

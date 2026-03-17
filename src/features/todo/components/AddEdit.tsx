@@ -112,7 +112,7 @@ export const TagsInput = ({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Add tag..."
-          className="input-base flex-1 [font-size:16px]"
+          className="input-base flex-1 text-[16px]"
         />
         <button
           onClick={handleAdd}
@@ -256,14 +256,14 @@ export const Footer = ({
       }}
       onClick={onSave}
       disabled={!isValid}
-      className="btn-base btn-active flex-1 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed [touch-action:manipulation]"
+      className="btn-base btn-active flex-1 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation"
     >
       {isEditing ? "Update" : "Save"}
     </button>
     <button
       type="button"
       onClick={onCancel}
-      className="btn-base btn-inactive flex-1 [touch-action:manipulation]"
+      className="btn-base btn-inactive flex-1 touch-manipulation"
     >
       Cancel
     </button>

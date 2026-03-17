@@ -1,212 +1,109 @@
 // SETTINGS UI COMPONENTS ONLY
 
-import { X, AudioLines, Volume2, VolumeX, Settings as SettingsIcon } from "lucide-react";
-import { SOUNDS, REPEAT_OPTIONS } from "../configs/constants";
+import { X, Minus, Plus, Settings as SettingsIcon } from "lucide-react";
+import { DURATION_FIELDS } from "../configs/constants";
 
-// SETTINGS BUTTON
-export const SettingsButton = ({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`btn-base ${isOpen ? 'btn-active' : 'btn-inactive'}`}
-      aria-label="Open settings"
-      title="Open settings"
-    >
-      <SettingsIcon size={18} />
-    </button>
-  );
-};
-
-// DURATION INPUTS
-export const DurationInputs = ({
-  durations,
-  onChange,
+export const SettingsButton = ({
+  onClick,
+  isOpen,
 }: {
-  durations: { work: number; break: number; long: number };
-  onChange: (field: 'work' | 'break' | 'long', value: string) => void;
-}) => {
-  return (
-    <div className="space-y-3">
-      {/* ✅ Matches addedit.tsx section label style */}
-      <h3 className="text-sm font-medium opacity-60">DURATIONS ( MINS )</h3>
-      <div className="grid grid-cols-3 gap-3">
-        <div>
-          {/* ✅ Matches addedit.tsx label style */}
-          <label className="block text-sm font-medium mb-2 opacity-60">FOCUS</label>
-          <input
-            type="number"
-            min={0}
-            max={999}
-            value={durations.work}
-            onChange={(e) => onChange('work', e.target.value)}
-            className="input-base w-full text-center" // ✅ input-base instead of inline class
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2 opacity-60">SHORT</label>
-          <input
-            type="number"
-            min={0}
-            max={999}
-            value={durations.break}
-            onChange={(e) => onChange('break', e.target.value)}
-            className="input-base w-full text-center"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2 opacity-60">LONG</label>
-          <input
-            type="number"
-            min={0}
-            max={999}
-            value={durations.long}
-            onChange={(e) => onChange('long', e.target.value)}
-            className="input-base w-full text-center"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
+  onClick: () => void;
+  isOpen: boolean;
+}) => (
+  <button
+    onClick={onClick}
+    className={`btn-base ${isOpen ? "btn-active" : "btn-inactive"}`}
+    aria-label="Open settings"
+    title="Open settings"
+  >
+    <SettingsIcon size={18} />
+  </button>
+);
 
-// SOUND CONTROLS
-export const SoundControls = ({
-  sound,
-  repeatCount,
-  isMuted,
-  soundError,
-  onChange,
-  onPreview,
+export const SettingsPanel = ({
+  getValue,
+  onStep,
+  onClose,
+  onReset,
+  onSave,
+  hasChanges,
 }: {
-  sound: string;
-  repeatCount: number;
-  isMuted: boolean;
-  soundError: string | null;
-  onChange: (field: 'sound' | 'repeat', value: string | number) => void;
-  onPreview: () => void;
-}) => {
-  const previewDisabled = !sound || sound === "none" || isMuted;
-
-  return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium opacity-60">SOUND</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium mb-2 opacity-60">ALERT SOUND</label>
-          <select
-            value={sound}
-            onChange={(e) => onChange('sound', e.target.value)}
-            className="input-base w-full" // ✅ input-base
-            style={{ color: 'var(--color-fg)', backgroundColor: 'var(--color-bg)' }}
-          >
-            {SOUNDS.map((s) => (
-              <option key={s.value} value={s.value}
-                style={{ color: 'var(--color-fg)', backgroundColor: 'var(--color-bg)' }}
-              >
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2 opacity-60">REPEAT</label>
-          <select
-            value={repeatCount}
-            onChange={(e) => onChange('repeat', parseInt(e.target.value))}
-            className="input-base w-full" // ✅ input-base
-            style={{ color: 'var(--color-fg)', backgroundColor: 'var(--color-bg)' }}
-          >
-            {REPEAT_OPTIONS.map((count) => (
-              <option key={count} value={count}
-                style={{ color: 'var(--color-fg)', backgroundColor: 'var(--color-bg)' }}
-              >
-                {count}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      {/* ✅ btn-base btn-inactive instead of custom inline styles */}
-      <button
-        onClick={onPreview}
-        disabled={previewDisabled}
-        className="btn-base btn-inactive w-full flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        <AudioLines size={16} />
-        <span className="text-sm">PREVIEW SOUND</span>
-      </button>
-      {soundError && (
-        <p className="text-xs text-red-500 mt-2">{soundError}</p>
-      )}
-    </div>
-  );
-};
-
-// VOLUME CONTROLS
-export const VolumeControls = ({
-  volume,
-  isMuted,
-  onChange,
-}: {
-  volume: number;
-  isMuted: boolean;
-  onChange: (field: 'volume' | 'mute', value: number | boolean) => void;
-}) => {
-  return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium opacity-60">VOLUME</h3>
-      <div className="flex items-center gap-3">
-        {/* ✅ btn-base btn-inactive instead of custom inline styles */}
-        <button
-          onClick={() => onChange('mute', !isMuted)}
-          className="btn-base btn-inactive p-2.5"
-        >
-          {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-        </button>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={volume}
-          onChange={(e) => onChange('volume', parseInt(e.target.value))}
-          disabled={isMuted}
-          className="flex-1 h-2 rounded-lg bg-(--color-border) disabled:opacity-40"
-        />
-        <span className="text-sm opacity-60 w-14 text-right tabular-nums">
-          {isMuted ? "Muted" : `${volume}%`}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-// HEADER
-export const SettingsHeader = ({ onClose }: { onClose: () => void }) => {
-  return (
-    <div className="flex items-center justify-between px-6 py-5 border-b border-(--color-border)">
-      <h2 className="text-xl font-semibold">SETTINGS</h2>
-      {/* ✅ btn-base pattern for close button */}
+  getValue: (field: "work" | "break" | "long") => number;
+  onStep: (field: "work" | "break" | "long", direction: "inc" | "dec") => void;
+  onClose: () => void;
+  onReset: () => void;
+  onSave: () => void;
+  hasChanges: boolean;
+}) => (
+  <div className="flex flex-col px-6 py-5 gap-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+    {/* Header */}
+    <div className="flex items-center justify-between">
+      <h2 className="text-base font-semibold tracking-widest">SETTINGS</h2>
       <button
         onClick={onClose}
-        className="btn-base btn-inactive p-1"
+        className="p-1 hover:bg-(--color-border)/30 rounded-lg transition-colors"
         aria-label="Close settings"
       >
-        <X size={20} />
+        <X size={18} />
       </button>
     </div>
-  );
-};
 
-// FOOTER
-export const SettingsFooter = ({ onReset, onSave }: { onReset: () => void; onSave: () => void }) => {
-  return (
-    <div className="flex gap-3 px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-4 border-t border-(--color-border)">
-      <button onClick={onReset} className="btn-base btn-inactive flex-1">
+    {/* Content */}
+    <div className="overflow-y-auto flex-1 min-h-0">
+      {DURATION_FIELDS.map(({ field, label, min, max }) => {
+        const value = getValue(field);
+        return (
+          <div key={field} className="py-4">
+            <p className="text-sm font-semibold mb-3">{label}</p>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => onStep(field, "dec")}
+                disabled={value <= min}
+                className="flex items-center justify-center w-8 h-8 border border-(--color-border) hover:bg-(--color-border)/30 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                aria-label={`Decrease ${label}`}
+              >
+                <Minus size={14} />
+              </button>
+
+              <div className="input-base flex-1 flex items-center justify-center px-4 py-3 select-none">
+                <span className="text-lg font-semibold">{value}</span>
+              </div>
+
+              <button
+                onClick={() => onStep(field, "inc")}
+                disabled={value >= max}
+                className="flex items-center justify-center w-8 h-8 border border-(--color-border) hover:bg-(--color-border)/30 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                aria-label={`Increase ${label}`}
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+
+            <div className="flex justify-between mt-2 text-xs opacity-30">
+              <span>Min: {min}</span>
+              <span>Max: {max}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    {/* Footer */}
+    <div className="flex gap-3">
+      <button
+        onClick={onReset}
+        className="btn-base btn-inactive flex-1 text-sm tracking-widest"
+      >
         RESET
       </button>
-      <button onClick={onSave} className="btn-base btn-active flex-1">
+      <button
+        onClick={onSave}
+        disabled={!hasChanges}
+        className="btn-base btn-active flex-1 text-sm tracking-widest disabled:opacity-30 disabled:cursor-not-allowed"
+      >
         SAVE
       </button>
     </div>
-  );
-};
+  </div>
+);

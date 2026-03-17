@@ -1,7 +1,10 @@
 // TIMER LOGIC
 
+// TIMER LOGIC
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { loadSettings } from "../utils/settings";
+import { ALERT_SOUND } from "../configs/constants";
 import type { TimerMode, TimerStatus, TimerSettings } from "../configs/types";
 
 export const useTimer = (settings?: TimerSettings) => {
@@ -17,14 +20,10 @@ export const useTimer = (settings?: TimerSettings) => {
   const getTotalTime = useCallback(
     (currentMode: TimerMode): number => {
       switch (currentMode) {
-        case "focus":
-          return currentSettings.workDuration * 60;
-        case "shortbreak":
-          return currentSettings.breakDuration * 60;
-        case "longBreak":
-          return currentSettings.longBreakDuration * 60;
-        case "infinite":
-          return 0;
+        case "focus":      return currentSettings.workDuration * 60;
+        case "shortbreak": return currentSettings.breakDuration * 60;
+        case "longBreak":  return currentSettings.longBreakDuration * 60;
+        case "infinite":   return 0;
       }
     },
     [currentSettings],
@@ -33,6 +32,20 @@ export const useTimer = (settings?: TimerSettings) => {
   const [timeLeft, setTimeLeft] = useState(() => getTotalTime("focus"));
   const [totalTime, setTotalTime] = useState(() => getTotalTime("focus"));
 
+  // Preload single alert sound once on mount
+  useEffect(() => {
+    const audio = new Audio(`/sounds/${ALERT_SOUND}`);
+    audio.preload = "auto";
+    audio.load();
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  // Sync timer display when settings change while idle
   useEffect(() => {
     const handleStorageChange = () => {
       if (status === "idle") {
@@ -46,36 +59,6 @@ export const useTimer = (settings?: TimerSettings) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [mode, status, getTotalTime]);
 
-  // ✅ FIX: Update audio when settings change
-  useEffect(() => {
-    // Clean up old audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    // Don't create audio if no sound or "none"
-    if (!currentSettings.sound || currentSettings.sound === "none") {
-      return;
-    }
-
-    // Create new audio with current settings
-    const audio = new Audio(`/sounds/${currentSettings.sound}`);
-    audio.preload = "auto";
-    audio.volume = currentSettings.isMuted
-      ? 0
-      : (currentSettings.volume ?? 50) / 100;
-    audio.load();
-    audioRef.current = audio;
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [currentSettings.sound, currentSettings.volume, currentSettings.isMuted]);
-
   const updateMode = useCallback(
     (newMode: TimerMode) => {
       const newTotal = getTotalTime(newMode);
@@ -87,66 +70,21 @@ export const useTimer = (settings?: TimerSettings) => {
     [getTotalTime],
   );
 
-  const start = useCallback(() => setStatus("running"), []);
-  const pause = useCallback(() => setStatus("paused"), []);
-  const reset = useCallback(() => updateMode(mode), [mode, updateMode]);
-  const switchMode = useCallback(
-    (newMode: TimerMode) => updateMode(newMode),
-    [updateMode],
-  );
+  const start      = useCallback(() => setStatus("running"), []);
+  const pause      = useCallback(() => setStatus("paused"), []);
+  const reset      = useCallback(() => updateMode(mode), [mode, updateMode]);
+  const switchMode = useCallback((newMode: TimerMode) => updateMode(newMode), [updateMode]);
 
   const playTimerSound = useCallback(() => {
-    // Get fresh settings values
-    if (currentSettings.isMuted || !audioRef.current) {
-      console.log("Sound muted or no audio ref");
-      return;
-    }
+    if (!audioRef.current) return;
 
     const audio = audioRef.current;
-
-    // ✅ FIX: Only reset currentTime, don't pause if already paused
     audio.currentTime = 0;
-    audio.volume = (currentSettings.volume ?? 50) / 100;
 
-    let played = 0;
-    const intervalMs = 500;
-    const repeatCount = currentSettings.repeatCount ?? 1;
-
-    const playNext = () => {
-      if (played >= repeatCount) return;
-
-      audio.currentTime = 0;
-
-      // ✅ FIX: Use a promise chain to handle errors properly
-      const playPromise = audio.play();
-
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // Audio is playing successfully
-          })
-          .catch((err) => {
-            console.warn("Audio playback failed:", err);
-          });
-      }
-
-      const onEnded = () => {
-        audio.removeEventListener("ended", onEnded);
-        played++;
-        if (played < repeatCount) {
-          setTimeout(playNext, intervalMs);
-        }
-      };
-
-      audio.addEventListener("ended", onEnded);
-    };
-
-    playNext();
-  }, [
-    currentSettings.volume,
-    currentSettings.isMuted,
-    currentSettings.repeatCount,
-  ]);
+    audio.play().catch((err) => {
+      console.warn("Audio playback failed:", err);
+    });
+  }, []);
 
   useEffect(() => {
     if (status !== "running") {
@@ -168,26 +106,19 @@ export const useTimer = (settings?: TimerSettings) => {
           if (mode === "focus") {
             setSessionsCompleted((prevSessions) => {
               const newSessions = prevSessions + 1;
-
+              // every 4 focus sessions → long break, otherwise short break
               setTimeout(() => {
-                if (
-                  newSessions % currentSettings.sessionsBeforeLongBreak ===
-                  0
-                ) {
+                if (newSessions % 4 === 0) {
                   updateMode("longBreak");
                 } else {
                   updateMode("shortbreak");
                 }
               }, 0);
-
               return newSessions;
             });
-
             return prev - 1;
           } else {
-            setTimeout(() => {
-              updateMode("focus");
-            }, 0);
+            setTimeout(() => updateMode("focus"), 0);
             return prev - 1;
           }
         }
@@ -202,13 +133,7 @@ export const useTimer = (settings?: TimerSettings) => {
         intervalRef.current = null;
       }
     };
-  }, [
-    status,
-    mode,
-    currentSettings.sessionsBeforeLongBreak,
-    updateMode,
-    playTimerSound,
-  ]);
+  }, [status, mode, updateMode, playTimerSound]);
 
   return {
     mode,

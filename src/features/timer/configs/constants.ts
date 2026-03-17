@@ -3,24 +3,16 @@
 import type { TimerSettings } from "./types";
 
 export const TIMER_STORAGE_KEY = "timerSettings";
+export const ALERT_SOUND = "Sound_1.mp3";
 
 export const DEFAULT_SETTINGS: TimerSettings = {
   workDuration: 25,
   breakDuration: 5,
   longBreakDuration: 15,
-  sessionsBeforeLongBreak: 4,
-  sound: "Sound_1.mp3", 
-  volume: 50, 
-  isMuted: false, 
-  repeatCount: 1,
 };
 
-export const SOUNDS = [
-  { label: "Sound 1", value: "Sound_1.mp3" },
-  { label: "Sound 2", value: "Sound_2.mp3" },
-  { label: "Sound 3", value: "Sound_3.mp3" },
-  { label: "Sound 4", value: "Sound_4.mp3" },
-  { label: "No sound", value: "none" },
+export const DURATION_FIELDS = [
+  { field: "work" as const, label: "Work Duration", min: 5, max: 60, step: 5 },
+  { field: "break" as const, label: "Short Break", min: 5, max: 15, step: 5 },
+  { field: "long" as const, label: "Long Break", min: 5, max: 30, step: 5 },
 ] as const;
-
-export const REPEAT_OPTIONS = [1, 2, 3, 4, 5] as const;

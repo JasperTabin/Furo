@@ -1,5 +1,3 @@
-// Load and save timer settings to localStorage
-
 import { DEFAULT_SETTINGS, TIMER_STORAGE_KEY } from "../configs/constants";
 import type { TimerSettings } from "../configs/types";
 
@@ -8,12 +6,7 @@ export const loadSettings = (): TimerSettings => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      return {
-        ...DEFAULT_SETTINGS,
-        ...parsed,
-        volume: parsed.volume ?? DEFAULT_SETTINGS.volume,
-        isMuted: parsed.isMuted ?? DEFAULT_SETTINGS.isMuted,
-      };
+      return { ...DEFAULT_SETTINGS, ...parsed };
     } catch {
       return DEFAULT_SETTINGS;
     }
