@@ -1,17 +1,87 @@
 @import "tailwindcss";
 
-/* Light */
+/* ── Default Light ── */
 :root {
   --color-bg: #ffffff;
   --color-fg: #0a0a0a;
   --color-border: #404040;
 }
 
-/* Dark */
+/* ── Default Dark ── */
 :root.dark {
   --color-bg: #000000;
   --color-fg: #ffffff;
   --color-border: #404040;
+}
+
+/* ── Soft Slate Light ── */
+:root.palette-slate {
+  --color-bg: #f0f4f8;
+  --color-fg: #1e2a3a;
+  --color-border: #8a9bb0;
+}
+
+/* ── Soft Slate Dark ── */
+:root.palette-slate.dark {
+  --color-bg: #1e2a3a;
+  --color-fg: #e8eef4;
+  --color-border: #3a4f68;
+}
+
+/* ── Warm Light ── */
+:root.palette-warm {
+  --color-bg: #f7f3ed;
+  --color-fg: #2b2b2b;
+  --color-border: #ddd3c3;
+}
+
+/* ── Warm Dark ── */
+:root.palette-warm.dark {
+  --color-bg: #26221d;
+  --color-fg: #f2ebe3;
+  --color-border: #4e463c;
+}
+
+/* ── Nordic Light ── */
+:root.palette-nordic {
+  --color-bg: #e8edf0;
+  --color-fg: #1e2233;
+  --color-border: #8a9ab0;
+}
+
+/* ── Nordic Dark ── */
+:root.palette-nordic.dark {
+  --color-bg: #1e2233;
+  --color-fg: #d4d8e8;
+  --color-border: #3a4560;
+}
+
+/* ── Rose Light ── */
+:root.palette-rose {
+  --color-bg: #fdf0f3;
+  --color-fg: #2a1018;
+  --color-border: #e8a0b0;
+}
+
+/* ── Rose Dark ── */
+:root.palette-rose.dark {
+  --color-bg: #2a1018;
+  --color-fg: #fdf0f3;
+  --color-border: #6a3040;
+}
+
+/* ── Moss Light ── */
+:root.palette-moss {
+  --color-bg: #f0f5f0;
+  --color-fg: #1a2a1e;
+  --color-border: #90b898;
+}
+
+/* ── Moss Dark ── */
+:root.palette-moss.dark {
+  --color-bg: #1a2a1e;
+  --color-fg: #d8eedd;
+  --color-border: #3a5a40;
 }
 
 body {

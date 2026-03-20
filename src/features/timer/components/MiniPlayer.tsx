@@ -12,7 +12,7 @@ export const MiniPlayerButton = ({
 }) => (
   <button
     onClick={onClick}
-    className={`btn-base ${isOpen ? "btn-active" : "btn-inactive"}`}
+    className={`p-2 transition-opacity ${isOpen ? "opacity-100" : "opacity-40 hover:opacity-100"}`}
     aria-label="Toggle mini player"
     title="Mini player"
   >
@@ -34,12 +34,14 @@ export const MiniPlayerWindow = ({
   onPause: () => void;
   onStop: () => void;
 }) => {
-  const isIdle    = status === "idle";
+  const isIdle = status === "idle";
   const isRunning = status === "running";
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center gap-5
-                    bg-(--color-bg) text-(--color-text) overflow-hidden select-none">
+    <div
+      className="h-screen flex flex-col items-center justify-center gap-5
+                    bg-(--color-bg) text-(--color-text) overflow-hidden select-none"
+    >
       <div className="text-6xl font-bold tracking-tight leading-none">
         {formatTime(timeLeft)}
       </div>

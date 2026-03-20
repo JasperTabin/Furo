@@ -1,74 +1,82 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
+interface DocumentPictureInPicture {
+  requestWindow(options?: { width?: number; height?: number }): Promise<Window>;
+}
+
+declare global {
+  interface Window {
+    documentPictureInPicture?: DocumentPictureInPicture;
+  }
+}
+
 export const useMiniPlayer = () => {
-  const popupRef = useRef<Window | null>(null);
-  const [popupContainer, setPopupContainer] = useState<HTMLElement | null>(
-    null,
-  );
+  const pipRef = useRef<Window | null>(null);
+  const [popupContainer, setPopupContainer] = useState<HTMLElement | null>(null);
+  const [isSupported] = useState(() => !!window.documentPictureInPicture);
 
   useEffect(() => {
-    return () => {
-      popupRef.current?.close();
-    };
+    return () => { pipRef.current?.close(); };
   }, []);
 
-  const openMiniPlayer = useCallback(() => {
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.focus();
+  useEffect(() => {
+    if (!pipRef.current || pipRef.current.closed) return;
+    pipRef.current.document.documentElement.className =
+      document.documentElement.className;
+  });
+
+  const openMiniPlayer = useCallback(async () => {
+    if (!window.documentPictureInPicture) return;
+
+    if (pipRef.current && !pipRef.current.closed) {
+      pipRef.current.focus();
       return;
     }
 
-    const W = 280,
-      H = 220;
-    const left = window.screenX + window.outerWidth - W - 24;
-    const top = window.screenY + window.outerHeight - H - 60;
+    const pipWindow = await window.documentPictureInPicture.requestWindow({
+      width: 280,
+      height: 220,
+    });
 
-    const popup = window.open(
-      "/mini-player",
-      "furo_mini",
-      `width=${W},height=${H},left=${left},top=${top},` +
-        `resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`,
-    );
+    pipRef.current = pipWindow;
 
-    if (!popup) return;
-    popupRef.current = popup;
-
-    popup.document.title = "FURŌ · Timer";
-    popup.document.body.style.cssText =
-      "margin:0;padding:0;height:100vh;overflow:hidden;";
-
-    // Copy all stylesheets — catch is intentionally a no-op for cross-origin sheets
     [...document.styleSheets].forEach((ss) => {
       try {
-        const style = popup.document.createElement("style");
+        const style = pipWindow.document.createElement("style");
         style.textContent = [...ss.cssRules].map((r) => r.cssText).join("\n");
-        popup.document.head.appendChild(style);
-      } catch {
-        // Cross-origin stylesheet — skip
-      }
+        pipWindow.document.head.appendChild(style);
+      } catch { /* cross-origin — skip */ }
     });
 
-    // Copy font links
     document.querySelectorAll("link[rel='stylesheet']").forEach((link) => {
-      popup.document.head.appendChild(link.cloneNode());
+      pipWindow.document.head.appendChild(link.cloneNode());
     });
 
-    setPopupContainer(popup.document.body);
+    pipWindow.document.documentElement.className =
+      document.documentElement.className;
 
-    const interval = setInterval(() => {
-      if (popup.closed) {
-        setPopupContainer(null);
-        popupRef.current = null;
-        clearInterval(interval);
-      }
-    }, 500);
+    pipWindow.document.body.style.cssText =
+      "margin:0;padding:0;height:100vh;overflow:hidden;";
+
+    setPopupContainer(pipWindow.document.body);
+
+    pipWindow.addEventListener("pagehide", () => {
+      setPopupContainer(null);
+      pipRef.current = null;
+    });
   }, []);
 
   const closeMiniPlayer = useCallback(() => {
-    popupRef.current?.close();
-    popupRef.current = null;
+    pipRef.current?.close();
+    pipRef.current = null;
     setPopupContainer(null);
   }, []);
 
-  return { openMiniPlayer, closeMiniPlayer, popupContainer };
+  return {
+    openMiniPlayer,
+    closeMiniPlayer,
+    popupContainer,
+    isOpen: popupContainer !== null,
+    isSupported,
+  };
 };

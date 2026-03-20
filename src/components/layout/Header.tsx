@@ -35,7 +35,6 @@ export const HeaderTabs = ({
       <Timer size={18} />
       <span className="hidden text-xs font-medium sm:inline sm:text-sm">Timer</span>
     </button>
-
     <button
       onClick={() => onViewChange("todo")}
       className={`btn-tab-base px-2.5 sm:px-4 ${currentView === "todo" ? "btn-tab-active" : "btn-tab-inactive"}`}
@@ -43,7 +42,6 @@ export const HeaderTabs = ({
       <ListChecks size={18} />
       <span className="hidden text-xs font-medium sm:inline sm:text-sm">Tasks</span>
     </button>
-
     <button
       onClick={() => onViewChange("calendar")}
       className={`btn-tab-base px-2.5 sm:px-4 ${currentView === "calendar" ? "btn-tab-active" : "btn-tab-inactive"}`}
@@ -56,7 +54,7 @@ export const HeaderTabs = ({
 
 /* THEME TOGGLE UI */
 export const HeaderThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { mode, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -73,18 +71,28 @@ export const HeaderThemeToggle = () => {
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen(!open)} className="btn-theme-trigger">
-        {theme === "light" ? <Sun size={20} /> : <Moon size={20} />}
-        <ChevronDown size={16} className={open ? "rotate-180" : ""} />
+        {mode === "light" ? <Sun size={20} /> : <Moon size={20} />}
+        <ChevronDown
+          size={16}
+          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 bg-(--color-bg) border-2 border-(--color-border) rounded-lg shadow-xl">
-          <button onClick={() => setTheme("light")} className="btn-theme-item">
-            <Sun size={18} /> Light
+        <div className="absolute right-0 mt-2 w-36 bg-(--color-bg) border border-(--color-border) rounded-lg overflow-hidden z-50">
+          <button
+            onClick={() => { setTheme("light"); setOpen(false); }}
+            className={mode === "light" ? "btn-theme-item-active" : "btn-theme-item"}
+          >
+            <Sun size={16} />
+            <span className="text-sm">Light</span>
           </button>
-
-          <button onClick={() => setTheme("dark")} className="btn-theme-item">
-            <Moon size={18} /> Dark
+          <button
+            onClick={() => { setTheme("dark"); setOpen(false); }}
+            className={mode === "dark" ? "btn-theme-item-active" : "btn-theme-item"}
+          >
+            <Moon size={16} />
+            <span className="text-sm">Dark</span>
           </button>
         </div>
       )}
@@ -105,11 +113,9 @@ export const Header = ({
       <div className="shrink-0">
         <HeaderTitle />
       </div>
-
       <div className="absolute left-1/2 -translate-x-1/2">
         <HeaderTabs currentView={currentView} onViewChange={onViewChange} />
       </div>
-
       <div className="shrink-0">
         <HeaderThemeToggle />
       </div>
