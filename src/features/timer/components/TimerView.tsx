@@ -1,10 +1,11 @@
-// TIMER CONTAINER -  Container & orchestration logic
-
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTimer } from "../hooks/useTimer";
+import { useMiniPlayer } from "../hooks/useMiniPlayer";
 import { Timer, ModeSwitcher, FullscreenMode, TimerControls } from "./Timer";
 import { SettingsButton } from "./Settings";
 import { SettingsModal } from "./SettingsView";
+import { MiniPlayerButton, MiniPlayerWindow } from "./MiniPlayer";
 import { loadSettings } from "../utils/settings";
 import type { TimerSettings } from "../configs/types";
 
@@ -13,11 +14,18 @@ interface TimerViewProps {
   toggleFullscreen: () => void;
 }
 
-export const TimerView = ({ isFullscreen, toggleFullscreen }: TimerViewProps) => {
+export const TimerView = ({
+  isFullscreen,
+  toggleFullscreen,
+}: TimerViewProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [timerSettings, setTimerSettings] = useState<TimerSettings>(loadSettings());
+  const [timerSettings, setTimerSettings] =
+    useState<TimerSettings>(loadSettings());
 
-  const { mode, status, timeLeft, start, pause, reset, switchMode } = useTimer(timerSettings);
+  const { mode, status, timeLeft,  start, pause, reset, switchMode } =
+    useTimer(timerSettings);
+
+  const { openMiniPlayer, popupContainer } = useMiniPlayer();
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -69,6 +77,10 @@ export const TimerView = ({ isFullscreen, toggleFullscreen }: TimerViewProps) =>
             onClick={() => setIsSettingsOpen(true)}
             isOpen={isSettingsOpen}
           />
+          <MiniPlayerButton
+            onClick={openMiniPlayer}
+            isOpen={!!popupContainer}
+          />
           <FullscreenMode
             isFullscreen={isFullscreen}
             toggleFullscreen={toggleFullscreen}
@@ -81,6 +93,18 @@ export const TimerView = ({ isFullscreen, toggleFullscreen }: TimerViewProps) =>
         onClose={() => setIsSettingsOpen(false)}
         onSave={handleSaveSettings}
       />
+
+      {popupContainer &&
+        createPortal(
+          <MiniPlayerWindow
+            status={status}
+            timeLeft={timeLeft}
+            onStart={start}
+            onPause={pause}
+            onStop={reset}
+          />,
+          popupContainer,
+        )}
     </>
   );
 };
