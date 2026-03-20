@@ -9,7 +9,7 @@
 
 /* Dark */
 :root.dark {
-  --color-bg: #0a0a0a;
+  --color-bg: #000000;
   --color-fg: #ffffff;
   --color-border: #404040;
 }
@@ -50,7 +50,7 @@ body {
   }
 
   .btn-tab-base {
-    @apply flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200;
+    @apply flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-200 sm:gap-2 sm:px-4;
   }
 
   .btn-tab-active {
@@ -62,7 +62,7 @@ body {
   }
 
   .tab-container {
-    @apply flex gap-2 p-1 bg-(--color-bg) border border-(--color-border) rounded-xl;
+    @apply flex gap-1 p-1 bg-(--color-bg) border border-(--color-border) rounded-xl sm:gap-2;
   }
 
   .btn-theme-trigger {

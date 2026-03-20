@@ -7,11 +7,15 @@ import { Footer } from "./components/layout/Footer";
 
 import { TimerView } from "./features/timer/components/TimerView";
 import { TodoView } from "./features/todo/components/TodoView";
+import { CalendarView } from "./features/calendar/components/CalendarView";
 
 function App() {
-  const [currentView, setCurrentView] = useState<"timer" | "todo">("timer");
+  const [currentView, setCurrentView] = useState<
+    "timer" | "todo" | "calendar"
+  >("timer");
   const { isFullscreen, toggleFullscreen } = useFullscreen();
-  const { timerContainerRef, todoContainerRef } = useGSAPAnimation(currentView);
+  const { timerContainerRef, todoContainerRef, calendarContainerRef } =
+    useGSAPAnimation(currentView);
 
   return (
     <div
@@ -24,9 +28,9 @@ function App() {
       )}
 
       <main
-        className={`flex-1 flex flex-col ${
+        className={`flex-1 flex flex-col overflow-x-hidden ${
           currentView === "todo" ? "overflow-y-hidden" : "overflow-y-auto"
-        }`}
+        } ${currentView === "calendar" ? "sm:justify-center" : ""}`}
       >
         {currentView === "timer" ? (
           <div
@@ -38,9 +42,16 @@ function App() {
               toggleFullscreen={toggleFullscreen}
             />
           </div>
-        ) : (
+        ) : currentView === "todo" ? (
           <div ref={todoContainerRef} className="w-full px-4 pt-4 pb-8">
             <TodoView />
+          </div>
+        ) : (
+          <div
+            ref={calendarContainerRef}
+            className="w-full "
+          >
+            <CalendarView />
           </div>
         )}
       </main>

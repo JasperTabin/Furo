@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-export const useGSAPAnimation = (currentView: "timer" | "todo") => {
+export const useGSAPAnimation = (
+  currentView: "timer" | "todo" | "calendar",
+) => {
   const timerContainerRef = useRef<HTMLDivElement>(null);
   const todoContainerRef = useRef<HTMLDivElement>(null);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
 
   // Initial page load animations (header & footer)
   useEffect(() => {
@@ -109,7 +112,77 @@ export const useGSAPAnimation = (currentView: "timer" | "todo") => {
 
       return () => ctx.revert();
     }
+
+    if (currentView === "calendar" && calendarContainerRef.current) {
+      const ctx = gsap.context(() => {
+        gsap.set(".calendar-heading", { opacity: 1 });
+        gsap.set(".calendar-grid", { opacity: 1 });
+        gsap.set(".calendar-panel", { opacity: 1 });
+        gsap.set(".calendar-cell", { opacity: 1 });
+
+        const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+        tl.fromTo(
+          ".calendar-heading",
+          {
+            y: -20,
+            opacity: 0,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            clearProps: "all",
+          },
+        )
+          .fromTo(
+            ".calendar-grid",
+            {
+              y: 24,
+              opacity: 0,
+            },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 1.0,
+              clearProps: "all",
+            },
+            "-=0.5",
+          )
+          .fromTo(
+            ".calendar-panel",
+            {
+              x: 20,
+              opacity: 0,
+            },
+            {
+              x: 0,
+              opacity: 1,
+              duration: 0.9,
+              clearProps: "all",
+            },
+            "-=0.75",
+          )
+          .fromTo(
+            ".calendar-cell",
+            {
+              y: 12,
+              opacity: 0,
+            },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.45,
+              stagger: 0.015,
+              clearProps: "all",
+            },
+            "-=0.6",
+          );
+      }, calendarContainerRef);
+
+      return () => ctx.revert();
+    }
   }, [currentView]);
 
-  return { timerContainerRef, todoContainerRef };
+  return { timerContainerRef, todoContainerRef, calendarContainerRef };
 };

@@ -1,23 +1,47 @@
 // STORAGE SERVICE - Handles all localStorage operations
 
+import type { Todo, TodoPriority, TodoStatus } from "../types/todo";
+
 const STORAGE_KEY = "furo-todos";
 
+const VALID_STATUSES: TodoStatus[] = ["todo", "doing", "done"];
+const VALID_PRIORITIES: TodoPriority[] = ["low", "medium", "high"];
+
+const isTodo = (item: unknown): item is Todo => {
+  if (!item || typeof item !== "object") return false;
+  const t = item as Record<string, unknown>;
+
+  return (
+    typeof t.id === "string" &&
+    typeof t.text === "string" &&
+    typeof t.createdAt === "number" &&
+    VALID_STATUSES.includes(t.status as TodoStatus) &&
+    VALID_PRIORITIES.includes(t.priority as TodoPriority) &&
+    (t.description === undefined || typeof t.description === "string") &&
+    (t.dueDate === undefined || typeof t.dueDate === "number") &&
+    (t.notes === undefined || typeof t.notes === "string") &&
+    (t.tags === undefined || (Array.isArray(t.tags) && t.tags.every((tag) => typeof tag === "string")))
+  );
+};
+
 export const todoStorage = {
-  load: <T>(): T[] => {
+  load: (): Todo[] => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
-      console.error("Failed to load from storage:", error);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed.filter(isTodo) : [];
+    } catch {
       return [];
     }
   },
 
-  save: <T>(data: T[]): void => {
+  save: (data: Todo[]): void => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error("Failed to save to storage:", error);
+      if (import.meta.env.DEV) {
+        console.error("Failed to save todos:", error);
+      }
     }
   },
 
@@ -25,7 +49,9 @@ export const todoStorage = {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
-      console.error("Failed to clear storage:", error);
+      if (import.meta.env.DEV) {
+        console.error("Failed to clear todos:", error);
+      }
     }
   },
 };

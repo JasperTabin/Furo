@@ -1,4 +1,11 @@
-import { Sun, Moon, ChevronDown, Timer, ListTodo } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  ChevronDown,
+  Timer,
+  ListChecks,
+  CalendarDays,
+} from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
 import { useState, useRef, useEffect } from "react";
 
@@ -17,24 +24,32 @@ export const HeaderTabs = ({
   currentView,
   onViewChange,
 }: {
-  currentView: "timer" | "todo";
-  onViewChange: (view: "timer" | "todo") => void;
+  currentView: "timer" | "todo" | "calendar";
+  onViewChange: (view: "timer" | "todo" | "calendar") => void;
 }) => (
   <div className="tab-container">
     <button
       onClick={() => onViewChange("timer")}
-      className={`btn-tab-base ${currentView === "timer" ? "btn-tab-active" : "btn-tab-inactive"}`}
+      className={`btn-tab-base px-2.5 sm:px-4 ${currentView === "timer" ? "btn-tab-active" : "btn-tab-inactive"}`}
     >
       <Timer size={18} />
-      <span className="text-sm font-medium">Timer</span>
+      <span className="hidden text-xs font-medium sm:inline sm:text-sm">Timer</span>
     </button>
 
     <button
       onClick={() => onViewChange("todo")}
-      className={`btn-tab-base ${currentView === "todo" ? "btn-tab-active" : "btn-tab-inactive"}`}
+      className={`btn-tab-base px-2.5 sm:px-4 ${currentView === "todo" ? "btn-tab-active" : "btn-tab-inactive"}`}
     >
-      <ListTodo size={18} />
-      <span className="text-sm font-medium">Tasks</span>
+      <ListChecks size={18} />
+      <span className="hidden text-xs font-medium sm:inline sm:text-sm">Tasks</span>
+    </button>
+
+    <button
+      onClick={() => onViewChange("calendar")}
+      className={`btn-tab-base px-2.5 sm:px-4 ${currentView === "calendar" ? "btn-tab-active" : "btn-tab-inactive"}`}
+    >
+      <CalendarDays size={18} />
+      <span className="hidden text-xs font-medium sm:inline sm:text-sm">Calendar</span>
     </button>
   </div>
 );
@@ -82,18 +97,22 @@ export const Header = ({
   currentView,
   onViewChange,
 }: {
-  currentView: "timer" | "todo";
-  onViewChange: (view: "timer" | "todo") => void;
+  currentView: "timer" | "todo" | "calendar";
+  onViewChange: (view: "timer" | "todo" | "calendar") => void;
 }) => {
   return (
-    <header className="flex items-center justify-between w-full mb-8 relative">
-      <HeaderTitle />
+    <header className="relative mb-8 flex w-full items-center justify-between">
+      <div className="shrink-0">
+        <HeaderTitle />
+      </div>
 
       <div className="absolute left-1/2 -translate-x-1/2">
         <HeaderTabs currentView={currentView} onViewChange={onViewChange} />
       </div>
 
-      <HeaderThemeToggle />
+      <div className="shrink-0">
+        <HeaderThemeToggle />
+      </div>
     </header>
   );
 };
