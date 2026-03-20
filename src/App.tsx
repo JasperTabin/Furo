@@ -9,6 +9,9 @@ import { TimerView } from "./features/timer/components/TimerView";
 import { TodoView } from "./features/todo/components/TodoView";
 import { CalendarView } from "./features/calendar/components/CalendarView";
 
+import MusicPlayer from "./components/MusicPlayer";
+
+
 function App() {
   const [currentView, setCurrentView] = useState<"timer" | "todo" | "calendar">("timer");
   const { isFullscreen, toggleFullscreen } = useFullscreen();
@@ -56,6 +59,7 @@ function App() {
       </main>
 
       {!isFullscreen && <Footer />}
+      <MusicPlayer />
     </div>
   );
 }
