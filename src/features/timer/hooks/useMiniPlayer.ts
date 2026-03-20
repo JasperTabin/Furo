@@ -24,7 +24,7 @@ export const useMiniPlayer = () => {
     const top = window.screenY + window.outerHeight - H - 60;
 
     const popup = window.open(
-      "",
+      "/mini-player",
       "furo_mini",
       `width=${W},height=${H},left=${left},top=${top},` +
         `resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`,
