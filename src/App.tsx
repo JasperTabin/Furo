@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useFullscreen } from "./features/timer/hooks/useFullscreen";
 import { useGSAPAnimation } from "./hooks/useGSAPAnimation";
+import { useMiniPlayer } from "./features/timer/hooks/useMiniPlayer";
 
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
-
 import { TimerView } from "./features/timer/components/TimerView";
 import { TodoView } from "./features/todo/components/TodoView";
 import { CalendarView } from "./features/calendar/components/CalendarView";
 
 function App() {
-  const [currentView, setCurrentView] = useState<
-    "timer" | "todo" | "calendar"
-  >("timer");
+  const [currentView, setCurrentView] = useState<"timer" | "todo" | "calendar">("timer");
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   const { timerContainerRef, todoContainerRef, calendarContainerRef } =
     useGSAPAnimation(currentView);
+  const { openMiniPlayer, closeMiniPlayer, popupContainer, isOpen, isSupported } =
+    useMiniPlayer();
 
   return (
     <div
@@ -33,13 +33,15 @@ function App() {
         } ${currentView === "calendar" ? "sm:justify-center" : ""}`}
       >
         {currentView === "timer" ? (
-          <div
-            ref={timerContainerRef}
-            className="flex-1 flex items-center justify-center"
-          >
+          <div ref={timerContainerRef} className="flex-1 flex items-center justify-center">
             <TimerView
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
+              openMiniPlayer={openMiniPlayer}
+              closeMiniPlayer={closeMiniPlayer}
+              isOpen={isOpen}
+              isSupported={isSupported}
+              popupContainer={popupContainer}
             />
           </div>
         ) : currentView === "todo" ? (
@@ -47,10 +49,7 @@ function App() {
             <TodoView />
           </div>
         ) : (
-          <div
-            ref={calendarContainerRef}
-            className="w-full "
-          >
+          <div ref={calendarContainerRef} className="w-full">
             <CalendarView />
           </div>
         )}
