@@ -28,15 +28,17 @@ export const SettingsModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen}>
-      <SettingsPanel
-        getValue={getValue}
-        onStep={handleStep}
-        onClose={onClose}
-        onReset={resetToDefaults}
-        onSave={handleSave}
-        hasChanges={hasChanges}
-      />
+   <Modal isOpen={isOpen}>
+      <div className="max-h-[90dvh] overflow-y-auto overscroll-contain">
+        <SettingsPanel
+          getValue={getValue}
+          onStep={handleStep}
+          onClose={onClose}
+          onReset={resetToDefaults}
+          onSave={handleSave}
+          hasChanges={hasChanges}
+        />
+      </div>
     </Modal>
   );
 };

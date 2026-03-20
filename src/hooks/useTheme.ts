@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export type Mode = "light" | "dark";
+export type Mode    = "light" | "dark";
 export type Palette = "default" | "slate" | "warm" | "nordic" | "rose" | "moss";
 
 export interface PaletteOption {
@@ -20,9 +20,6 @@ export const PALETTE_OPTIONS: PaletteOption[] = [
   { id: "moss",    label: "Moss",       swatch: "#1a2a1e", light: "#f0f5f0",  dark: "#1a2a1e"  },
 ];
 
-let listeners: Array<() => void> = [];
-const notify = () => listeners.forEach((fn) => fn());
-
 const applyTheme = (palette: Palette, mode: Mode) => {
   const root = document.documentElement;
   root.classList.remove(
@@ -31,26 +28,32 @@ const applyTheme = (palette: Palette, mode: Mode) => {
     "palette-warm",
     "palette-nordic",
     "palette-rose",
-    "palette-moss"
+    "palette-moss",
   );
   if (mode === "dark") root.classList.add("dark");
   if (palette !== "default") root.classList.add(`palette-${palette}`);
 };
 
+// ── Apply immediately on module load (before React renders) ──
+const savedMode    = (localStorage.getItem("furo-mode")    as Mode)    ?? "light";
+const savedPalette = (localStorage.getItem("furo-palette") as Palette) ?? "default";
+applyTheme(savedPalette, savedMode);
+
+// Module-level listeners to keep all hook instances in sync
+let listeners: Array<() => void> = [];
+const notify = () => listeners.forEach(fn => fn());
+
 export const useTheme = () => {
   const [, rerender] = useState(0);
 
   useEffect(() => {
-    const handler = () => rerender((n) => n + 1);
+    const handler = () => rerender(n => n + 1);
     listeners.push(handler);
-    return () => {
-      listeners = listeners.filter((fn) => fn !== handler);
-    };
+    return () => { listeners = listeners.filter(fn => fn !== handler); };
   }, []);
 
-  const mode = (localStorage.getItem("furo-mode") as Mode) ?? "light";
-  const palette =
-    (localStorage.getItem("furo-palette") as Palette) ?? "default";
+  const mode    = (localStorage.getItem("furo-mode")    as Mode)    ?? "light";
+  const palette = (localStorage.getItem("furo-palette") as Palette) ?? "default";
 
   const setMode = (m: Mode) => {
     localStorage.setItem("furo-mode", m);
@@ -67,11 +70,8 @@ export const useTheme = () => {
   const toggleMode = () => setMode(mode === "dark" ? "light" : "dark");
 
   return {
-    mode,
-    palette,
-    setMode,
-    setPalette,
-    toggleMode,
+    mode, palette,
+    setMode, setPalette, toggleMode,
     theme: mode,
     setTheme: setMode,
   };

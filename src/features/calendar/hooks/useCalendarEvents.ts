@@ -7,14 +7,13 @@ import {
   type CalendarEventInput,
 } from "../utils/calendarUtils";
 
-const MAX_EVENTS_PER_DAY = 5;
 const createEventId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export const useCalendarEvents = () => {
   const [events, setEvents] = useState<CalendarEvent[]>(() =>
-  calendarStorage.load().sort(sortCalendarEvents),
-);
+    calendarStorage.load().sort(sortCalendarEvents),
+  );
 
   useEffect(() => {
     calendarStorage.save(events);
@@ -23,9 +22,6 @@ export const useCalendarEvents = () => {
   const addEvent = (date: string, input: CalendarEventInput) => {
     const title = input.title.trim();
     if (!title) return false;
-    if (events.filter((event) => event.date === date).length >= MAX_EVENTS_PER_DAY) {
-      return false;
-    }
 
     const newEvent: CalendarEvent = {
       id: createEventId(),
@@ -68,22 +64,12 @@ export const useCalendarEvents = () => {
 
   const eventsByDate = useMemo(() => {
     const groupedEvents: Record<string, CalendarEvent[]> = {};
-
     events.forEach((event) => {
-      if (!groupedEvents[event.date]) {
-        groupedEvents[event.date] = [];
-      }
-
+      if (!groupedEvents[event.date]) groupedEvents[event.date] = [];
       groupedEvents[event.date].push(event);
     });
-
     return groupedEvents;
   }, [events]);
 
-  return {
-    eventsByDate,
-    addEvent,
-    updateEvent,
-    deleteEvent,
-  };
+  return { eventsByDate, addEvent, updateEvent, deleteEvent };
 };
