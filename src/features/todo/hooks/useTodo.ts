@@ -6,17 +6,17 @@ import { generateId, groupByStatus } from "../utils/todoUtils";
 import type { Todo, TodoStatus, TodoPriority } from "../types/todo";
 
 export const useTodos = () => {
-
-  const [todos, setTodos] = useState<Todo[]>(() => todoStorage.load<Todo>());
+  const [todos, setTodos] = useState<Todo[]>(() => todoStorage.load());
 
   useEffect(() => {
     todoStorage.save(todos);
   }, [todos]);
 
-  const { todo: todoList, doing: doingList, done: doneList } = useMemo(
-    () => groupByStatus(todos),
-    [todos]
-  );
+  const {
+    todo: todoList,
+    doing: doingList,
+    done: doneList,
+  } = useMemo(() => groupByStatus(todos), [todos]);
 
   const addTodo = useCallback(
     (
@@ -26,7 +26,7 @@ export const useTodos = () => {
       dueDate?: number,
       status: TodoStatus = "todo",
       tags?: string[],
-      notes?: string
+      notes?: string,
     ) => {
       const newTodo: Todo = {
         id: generateId(),
@@ -41,7 +41,7 @@ export const useTodos = () => {
       };
       setTodos((prev) => [newTodo, ...prev]);
     },
-    []
+    [],
   );
 
   const updateTodo = useCallback(
@@ -54,18 +54,18 @@ export const useTodos = () => {
         dueDate?: number;
         tags?: string[];
         notes?: string;
-      }
+      },
     ) => {
       setTodos((prev) =>
-        prev.map((todo) => (todo.id === id ? { ...todo, ...data } : todo))
+        prev.map((todo) => (todo.id === id ? { ...todo, ...data } : todo)),
       );
     },
-    []
+    [],
   );
 
   const updateTodoStatus = useCallback((id: string, status: TodoStatus) => {
     setTodos((prev) =>
-      prev.map((todo) => (todo.id === id ? { ...todo, status } : todo))
+      prev.map((todo) => (todo.id === id ? { ...todo, status } : todo)),
     );
   }, []);
 
