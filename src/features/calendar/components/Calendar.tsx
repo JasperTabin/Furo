@@ -318,7 +318,9 @@ const CalendarPanel = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <p className={labelClass}>Events</p>
-          <span className="text-sm text-(--color-fg)/40">{eventCountLabel}</span>
+          <span className="text-sm text-(--color-fg)/40">
+            {eventCountLabel}
+          </span>
         </div>
 
         <div className="space-y-3">
@@ -439,7 +441,7 @@ export const Calendar = ({
           onMonthChange={onMonthChange}
           onDateSelect={onDateSelect}
         />
-        <div className="self-start lg:sticky lg:top-4 lg:max-h-[80dvh] lg:overflow-y-auto">
+        <div className="self-start lg:sticky lg:top-4 lg:max-h-[80dvh] lg:overflow-y-auto no-scrollbar">
           <CalendarPanel
             formData={formData}
             timeParts={timeParts}

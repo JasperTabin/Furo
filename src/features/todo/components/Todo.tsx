@@ -29,7 +29,7 @@ export const ColumnHeader = ({
         {title}
       </h3>
       <div className="flex items-center gap-2">
-        <span className="badge-base bg-(--color-border)/30">{count}</span>
+        <span className="badge-base">{count}</span>
         <button
           onClick={onAdd}
           className="p-1 hover:bg-(--color-border)/30 rounded-lg transition-colors"
@@ -254,28 +254,28 @@ export const Column = ({
   onDrop: (e: React.DragEvent) => void;
 }) => {
   return (
-    <div
-      className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column snap-start"
-    >
-      <div className="p-4">
+    <div className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column snap-start max-h-[calc(100dvh-16rem)] ">
+      {" "}
+      {/* Fixed header */}
+      <div className="p-4 shrink-0">
         <ColumnHeader title={title} count={totalCount} onAdd={onAdd} />
       </div>
-
-      <div className="p-3">
+      {/* Scrollable task area */}
+      <div className="overflow-y-auto no-scrollbar p-3 pt-0">
         <div
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
           role="region"
           aria-label={`${title} column`}
-          className={`flex flex-col rounded-xl transition-all ${
+          className={`flex flex-col rounded-xl transition-all h-full ${
             todos.length === 0 ? "border-2 border-dashed" : ""
           } ${
             isDragOver
               ? "border-(--color-border) bg-(--color-border)/10"
               : todos.length === 0
-              ? "border-(--color-border)/30"
-              : ""
+                ? "border-(--color-border)/30"
+                : ""
           }`}
         >
           <div className="space-y-3">
@@ -297,12 +297,15 @@ export const Column = ({
               ))
             )}
           </div>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-          />
         </div>
+      </div>
+      {/* Fixed pagination at bottom */}
+      <div className="shrink-0 px-3 pb-3">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

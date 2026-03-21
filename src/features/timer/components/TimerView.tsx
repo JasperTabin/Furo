@@ -29,9 +29,10 @@ export const TimerView = ({
   popupContainer,
 }: TimerViewProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isInfoOpen, setIsInfoOpen]         = useState(false);
-  const [isReversed, setIsReversed]         = useState(false);
-  const [timerSettings, setTimerSettings]   = useState<TimerSettings>(loadSettings());
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [isReversed, setIsReversed] = useState(false);
+  const [timerSettings, setTimerSettings] =
+    useState<TimerSettings>(loadSettings());
 
   const { mode, status, timeLeft, start, pause, reset, switchMode } =
     useTimer(timerSettings);
@@ -63,7 +64,6 @@ export const TimerView = ({
       <div className="flex flex-col items-center">
         {!isFullscreen && (
           <div className="mb-8 flex flex-col items-center gap-4 mode-switcher">
-
             {/* Row 1: mode pills */}
             <ModeSwitcher
               onSwitchMode={switchMode}
@@ -73,29 +73,37 @@ export const TimerView = ({
 
             {/* Row 2: reverse toggle + icons */}
             <div className="flex items-center gap-3">
-              <span className="text-xs font-medium tracking-widest uppercase text-(--color-fg) opacity-40">
-                Reverse
+              <span
+                className={`text-sm font-bold tracking-wide transition-opacity ${isReversed ? "opacity-30" : "opacity-100"}`}
+              >
+                Classic
               </span>
+
               <button
                 onClick={handleToggleReverse}
                 role="switch"
                 aria-checked={isReversed}
                 className="relative w-10 h-5 rounded-full border border-(--color-border) transition-all duration-200 focus:outline-none"
-                style={{ background: isReversed ? "var(--color-fg)" : "transparent" }}
+                style={{
+                  background: isReversed ? "var(--color-fg)" : "transparent",
+                }}
               >
                 <span
                   className="absolute top-0.5 w-3.5 h-3.5 rounded-full transition-all duration-200"
                   style={{
                     left: isReversed ? "calc(100% - 18px)" : "2px",
-                    background: isReversed ? "var(--color-bg)" : "var(--color-fg)",
+                    background: isReversed
+                      ? "var(--color-bg)"
+                      : "var(--color-fg)",
                   }}
                 />
               </button>
-              <span className="text-sm font-bold tracking-wide text-(--color-fg)">
-                Classic
-              </span>
 
-              <div className="w-px h-5 bg-(--color-border) opacity-30" />
+              <span
+                className={`text-sm font-bold tracking-wide transition-opacity ${isReversed ? "opacity-100" : "opacity-30"}`}
+              >
+                Reverse
+              </span>
 
               <SettingsButton
                 onClick={() => setIsSettingsOpen(true)}
@@ -120,22 +128,24 @@ export const TimerView = ({
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-72 card-base p-4 z-50">
                     <div className="flex flex-col gap-3 text-sm">
                       <div>
-                        <span className="font-bold text-(--color-fg)">Classic Pomodoro: </span>
+                        <span className="font-bold text-(--color-fg)">
+                          Reverse Timer Mode:
+                        </span>
+                        {" "}
                         <span className="text-(--color-fg) opacity-60">
-                          Focused work sessions with short and long breaks in between.
+                          Work as long as you want and earn break time based on
+                          your work duration. The longer you work, the more
+                          break time you earn.
                         </span>
                       </div>
                       <div>
-                        <span className="font-bold text-(--color-fg)">Reverse: </span>
-                        <span className="text-(--color-fg) opacity-60">
-                          Count up from zero with no set end time — great for
-                          open-ended focus sessions.
+                        <span className="font-bold text-(--color-fg)">
+                          Settings: 
                         </span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-(--color-fg)">Settings: </span>
+                        {" "}
                         <span className="text-(--color-fg) opacity-60">
-                          Set your preferred time for each mode in the classic pomodoro.
+                          Set your preferred time for each mode in the classic
+                          pomodoro.
                         </span>
                       </div>
                     </div>
@@ -164,7 +174,11 @@ export const TimerView = ({
 
         {isFullscreen && (
           <p className="fixed bottom-6 left-1/2 -translate-x-1/2 text-xs tracking-widest uppercase opacity-20 select-none whitespace-nowrap">
-            Press <kbd className="px-1.5 py-0.5 rounded border border-current font-mono">Esc</kbd> to exit fullscreen
+            Press{" "}
+            <kbd className="px-1.5 py-0.5 rounded border border-current font-mono">
+              Esc
+            </kbd>{" "}
+            to exit fullscreen
           </p>
         )}
 

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useFullscreen } from "./features/timer/hooks/useFullscreen";
-import { useGSAPAnimation } from "./hooks/useGSAPAnimation";
 import { useMiniPlayer } from "./features/timer/hooks/useMiniPlayer";
 
 import { Header } from "./components/layout/Header";
@@ -9,16 +8,20 @@ import { TimerView } from "./features/timer/components/TimerView";
 import { TodoView } from "./features/todo/components/TodoView";
 import { CalendarView } from "./features/calendar/components/CalendarView";
 
-import MusicPlayer from "./components/MusicPlayer";
-
+import MusicPlayer from "./features/MusicPlayer";
 
 function App() {
-  const [currentView, setCurrentView] = useState<"timer" | "todo" | "calendar">("timer");
+  const [currentView, setCurrentView] = useState<"timer" | "todo" | "calendar">(
+    "timer",
+  );
   const { isFullscreen, toggleFullscreen } = useFullscreen();
-  const { timerContainerRef, todoContainerRef, calendarContainerRef } =
-    useGSAPAnimation(currentView);
-  const { openMiniPlayer, closeMiniPlayer, popupContainer, isOpen, isSupported } =
-    useMiniPlayer();
+  const {
+    openMiniPlayer,
+    closeMiniPlayer,
+    popupContainer,
+    isOpen,
+    isSupported,
+  } = useMiniPlayer();
 
   return (
     <div
@@ -35,8 +38,8 @@ function App() {
           currentView === "todo" ? "overflow-y-hidden" : "overflow-y-auto"
         } ${currentView === "calendar" ? "sm:justify-center" : ""}`}
       >
-        {currentView === "timer" ? (
-          <div ref={timerContainerRef} className="flex-1 flex items-center justify-center">
+        {currentView === "timer" && (
+          <div className="flex-1 flex items-center justify-center">
             <TimerView
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
@@ -47,12 +50,16 @@ function App() {
               popupContainer={popupContainer}
             />
           </div>
-        ) : currentView === "todo" ? (
-          <div ref={todoContainerRef} className="w-full px-4 pt-4 pb-8">
+        )}
+
+        {currentView === "todo" && (
+          <div className="w-full px-4 pt-4 pb-4 flex flex-col">
             <TodoView />
           </div>
-        ) : (
-          <div ref={calendarContainerRef} className="w-full">
+        )}
+
+        {currentView === "calendar" && (
+          <div className="w-full">
             <CalendarView />
           </div>
         )}

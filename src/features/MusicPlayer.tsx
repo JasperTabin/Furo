@@ -7,8 +7,8 @@ import {
   SkipBack,
   SkipForward,
   Shuffle,
-  ChevronLeft,
-  ChevronRight,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 interface Track {
@@ -18,7 +18,6 @@ interface Track {
 }
 
 const TRACKS: Track[] = [
-  { id: "OgU_UDYd9lY", title: "Chill Lofi Beats", artist: "Lofi Radio" },
   { id: "rYXVAAL_1ss", title: "Study with Me", artist: "Ambient Waves" },
   { id: "ivdPyFUPbAk", title: "Focus Flow", artist: "Deep Work" },
   { id: "_Q8Ih2SW-TE", title: "Peaceful Piano", artist: "Relax Music" },
@@ -27,9 +26,10 @@ const TRACKS: Track[] = [
   { id: "QebXHPY7sac", title: "Study & Work", artist: "Mr. Tiny's Studio" },
   { id: "bjelz7JxFZQ", title: "Let's just Start", artist: "Roti" },
   { id: "vWjl07A3rZg", title: "Tunes of Capy", artist: "Chill Pills Studio" },
+  { id: "ZbyxjGE885I", title: "Track 9", artist: "MØNØM" },
+  { id: "Y9mRoCerrpY", title: "Track 10", artist: "Kodi Lofi" },
+  { id: "amfWIRasxtI", title: "Track 11", artist: "Lofi Study Room" },
 ];
-
-const PAGE_SIZE = 3;
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -46,17 +46,15 @@ export default function MusicPlayer() {
   const [queue, setQueue] = useState<Track[]>(TRACKS);
   const [index, setIndex] = useState(0);
   const [shuffled, setShuffled] = useState(false);
-  const [page, setPage] = useState(0);
+  const [volume, setVolume] = useState(80);
+  const [muted, setMuted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const current = queue[index];
-  const totalPages = Math.ceil(queue.length / PAGE_SIZE);
-  const pageStart = page * PAGE_SIZE;
-  const visible = queue.slice(pageStart, pageStart + PAGE_SIZE);
 
-  const sendCommand = (func: string) => {
+  const sendCommand = (func: string, args: unknown[] = []) => {
     iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: "command", func, args: [] }),
+      JSON.stringify({ event: "command", func, args }),
       "*",
     );
   };
@@ -69,7 +67,6 @@ export default function MusicPlayer() {
   const goTo = (nextIndex: number) => {
     setIndex(nextIndex);
     setIsPlaying(true);
-    setPage(Math.floor(nextIndex / PAGE_SIZE));
   };
 
   const skipNext = () => goTo((index + 1) % queue.length);
@@ -78,9 +75,26 @@ export default function MusicPlayer() {
   const toggleShuffle = () => {
     setQueue(shuffled ? TRACKS : shuffleArray(TRACKS));
     setIndex(0);
-    setPage(0);
     setShuffled((v) => !v);
     setIsPlaying(false);
+  };
+
+  const handleVolume = (val: number) => {
+    setVolume(val);
+    setMuted(val === 0);
+    sendCommand("setVolume", [val]);
+    if (val > 0) sendCommand("unMute");
+  };
+
+  const toggleMute = () => {
+    if (muted) {
+      sendCommand("unMute");
+      sendCommand("setVolume", [volume || 80]);
+      setMuted(false);
+    } else {
+      sendCommand("mute");
+      setMuted(true);
+    }
   };
 
   const handleClose = () => {
@@ -115,9 +129,9 @@ export default function MusicPlayer() {
             title="music"
           />
 
-          <div className="px-4 pt-4 pb-3">
-            {/* Track info */}
-            <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="px-4 pt-4 pb-4 flex flex-col gap-3">
+            {/* Track info + close */}
+            <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-(--color-fg) text-sm font-medium truncate leading-tight">
                   {current.title}
@@ -129,7 +143,7 @@ export default function MusicPlayer() {
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-(--color-fg)/40 hover:text-(--color-fg) rounded transition-colors"
+                className="shrink-0 w-6 h-6 flex items-center justify-center text-(--color-fg)/40 hover:text-(--color-fg) rounded transition-colors"
               >
                 <X size={14} />
               </button>
@@ -176,91 +190,42 @@ export default function MusicPlayer() {
                 {index + 1}/{queue.length}
               </span>
             </div>
-          </div>
 
-          {/* Track list */}
-          <div className="border-t border-(--color-border) px-2 pt-2 pb-2">
-            {/* Page row — only shown when more than 1 page */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-2 mb-1">
-                <button
-                  onClick={() => setPage((p) => p - 1)}
-                  disabled={page === 0}
-                  aria-label="Previous page"
-                  className="w-6 h-6 flex items-center justify-center rounded text-(--color-fg)/40 hover:text-(--color-fg) disabled:opacity-20 disabled:pointer-events-none transition-colors"
-                >
-                  <ChevronLeft size={14} />
-                </button>
+            {/* Volume control */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleMute}
+                aria-label={muted ? "Unmute" : "Mute"}
+                className="text-(--color-fg)/40 hover:text-(--color-fg) transition-colors shrink-0"
+              >
+                {muted || volume === 0 ? (
+                  <VolumeX size={15} />
+                ) : (
+                  <Volume2 size={15} />
+                )}
+              </button>
 
-                <span className="text-xs text-(--color-fg)/30 tabular-nums">
-                  {page + 1} / {totalPages}
-                </span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={muted ? 0 : volume}
+                onChange={(e) => handleVolume(Number(e.target.value))}
+                style={{
+                  accentColor: "var(--color-fg)",
+                  background: `linear-gradient(to right, var(--color-fg) ${muted ? 0 : volume}%, color-mix(in srgb, var(--color-fg) 20%, transparent) ${muted ? 0 : volume}%)`,
+                }}
+                className="flex-1 h-1 rounded-full cursor-pointer appearance-none"
+              />
 
-                <button
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= totalPages - 1}
-                  aria-label="Next page"
-                  className="w-6 h-6 flex items-center justify-center rounded text-(--color-fg)/40 hover:text-(--color-fg) disabled:opacity-20 disabled:pointer-events-none transition-colors"
-                >
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            )}
-
-            {visible.map((track, i) => {
-              const trackIndex = pageStart + i;
-              const isActive = trackIndex === index;
-              return (
-                <button
-                  key={track.id}
-                  onClick={() => goTo(trackIndex)}
-                  className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-left transition-colors ${
-                    isActive
-                      ? "bg-(--color-fg)/10 text-(--color-fg)"
-                      : "text-(--color-fg)/40 hover:bg-(--color-fg)/5 hover:text-(--color-fg)/70"
-                  }`}
-                >
-                  <span className="text-xs tabular-nums text-(--color-fg)/30 w-4 flex-shrink-0">
-                    {trackIndex + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">
-                      {track.title}
-                    </p>
-                    <p className="text-xs text-(--color-fg)/30 truncate">
-                      {track.artist}
-                    </p>
-                  </div>
-                  {isActive && isPlaying && <AnimatedBars />}
-                </button>
-              );
-            })}
+              <span className="text-(--color-fg)/30 text-xs tabular-nums w-6 text-right">
+                {muted ? 0 : volume}
+              </span>
+            </div>
           </div>
         </div>
       )}
     </>
-  );
-}
-
-function AnimatedBars() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      style={{ fill: "var(--color-fg)", flexShrink: 0 }}
-    >
-      <style>{`
-        @keyframes b1{0%,100%{height:4px;y:5px}50%{height:10px;y:2px}}
-        @keyframes b2{0%,100%{height:9px;y:2.5px}50%{height:4px;y:5px}}
-        @keyframes b3{0%,100%{height:6px;y:4px}50%{height:12px;y:1px}}
-        .b1{animation:b1 0.8s ease-in-out infinite}
-        .b2{animation:b2 0.9s ease-in-out infinite 0.15s}
-        .b3{animation:b3 0.75s ease-in-out infinite 0.05s}
-      `}</style>
-      <rect className="b1" x="0" y="5" width="3" height="4" rx="1" />
-      <rect className="b2" x="5.5" y="2.5" width="3" height="9" rx="1" />
-      <rect className="b3" x="11" y="4" width="3" height="6" rx="1" />
-    </svg>
   );
 }
