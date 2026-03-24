@@ -4,6 +4,7 @@ import { useMiniPlayer } from "./features/timer/hooks/useMiniPlayer";
 
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
+import { Landing } from "./components/landing/Landing";
 import { TimerView } from "./features/timer/components/TimerView";
 import { TodoView } from "./features/todo/components/TodoView";
 import { CalendarView } from "./features/calendar/components/CalendarView";
@@ -11,6 +12,7 @@ import { CalendarView } from "./features/calendar/components/CalendarView";
 import MusicPlayer from "./features/MusicPlayer";
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [currentView, setCurrentView] = useState<"timer" | "todo" | "calendar">(
     "timer",
   );
@@ -22,6 +24,10 @@ function App() {
     isOpen,
     isSupported,
   } = useMiniPlayer();
+
+  if (showLanding) {
+    return <Landing onEnter={() => setShowLanding(false)} />;
+  }
 
   return (
     <div
