@@ -155,20 +155,21 @@ export function MockMiniPlayer() {
   return (
     <MockShell>
       <div className="relative flex items-center justify-center min-h-32 sm:min-h-72">
-        <p className="font-serif text-2xl italic text-(--color-fg) text-center">
+        <p className="font-serif text-base sm:text-2xl italic text-(--color-fg) text-center">
           Sample Application
         </p>
 
-        <div className="absolute left-52 -bottom-14 sm:left-95 sm:top-64 border border-(--color-border) rounded-lg bg-(--color-fg)/5 p-2">
-          <div className="font-mono font-bold text-center text-3xl mb-1">
+        <div className="absolute left-55 -bottom-10 sm:left-95 sm:top-64 border border-(--color-border) rounded-lg bg-(--color-fg)/5 p-2">
+          <div className="font-mono font-bold text-center text-base mb-1">
             25:00
           </div>
           <div className="flex justify-center">
-            <div className="w-12 text-center text-xs py-1 px-1 border border-(--color-border) rounded">
+            <div className="w-12 text-center text-xs font-medium py-1 px-1 border border-(--color-border) rounded">
               START
             </div>
           </div>
         </div>
+
       </div>
     </MockShell>
   );

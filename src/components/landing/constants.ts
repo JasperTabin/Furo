@@ -1,4 +1,3 @@
-// ── Feature list ────────────────────────────────────────────────────────────
 import type { ComponentType } from "react";
 import {
   MockCalendar,
@@ -42,7 +41,6 @@ export const FEATURES: Feature[] = [
   },
 ];
 
-// ── How it works steps ──────────────────────────────────────────────────────
 export interface Step {
   title: string;
   desc: string;
@@ -51,15 +49,15 @@ export interface Step {
 export const STEPS: Step[] = [
   {
     title: "Open one tab",
-    desc: "No download, no account. Open Furō and your workspace is instantly ready — timer, tasks, and calendar all in one place.",
+    desc: "Zero distractions. One destination for your stream of consciousness.",
   },
   {
     title: "Set your session",
-    desc: "Pick Classic to count down or Reverse to count up. Add your tasks for the day. Hit start and stay in the zone.",
+    desc: "Define your craft through structured intervals of deep work.",
   },
   {
     title: "Track your day",
-    desc: "Move tasks across the board, mark events on the calendar. Your whole day stays visible and in control.",
+    desc: "A visual record of focused time to guide tomorrow's flow.",
   },
 ];
 
@@ -87,11 +85,11 @@ export const FAQS: FAQ[] = [
   {
     question: "Who's this app for?",
     answer:
-      "It's for everyone who wants these productivity tools — Pomodoro, To‑Do List, and Calendar — all in a single tab.",
+      "It's for everyone who wants these productivity tools - Pomodoro, To-Do List, and Calendar - all in a single tab.",
   },
   {
     question: "What does the name 'Furo' mean?",
     answer:
-      "Furo comes from the word 'flow' — it represents staying in the zone, focused, and productive.",
+      "Furo comes from the word 'flow' - it represents staying in the zone, focused, and productive.",
   },
 ];

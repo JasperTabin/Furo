@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { AlarmClock, BarChart3, ChevronDown, Monitor } from "lucide-react";
 import { STEPS, FEATURES, FAQS } from "./constants";
 import { useScrollActiveIndex } from "./hooks";
 
@@ -11,11 +11,11 @@ interface LandingProps {
 // ── Navbar ─────────────────────────────────────────────────────────────────── (DONE)
 function Navbar({ onEnter }: LandingProps) {
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-60 px-6 py-3 flex items-center justify-between gap-4 bg-(--color-bg)/40 rounded-full border border-(--color-border)">
-      <div className="font-mono text-sm font-bold tracking-[.16em]">FURŌ</div>
+    <nav className="fixed top-6 left-1/2 z-50 flex w-[min(22rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-between rounded-full border border-(--color-border)/80 px-3 py-2 ">
+      <div className="px-4 text-2xl font-semibold">FURŌ</div>
       <button
         onClick={onEnter}
-        className="px-4 py-1.5 text-xs bg-(--color-fg) text-(--color-bg) rounded-full"
+        className="rounded-full bg-(--color-fg) px-6 py-3 text-base font-medium text-(--color-bg) "
       >
         Open App
       </button>
@@ -26,82 +26,97 @@ function Navbar({ onEnter }: LandingProps) {
 // ── First Section ────────────────────────────────────────────────────────────────────── (DONE)
 function HeroSection({ onEnter }: LandingProps) {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-6">
-      <div className="w-full max-w-4xl grid lg:grid-cols-2 gap-12 items-center">
+    <section className="relative flex min-h-screen items-center overflow-hidden px-6 pb-16 pt-32 sm:px-10 lg:px-16">
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] xl:gap-24">
         <div className="text-left">
-          <h1 className="font-serif font-normal leading-[.95] tracking-tight mb-8 text-[clamp(64px,9vw,100px)]">
-            One tab.
-            <br />
-            <em className="text-(--color-fg)/40">All you need.</em>
+          <h1 className="mb-7 font-serif text-[clamp(68px,9vw,110px)] font-normal leading-[0.88] tracking-tight">
+            <span className="block">One tab.</span>
+            <em className="block not-italic text-(--color-fg)/60">
+              All you need.
+            </em>
           </h1>
-          <p className="text-sm leading-relaxed mb-10 max-w-sm text-(--color-fg)/50">
+          <p className="mb-10 max-w-lg text-lg text-(--color-fg)/70">
             Timer, tasks, and calendar — together in one distraction-free
             workspace. No switching. No friction.
           </p>
-          <div className="flex gap-2.5 flex-wrap">
+          <div className="flex flex-wrap gap-4">
             <button
               onClick={onEnter}
-              className="px-4 py-2 text-base font-light bg-(--color-fg) text-(--color-bg)  rounded-full"
+              className="rounded-full bg-(--color-fg) px-6 py-4 text-lead font-medium text-(--color-bg) transition hover:opacity-90"
             >
               Open Furō
             </button>
             <a
               href="#features"
-              className="px-4 py-2 text-base font-extralight border border-(--color-border) text-(--color-fg)/50  rounded-full"
+              className="rounded-full border border-(--color-border) px-6 py-4 text-lead font-light text-(--color-fg) transition hover:bg-(--color-fg)/5"
             >
               See features
             </a>
           </div>
         </div>
 
-        <div className="relative hidden lg:flex items-center justify-center h-124">
-          <div className="relative w-full h-full overflow-hidden rounded-xl">
-            <div className="absolute z-10 right-60 top-30 w-40 p-3 rounded-xl border border-(--color-border) ">
-              <div className="font-mono text-xs text-(--color-fg) text-center">
+        <div className="relative hidden h-136 items-center justify-center lg:flex">
+          <div className="relative h-full w-full max-w-136 overflow-visible">
+            <div className="absolute right-30 top-2 z-20 w-66 rounded-3xl border border-(--color-border)/80 p-5 ">
+              <div className="mb-4 text-center text-lg font-light text-(--color-fg)/80">
                 Pomodoro Timer
               </div>
-              <div className="font-mono font-bold mb-2 leading-none text-4xl text-center">
+              <div className="mb-5 text-center font-mono text-[4.5rem] font-semibold leading-none tracking-tight ">
                 18:42
               </div>
-              <div className="flex gap-1.5 justify-center">
-                <div className="font-mono px-2 py-0.5 text-xs rounded-sm text-(--color-fg)/70 border border-(--color-border)">
+              <div className="flex gap-2">
+                <div className="flex-1 rounded-full bg-(--color-fg)/10 px-4 py-2 text-center font-mono text-base text-(--color-fg)/90">
                   PAUSE
                 </div>
-                <div className="font-mono px-2 py-0.5 text-xs rounded-sm text-red-500 border border-red-500/40 transition">
+                <div className="flex-1 rounded-full bg-(--color-fg)/10 px-4 py-2 text-center font-mono text-base text-(--color-fg)/90">
                   STOP
                 </div>
               </div>
             </div>
 
-            <div className="absolute z-10 right-10 top-20 w-45 p-3 rounded-xl border border-(--color-border)">
-              <div className="font-mono text-xm text-(--color-fg) mb-2">
-                Calendar
-              </div>
-              <div className="grid grid-cols-7 gap-0.5 text-xs text-center">
+            {/* Calendar */}
+            <div className="absolute bottom-17 left-10 z-10 w-60 rounded-3xl border border-(--color-border)/80 p-5">
+              <div className="mb-4 grid grid-cols-7 text-center text-lead text-(--color-fg)/65">
                 {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                  <div key={i} className="opacity-50">
-                    {d}
-                  </div>
+                  <div key={i}>{d}</div>
                 ))}
-                {Array.from({ length: 35 }, (_, i) => (
-                  <div key={i} className="py-0.5">
-                    {i < 3 ? "" : i > 32 ? "" : i - 2}
-                  </div>
-                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-y-2 text-center text-xs ">
+                {Array.from({ length: 35 }, (_, i) => {
+                  const day = i < 4 ? null : i - 3;
+                  const isActiveDay = day === 18;
+
+                  return (
+                    <div
+                      key={i}
+                      className={`mx-auto flex h-6 w-6 items-center justify-center rounded-full ${
+                        day
+                          ? isActiveDay
+                            ? "bg-(--color-fg)/20 "
+                            : "text-(--color-fg)"
+                          : "text-transparent"
+                      }`}
+                    >
+                      {day ?? ""}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="absolute z-10 right-30 bottom-18 w-48 p-3 rounded-xl border border-(--color-border)">
-              <div className="font-mono text-xs text-(--color-fg) mb-2">
+            {/* TodoList */}
+            <div className="absolute bottom-30 right-7 z-10 w-55 rounded-3xl border border-(--color-border)/80 p-5">
+              <div className="mb-4 text-lg font-light text-(--color-fg)/80">
                 Todo-list
               </div>
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {["Task 1", "Task 2", "Task 3"].map((task, i) => (
                   <div
                     key={i}
-                    className="bg-(--color-border)/20 rounded p-1.5 text-xs"
+                    className="flex items-center justify-between text-base"
                   >
-                    {task}
+                    <span>{task}</span>
+                    <span className="h-4 w-4 rounded-[0.3rem] border border-(--color-border)" />
                   </div>
                 ))}
               </div>
@@ -115,26 +130,43 @@ function HeroSection({ onEnter }: LandingProps) {
 
 // ── Second Section ────────────────────────────────────────────────────────────── (Done)
 function HowItWorksSection() {
+  const stepIcons = [Monitor, AlarmClock, BarChart3];
+
   return (
-    <section className="border-t border-b border-(--color-border) py-20 px-6">
-      <div className="max-w-6xl mx-auto">
-        <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[.2em] text-(--color-fg)/40 mb-10">
-          <span className="w-5 h-px bg-(--color-border)" /> How it works
+    <section className="border-t border-b border-(--color-border) px-6 py-18 sm:py-20">
+      <div className="max-w-4xl mx-auto">
+        <p className="mb-5 flex items-center gap-3 font-serif text-[clamp(2rem,3vw,3.1rem)] italic">
+          <span className="h-px w-8 bg-(--color-border)/70" />
+          How it works
         </p>
-        <div className="grid sm:grid-cols-3 border border-(--color-border) rounded-xl overflow-hidden">
-          {STEPS.map((step, i, arr) => (
-            <div
-              key={step.title}
-              className={`p-8 ${i < arr.length - 1 ? "border-b sm:border-b-0 sm:border-r border-(--color-border)" : ""}`}
-            >
-              <h3 className="font-serif text-xl font-bold mb-3">
-                {step.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-(--color-fg)/50">
-                {step.desc}
-              </p>
-            </div>
-          ))}
+        <div className="grid overflow-hidden rounded-2xl border border-(--color-border)/80 sm:grid-cols-3">
+          {STEPS.map((step, i, arr) => {
+            const Icon = stepIcons[i] ?? Monitor;
+
+            return (
+              <article
+                key={step.title}
+                className={`flex min-h-46 flex-col px-8 py-8 sm:min-h-42 sm:px-9 sm:py-9 ${
+                  i < arr.length - 1
+                    ? "border-b border-(--color-border)/80 sm:border-b-0 sm:border-r"
+                    : ""
+                }`}
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <Icon
+                    className="h-4 w-4 shrink-0 text-(--color-fg)/65"
+                    strokeWidth={1.9}
+                  />
+                  <h3 className="font-serif text-[clamp(1.55rem,1.8vw,1.85rem)] tracking-tight text-(--color-fg)/92">
+                    {step.title}
+                  </h3>
+                </div>
+                <p className="max-w-[18rem] text-sm leading-6 text-(--color-fg)/45 sm:text-[15px]">
+                  {step.desc}
+                </p>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -165,10 +197,11 @@ function FeaturesSection() {
           ref={stickyRef}
           className="sticky top-0 h-dvh flex items-center overflow-hidden bg-(--color-bg)"
         >
-          <div className="max-w-6xl mx-auto px-6 w-full grid grid-cols-2 gap-12 items-center">
+          <div className="max-w-4xl mx-auto px-6 w-full grid grid-cols-2 gap-12 items-center">
             <div>
-              <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[.2em] text-(--color-fg)/40 mb-10">
-                <span className="w-5 h-px bg-(--color-border)" /> Features
+              <p className="mb-5 flex items-center gap-3 font-serif text-[clamp(2rem,3vw,3.1rem)] italic">
+                <span className="h-px w-8 bg-(--color-border)/70" />
+                Features
               </p>
 
               <div className="relative space-y-0">
@@ -199,7 +232,7 @@ function FeaturesSection() {
                     <div className="pb-8 flex-1">
                       <h3
                         className={`font-serif font-normal leading-snug text-(--color-fg) transition-all duration-200 ${
-                          activeIndex === i ? "text-xl" : "text-base"
+                          activeIndex === i ? "text-lg" : "text-base"
                         }`}
                       >
                         {f.title}
@@ -235,18 +268,20 @@ function FeaturesSection() {
       </div>
 
       <section className="block sm:hidden border-t border-(--color-border) py-16 px-6">
-        <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[.2em] text-(--color-fg)/40 mb-10">
-          <span className="w-5 h-px bg-(--color-border)" /> Features
+        <p className="mb-5 flex items-center gap-2.5 font-serif text-[clamp(1.45rem,7vw,1.9rem)] italic">
+          <span className="h-px w-7 bg-(--color-border)/70" />
+          Features
         </p>
+
         <div className="space-y-14">
           {FEATURES.map((f) => {
             const Mock = f.Mockup;
             return (
               <div key={f.title}>
-                <h3 className="font-serif text-2xl font-normal mb-2">
+                <h3 className="font-serif text-xl font-normal mb-2">
                   {f.title}
                 </h3>
-                <p className="text-sm leading-relaxed text-(--color-fg)/50 mb-5">
+                <p className="text-xs leading-relaxed text-(--color-fg)/50 mb-5">
                   {f.desc}
                 </p>
                 <div className="w-full">
@@ -265,16 +300,11 @@ function FeaturesSection() {
 function WhySection() {
   return (
     <section className="border-b border-(--color-border) py-24 px-6">
-      <div className="max-w-2xl mx-auto">
-        <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[.2em] text-(--color-fg)/40 mb-10">
-          <span className="w-5 h-px bg-(--color-border)" /> Why I built this
+      <div className="max-w-4xl mx-auto">
+        <p className="mb-5 flex items-center gap-3 font-serif text-[clamp(2rem,3vw,3.1rem)] italic">
+          <span className="h-px w-8 bg-(--color-border)/70" />
+          Why I built this
         </p>
-        <h2
-          className="font-serif font-normal leading-snug mb-8"
-          style={{ fontSize: "clamp(28px, 4vw, 46px)" }}
-        >
-          It started as a simple Pomodoro timer.
-        </h2>
         <p className="text-sm leading-relaxed text-(--color-fg)/50 mb-5">
           At first, I just needed a focus timer. But I kept switching tabs — one
           for the timer, another for my to-do list, another for the calendar.
@@ -297,10 +327,11 @@ export default function FAQ() {
   return (
     <section className="border-b border-(--color-border) py-20 px-6">
       <div className="max-w-4xl mx-auto">
-        <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[.25em] text-(--color-fg)/40 mb-8">
-          <span className="w-8 h-px bg-(--color-border)" /> Frequently Asked
-          Questions
+        <p className="mb-5 flex items-center gap-3 font-serif text-[clamp(2rem,3vw,3.1rem)] italic">
+          <span className="h-px w-8 bg-(--color-border)/70" />
+          FAQS
         </p>
+
         <dl>
           {FAQS.map((faq, i) => (
             <div
