@@ -11,8 +11,16 @@ import { CalendarView } from "./features/calendar/components/CalendarView";
 
 import MusicPlayer from "./features/MusicPlayer";
 
+const LANDING_SESSION_KEY = "furo:entered-app";
+
 function App() {
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(() => {
+    try {
+      return sessionStorage.getItem(LANDING_SESSION_KEY) !== "true";
+    } catch {
+      return true;
+    }
+  });
   const [currentView, setCurrentView] = useState<"timer" | "todo" | "calendar">(
     "timer",
   );
@@ -25,8 +33,28 @@ function App() {
     isSupported,
   } = useMiniPlayer();
 
+  const handleEnterApp = () => {
+    try {
+      sessionStorage.setItem(LANDING_SESSION_KEY, "true");
+    } catch {
+      // Ignore storage failures and continue into the app.
+    }
+
+    setShowLanding(false);
+  };
+
+  const handleReturnToLanding = () => {
+    try {
+      sessionStorage.removeItem(LANDING_SESSION_KEY);
+    } catch {
+      // Ignore storage failures and continue back to the landing page.
+    }
+
+    setShowLanding(true);
+  };
+
   if (showLanding) {
-    return <Landing onEnter={() => setShowLanding(false)} />;
+    return <Landing onEnter={handleEnterApp} />;
   }
 
   return (
@@ -36,7 +64,11 @@ function App() {
       }`}
     >
       {!isFullscreen && (
-        <Header currentView={currentView} onViewChange={setCurrentView} />
+        <Header
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          onTitleClick={handleReturnToLanding}
+        />
       )}
 
       <main
