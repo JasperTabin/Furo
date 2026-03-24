@@ -4,7 +4,7 @@ import { X, Shuffle, SkipBack, Play, SkipForward, Volume2 } from "lucide-react";
 // ── Shared Container ─────────────────────────────────────────────────── (Done)
 function MockShell({ children }: { children: ReactNode }) {
   return (
-    <div className="card-base w-full h-[16rem] sm:h-[26rem] flex items-center justify-center overflow-hidden">
+    <div className="card-base w-full h-64 sm:h-104 flex items-center justify-center overflow-hidden">
       <div className="w-full p-6">{children}</div>
     </div>
   );
