@@ -159,7 +159,7 @@ export function MockMiniPlayer() {
           Sample Application
         </p>
 
-        <div className="absolute left-55 -bottom-10 sm:left-70 sm:top-64 border border-(--color-border) rounded-lg bg-(--color-fg)/5 p-2">
+        <div className="absolute left-55 -bottom-10 sm:left-85 sm:top-64 border border-(--color-border) rounded-lg bg-(--color-fg)/5 p-2">
           <div className="font-mono font-bold text-center text-base mb-1">
             25:00
           </div>

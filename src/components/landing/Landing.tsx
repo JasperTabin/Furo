@@ -8,31 +8,10 @@ interface LandingProps {
   onEnter: () => void;
 }
 // ── Shared styles ─────────────────────────────────────────────────────── (Done)
-const BUTTON_FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)";
-const SURFACE_CLASS =
-  "border border-(--color-border)/55 bg-(--color-bg)/70 shadow-[0_20px_60px_rgba(0,0,0,0.06)] backdrop-blur-xl";
 const SECTION_WRAP_CLASS = "mx-auto w-full max-w-5xl";
 
-function useSectionReveal() {
-  const prefersReducedMotion = useReducedMotion();
-
-  return prefersReducedMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.2 },
-        transition: { duration: 0.6, ease: "easeOut" as const },
-      };
-}
-
 // ── Reusable Section Heading ─────────────────────────────────────────────────────── (Done)
-function SectionHeading({
-  title,
-}: {
-  title: string;
-}) {
+function SectionHeading({ title }: { title: string }) {
   return (
     <div className="mb-8">
       <h2 className="flex items-center gap-3 font-serif text-[clamp(2rem,3vw,3.1rem)] italic tracking-tight">
@@ -48,7 +27,7 @@ function Navbar({ onEnter }: LandingProps) {
   return (
     <nav
       aria-label="Primary"
-      className={`fixed top-5 left-1/2 z-50 flex w-[min(25rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-between rounded-full px-3 py-2 ${SURFACE_CLASS}`}
+      className="fixed top-5 left-1/2 z-50 flex w-[min(25rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-between rounded-full border border-(--color-border)/55 bg-(--color-bg)/70 px-3 py-2 backdrop-blur-xl"
     >
       <div className="px-4 font-serif text-2xl font-semibold tracking-[0.08em]">
         FURŌ
@@ -56,7 +35,7 @@ function Navbar({ onEnter }: LandingProps) {
       <button
         type="button"
         onClick={onEnter}
-        className={`rounded-full bg-(--color-fg) px-5 py-2.5 text-sm font-medium uppercase tracking-[0.16em] text-(--color-bg) transition hover:opacity-90 ${BUTTON_FOCUS_RING}`}
+        className="rounded-full bg-(--color-fg) px-5 py-2.5 text-sm font-medium uppercase tracking-[0.16em] text-(--color-bg) hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
       >
         Open App
       </button>
@@ -66,19 +45,13 @@ function Navbar({ onEnter }: LandingProps) {
 
 // ── First Section ────────────────────────────────────────────────────────────────────── (DONE)
 function HeroSection({ onEnter }: LandingProps) {
-  const prefersReducedMotion = useReducedMotion();
   const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"] as const;
   const heroTasks = ["Task 1", "Task 2", "Task 3"] as const;
 
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden px-6 pb-16 pt-16 sm:px-10 lg:px-16">
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] xl:gap-24">
-        <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-left"
-        >
+        <div className="text-left">
           <h1 className="mb-7 font-serif text-[clamp(68px,9vw,110px)] font-normal leading-[0.88] tracking-tight">
             <span className="block">One tab.</span>
             <em className="block not-italic text-(--color-fg)/58">
@@ -94,32 +67,25 @@ function HeroSection({ onEnter }: LandingProps) {
             <button
               type="button"
               onClick={onEnter}
-              className={`rounded-full bg-(--color-fg) px-6 py-4 text-lead font-medium text-(--color-bg) transition hover:opacity-90 ${BUTTON_FOCUS_RING}`}
+              className="rounded-full bg-(--color-fg) px-6 py-4 text-lead font-medium text-(--color-bg) hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
             >
               Open Furō
             </button>
             <a
               href="#features"
-              className={`rounded-full border border-(--color-border) px-6 py-4 text-lead font-light text-(--color-fg) transition hover:bg-(--color-fg)/5 ${BUTTON_FOCUS_RING}`}
+              className="rounded-full border border-(--color-border) px-6 py-4 text-lead font-light text-(--color-fg) hover:bg-(--color-fg)/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
             >
               See features
             </a>
           </div>
-        </motion.div>
+        </div>
 
         <div
           aria-hidden="true"
-          className="relative hidden h-[30rem] items-center justify-center lg:flex xl:h-136"
+          className="relative hidden h-120 items-center justify-center lg:flex xl:h-136"
         >
-          <div className="relative h-full w-full max-w-[32rem] overflow-visible xl:max-w-136">
-            <motion.div
-              initial={
-                prefersReducedMotion ? false : { opacity: 0, y: 24, rotate: 0 }
-              }
-              animate={{ opacity: 1, y: 0, rotate: 0 }}
-              transition={{ duration: 0.55, ease: "easeOut", delay: 0.12 }}
-              className={`absolute right-21 top-7 z-20 w-56 rounded-[2rem] p-4 xl:right-31 xl:w-66 xl:p-5 ${SURFACE_CLASS}`}
-            >
+          <div className="relative h-full w-full max-w-lg overflow-visible xl:max-w-136">
+            <div className="absolute right-21 top-7 z-20 w-56 rounded-4xl border border-(--color-border) p-4 xl:right-31 xl:w-66 xl:p-5">
               <div className="mb-3 text-center text-base font-light text-(--color-fg)/80 xl:mb-4 xl:text-lg">
                 Pomodoro Timer
               </div>
@@ -134,19 +100,10 @@ function HeroSection({ onEnter }: LandingProps) {
                   STOP
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Calendar */}
-            <motion.div
-              initial={
-                prefersReducedMotion
-                  ? false
-                  : { opacity: 0, x: -22, y: 18, rotate: 0 }
-              }
-              animate={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
-              transition={{ duration: 0.55, ease: "easeOut", delay: 0.22 }}
-              className={`absolute right-50 top-55 z-10 w-52 rounded-[2rem] p-4 xl:top-65 xl:right-65 xl:w-60 xl:p-5 ${SURFACE_CLASS}`}
-            >
+            <div className="absolute right-50 top-55 z-10 w-52 rounded-4xl border border-(--color-border) p-4 xl:top-65 xl:right-65 xl:w-60 xl:p-5">
               <div className="mb-3 grid grid-cols-7 text-center text-sm text-(--color-fg)/65 xl:mb-4 xl:text-lead">
                 {weekdayLabels.map((dayLabel, index) => (
                   <div key={`${dayLabel}-${index}`}>{dayLabel}</div>
@@ -173,19 +130,10 @@ function HeroSection({ onEnter }: LandingProps) {
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
 
             {/* TodoList */}
-            <motion.div
-              initial={
-                prefersReducedMotion
-                  ? false
-                  : { opacity: 0, x: 22, y: 18, rotate: 0 }
-              }
-              animate={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
-              transition={{ duration: 0.55, ease: "easeOut", delay: 0.3 }}
-              className={`absolute top-55 right-0 z-10 w-48 rounded-[2rem] p-4 xl:right-7 xl:top-65 xl:w-55 xl:p-5 ${SURFACE_CLASS}`}
-            >
+            <div className="absolute top-55 right-0 z-10 w-48 rounded-4xl border border-(--color-border) p-4 xl:right-7 xl:top-65 xl:w-55 xl:p-5">
               <div className="mb-3 text-base font-light text-(--color-fg)/80 xl:mb-4 xl:text-lg">
                 Todo-list
               </div>
@@ -200,7 +148,7 @@ function HeroSection({ onEnter }: LandingProps) {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
@@ -210,43 +158,35 @@ function HeroSection({ onEnter }: LandingProps) {
 
 // ── Second Section ────────────────────────────────────────────────────────────── (Done)
 function HowItWorksSection() {
-  const reveal = useSectionReveal();
-
   return (
-    <section className="border-y border-(--color-border)/60 px-6 py-18 sm:py-20">
-      <motion.div {...reveal} className={SECTION_WRAP_CLASS}>
-        <SectionHeading title="How it works" />
-        <div
-          className={`grid overflow-hidden rounded-[2rem] sm:grid-cols-3 ${SURFACE_CLASS}`}
-        >
+    <section className="border-y border-(--color-border)/60 px-6 py-0">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="sm:grid sm:grid-cols-3">
           {STEPS.map((step, i, arr) => {
             const Icon = step.icon;
             return (
               <article
                 key={step.title}
-                className={`flex min-h-46 flex-col px-8 py-8 sm:min-h-42 sm:px-9 sm:py-9 ${
+                className={`flex min-h-40 flex-col items-center justify-center px-6 py-10 text-center sm:min-h-52 sm:px-8 ${
                   i < arr.length - 1
-                    ? "border-b border-(--color-border)/80 sm:border-b-0 sm:border-r"
+                    ? "border-b border-(--color-fg)/8 sm:border-b-0 sm:border-r"
                     : ""
                 }`}
               >
-                <div className="mb-4 flex items-center gap-3">
-                  <Icon
-                    className="h-4 w-4 shrink-0 text-(--color-fg)/65"
-                    strokeWidth={1.9}
-                  />
-                  <h3 className="font-serif text-[clamp(1.55rem,1.8vw,1.85rem)] tracking-tight text-(--color-fg)/92">
+                <div className="mb-3 flex items-center justify-center gap-3 whitespace-nowrap text-(--color-fg)">
+                  <Icon className="h-4 w-4 shrink-0" strokeWidth={1.7} />
+                  <h3 className="font-serif text-[clamp(1.5rem,2vw,2.35rem)] font-normal tracking-tight text-(--color-fg)">
                     {step.title}
                   </h3>
                 </div>
-                <p className="max-w-[18rem] text-sm leading-6 text-(--color-fg)/45 sm:text-[15px]">
+                <p className="mt-3 max-w-68 text-[11px] uppercase tracking-[0.18em] text-(--color-fg)/40 sm:text-sm">
                   {step.desc}
                 </p>
               </article>
             );
           })}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -257,7 +197,6 @@ function FeaturesSection() {
     FEATURES.length,
   );
   const prefersReducedMotion = useReducedMotion();
-  const reveal = useSectionReveal();
   const activeFeature = FEATURES[activeIndex] ?? FEATURES[0];
 
   if (!activeFeature) {
@@ -277,7 +216,9 @@ function FeaturesSection() {
           ref={stickyRef}
           className="sticky top-0 h-dvh flex items-center overflow-hidden bg-(--color-bg)"
         >
-          <div className="mx-auto grid w-full max-w-4xl grid-cols-2 items-center gap-12 px-6">
+          <div
+            className={`${SECTION_WRAP_CLASS} grid grid-cols-2 items-center gap-12 px-6`}
+          >
             <div>
               <SectionHeading title="Features" />
 
@@ -316,7 +257,7 @@ function FeaturesSection() {
 
                     <div className="pb-8 flex-1">
                       <h3
-                        className={`font-serif font-normal leading-snug text-(--color-fg) transition-all duration-200 ${
+                        className={`font-serif font-normal leading-snug text-(--color-fg) ${
                           activeIndex === i ? "text-lg" : "text-base"
                         }`}
                       >
@@ -354,7 +295,7 @@ function FeaturesSection() {
               }
               className="flex w-full items-center justify-center"
             >
-              <div className="w-full max-w-[34rem]">
+              <div className="w-full max-w-136">
                 <ActiveMock />
               </div>
             </motion.div>
@@ -363,7 +304,7 @@ function FeaturesSection() {
       </div>
 
       <section className="block border-t border-(--color-border)/60 px-6 py-16 sm:hidden">
-        <motion.div {...reveal} className={SECTION_WRAP_CLASS}>
+        <div className={SECTION_WRAP_CLASS}>
           <SectionHeading title="Features" />
 
           <div className="space-y-14">
@@ -371,7 +312,9 @@ function FeaturesSection() {
               const Mock = f.Mockup;
               return (
                 <div key={f.title}>
-                  <h3 className="mb-2 font-serif text-xl font-normal">{f.title}</h3>
+                  <h3 className="mb-2 font-serif text-xl font-normal">
+                    {f.title}
+                  </h3>
                   <p className="mb-5 text-xs leading-relaxed text-(--color-fg)/50">
                     {f.desc}
                   </p>
@@ -382,7 +325,7 @@ function FeaturesSection() {
               );
             })}
           </div>
-        </motion.div>
+        </div>
       </section>
     </section>
   );
@@ -390,27 +333,20 @@ function FeaturesSection() {
 
 // ── Fourth Section ────────────────────────────────────────────────────────── (Done)
 function WhySection() {
-  const reveal = useSectionReveal();
-
   return (
     <section className="border-b border-(--color-border)/60 px-6 py-24">
-      <motion.div
-        {...reveal}
-        className={`${SECTION_WRAP_CLASS} rounded-[2rem] p-8 sm:p-10 ${SURFACE_CLASS}`}
-      >
+      <div className={SECTION_WRAP_CLASS}>
         <SectionHeading title="Why I built this" />
-        <div className="grid gap-6 text-sm leading-8 text-(--color-fg)/56 sm:grid-cols-[1.2fr_.8fr]">
+        <div className="space-y-6 text-sm leading-8 text-(--color-fg)/56">
           <p>
             At first, I just needed a focus timer. But I kept switching tabs:
             one for the timer, another for my to-do list, another for the
-            calendar. The switching itself was breaking my focus.
-          </p>
-          <p>
-            So I built Furō as one quiet place for flow. A timer, a task board,
-            a calendar. Simple by design, not by accident.
+            calendar. The switching itself was breaking my focus. So I built
+            Furō as one quiet place for flow. A timer, a task board, a calendar.
+            Simple by design, not by accident.
           </p>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -419,14 +355,10 @@ function WhySection() {
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const faqId = useId();
-  const reveal = useSectionReveal();
 
   return (
     <section className="border-b border-(--color-border)/60 px-6 py-20">
-      <motion.div
-        {...reveal}
-        className={`${SECTION_WRAP_CLASS} rounded-[2rem] p-8 sm:p-10 ${SURFACE_CLASS}`}
-      >
+      <div className={SECTION_WRAP_CLASS}>
         <SectionHeading title="FAQs" />
 
         <dl>
@@ -442,14 +374,14 @@ export function FAQSection() {
                   aria-expanded={openIndex === i}
                   aria-controls={`${faqId}-answer-${i}`}
                   id={`${faqId}-question-${i}`}
-                  className={`flex w-full items-center justify-between gap-4 py-4 text-left transition-colors hover:text-(--color-fg) ${BUTTON_FOCUS_RING}`}
+                  className="flex w-full items-center justify-between gap-4 py-4 text-left hover:text-(--color-fg) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
                 >
                   <span className="font-serif text-base font-light text-(--color-fg)/80">
                     {faq.question}
                   </span>
                   <ChevronDown
                     aria-hidden="true"
-                    className={`shrink-0 transition-transform duration-300 ease-in-out text-(--color-fg)/80 ${
+                    className={`shrink-0 text-(--color-fg)/80 ${
                       openIndex === i ? "rotate-180" : ""
                     }`}
                     size={18}
@@ -459,7 +391,7 @@ export function FAQSection() {
               <dd
                 id={`${faqId}-answer-${i}`}
                 aria-labelledby={`${faqId}-question-${i}`}
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                className={`overflow-hidden ${
                   openIndex === i ? "max-h-40 pb-4" : "max-h-0"
                 }`}
               >
@@ -470,18 +402,16 @@ export function FAQSection() {
             </div>
           ))}
         </dl>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
 // ── Sixth Section ─────────────────────────────────────────────────────────────────────── (Done)
 function CtaSection({ onEnter }: LandingProps) {
-  const reveal = useSectionReveal();
-
   return (
     <section className="px-6 py-32 text-center">
-      <motion.div {...reveal}>
+      <div>
         <h2
           className="mb-7 font-serif font-normal leading-[.94] tracking-tight"
           style={{ fontSize: "clamp(56px, 8vw, 108px)" }}
@@ -496,11 +426,11 @@ function CtaSection({ onEnter }: LandingProps) {
         <button
           type="button"
           onClick={onEnter}
-          className={`rounded-full bg-(--color-fg) px-5 py-3 text-sm font-medium uppercase tracking-[0.18em] text-(--color-bg) transition hover:opacity-90 ${BUTTON_FOCUS_RING}`}
+          className="rounded-full bg-(--color-fg) px-5 py-3 text-sm font-medium uppercase tracking-[0.18em] text-(--color-bg) hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
         >
           Open Furō
         </button>
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -510,7 +440,9 @@ function Footer() {
   return (
     <footer className="flex flex-col justify-between gap-4 border-t border-(--color-border)/60 px-10 py-5 sm:flex-row sm:items-center">
       <div>
-        <div className="font-serif text-sm font-semibold tracking-[0.2em]">FURŌ</div>
+        <div className="font-serif text-sm font-semibold tracking-[0.2em]">
+          FURŌ
+        </div>
         <div className="text-xs text-(--color-fg)/40 mt-1">
           Built by Jasper Tabin
         </div>
