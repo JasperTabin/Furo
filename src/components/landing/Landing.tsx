@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { STEPS, FEATURES, FAQS } from "./constants";
@@ -29,7 +29,7 @@ function Navbar({ onEnter }: LandingProps) {
       aria-label="Primary"
       className="fixed top-5 left-1/2 z-50 flex w-[min(25rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-between rounded-full border border-(--color-border)/55 bg-(--color-bg)/70 px-3 py-2 backdrop-blur-xl"
     >
-      <div className="px-4 font-serif text-2xl font-semibold tracking-[0.08em]">
+      <div className="px-4 text-xl sm:text-2xl font-bold tracking-widest">
         FURŌ
       </div>
       <button
@@ -37,7 +37,7 @@ function Navbar({ onEnter }: LandingProps) {
         onClick={onEnter}
         className="rounded-full bg-(--color-fg) px-5 py-2.5 text-sm font-medium uppercase tracking-[0.16em] text-(--color-bg) hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
       >
-        Open App
+        Open Furō
       </button>
     </nav>
   );
@@ -71,12 +71,6 @@ function HeroSection({ onEnter }: LandingProps) {
             >
               Open Furō
             </button>
-            <a
-              href="#features"
-              className="rounded-full border border-(--color-border) px-6 py-4 text-lead font-light text-(--color-fg) hover:bg-(--color-fg)/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-fg) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-bg)"
-            >
-              See features
-            </a>
           </div>
         </div>
 
@@ -159,8 +153,8 @@ function HeroSection({ onEnter }: LandingProps) {
 // ── Second Section ────────────────────────────────────────────────────────────── (Done)
 function HowItWorksSection() {
   return (
-    <section className="border-y border-(--color-border)/60 px-6 py-0">
-      <div className="mx-auto w-full max-w-7xl">
+    <section className="border-y border-(--color-border)/60  py-0">
+      <div className={SECTION_WRAP_CLASS}>
         <div className="sm:grid sm:grid-cols-3">
           {STEPS.map((step, i, arr) => {
             const Icon = step.icon;
@@ -169,17 +163,17 @@ function HowItWorksSection() {
                 key={step.title}
                 className={`flex min-h-40 flex-col items-center justify-center px-6 py-10 text-center sm:min-h-52 sm:px-8 ${
                   i < arr.length - 1
-                    ? "border-b border-(--color-fg)/8 sm:border-b-0 sm:border-r"
+                    ? "border-b border-(--color-border)/60 sm:border-b-0 sm:border-r"
                     : ""
                 }`}
               >
                 <div className="mb-3 flex items-center justify-center gap-3 whitespace-nowrap text-(--color-fg)">
                   <Icon className="h-4 w-4 shrink-0" strokeWidth={1.7} />
-                  <h3 className="font-serif text-[clamp(1.5rem,2vw,2.35rem)] font-normal tracking-tight text-(--color-fg)">
+                  <h3 className="font-serif text-[clamp(1.5rem,1vw,2rem)] font-normal tracking-tight text-(--color-fg)">
                     {step.title}
                   </h3>
                 </div>
-                <p className="mt-3 max-w-68 text-[11px] uppercase tracking-[0.18em] text-(--color-fg)/40 sm:text-sm">
+                <p className="mt-3 max-w-68 text-xs uppercase tracking-[0.18em] text-(--color-fg)/40 ">
                   {step.desc}
                 </p>
               </article>
@@ -196,7 +190,6 @@ function FeaturesSection() {
   const { containerRef, stickyRef, activeIndex } = useScrollActiveIndex(
     FEATURES.length,
   );
-  const prefersReducedMotion = useReducedMotion();
   const activeFeature = FEATURES[activeIndex] ?? FEATURES[0];
 
   if (!activeFeature) {
@@ -229,11 +222,7 @@ function FeaturesSection() {
                     key={f.title}
                     className="relative flex gap-5"
                     animate={{ opacity: activeIndex === i ? 1 : 0.22 }}
-                    transition={
-                      prefersReducedMotion
-                        ? { duration: 0 }
-                        : { duration: 0.25, ease: "easeOut" }
-                    }
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                   >
                     <motion.div
                       className="relative shrink-0 pt-1.5 rounded-full top-2 border z-10"
@@ -248,11 +237,7 @@ function FeaturesSection() {
                             ? "var(--color-fg)"
                             : "var(--color-border)",
                       }}
-                      transition={
-                        prefersReducedMotion
-                          ? { duration: 0 }
-                          : { duration: 0.2, ease: "easeOut" }
-                      }
+                      transition={{ duration: 0.2, ease: "easeOut" }}
                     />
 
                     <div className="pb-8 flex-1">
@@ -270,11 +255,7 @@ function FeaturesSection() {
                           opacity: activeIndex === i ? 1 : 0,
                           marginTop: activeIndex === i ? 6 : 0,
                         }}
-                        transition={
-                          prefersReducedMotion
-                            ? { duration: 0 }
-                            : { duration: 0.2, ease: "easeOut" }
-                        }
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                       >
                         {f.desc}
                       </motion.p>
@@ -288,11 +269,7 @@ function FeaturesSection() {
               key={activeIndex}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.3, ease: "easeOut" }
-              }
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="flex w-full items-center justify-center"
             >
               <div className="w-full max-w-136">
@@ -410,7 +387,7 @@ export function FAQSection() {
 // ── Sixth Section ─────────────────────────────────────────────────────────────────────── (Done)
 function CtaSection({ onEnter }: LandingProps) {
   return (
-    <section className="px-6 py-32 text-center">
+    <section className="border-b border-(--color-border)/60 px-6 py-32 text-center">
       <div>
         <h2
           className="mb-7 font-serif font-normal leading-[.94] tracking-tight"
@@ -438,17 +415,19 @@ function CtaSection({ onEnter }: LandingProps) {
 // ── Last Section ──────────────────────────────────────────────────────────────────── (Done)
 function Footer() {
   return (
-    <footer className="flex flex-col justify-between gap-4 border-t border-(--color-border)/60 px-10 py-5 sm:flex-row sm:items-center">
-      <div>
-        <div className="font-serif text-sm font-semibold tracking-[0.2em]">
-          FURŌ
+    <footer className="px-10 py-5">
+      <div
+        className={`${SECTION_WRAP_CLASS} flex flex-col justify-between gap-4 sm:flex-row sm:items-center`}
+      >
+        <div>
+          <div className="text-lg font-bold tracking-widest">FURO</div>
+          <div className="mt-1 text-xs text-(--color-fg)/40">
+            Built by Jasper Tabin
+          </div>
         </div>
-        <div className="text-xs text-(--color-fg)/40 mt-1">
-          Built by Jasper Tabin
+        <div className="text-sm text-(--color-fg)/20">
+          © 2026 Furō. All rights reserved.
         </div>
-      </div>
-      <div className="text-xs text-(--color-fg)/20">
-        © 2026 Furō. All rights reserved.
       </div>
     </footer>
   );

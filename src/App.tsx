@@ -37,6 +37,7 @@ function App() {
     try {
       sessionStorage.setItem(LANDING_SESSION_KEY, "true");
     } catch {
+      // Ignore storage failures and continue into the app.
     }
 
     setShowLanding(false);
@@ -46,6 +47,7 @@ function App() {
     try {
       sessionStorage.removeItem(LANDING_SESSION_KEY);
     } catch {
+      // Ignore storage failures and still return to the landing view.
     }
 
     setShowLanding(true);
