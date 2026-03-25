@@ -87,7 +87,7 @@ export function MockCalendar() {
     <MockShell>
       <div className="grid grid-cols-7 text-center">
         {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-          <div key={i} className="text-base text-(--color-fg)">
+          <div key={`${d}-${i}`} className="text-base text-(--color-fg)">
             {d}
           </div>
         ))}
@@ -159,7 +159,7 @@ export function MockMiniPlayer() {
           Sample Application
         </p>
 
-        <div className="absolute left-55 -bottom-10 sm:left-95 sm:top-64 border border-(--color-border) rounded-lg bg-(--color-fg)/5 p-2">
+        <div className="absolute left-55 -bottom-10 sm:left-70 sm:top-64 border border-(--color-border) rounded-lg bg-(--color-fg)/5 p-2">
           <div className="font-mono font-bold text-center text-base mb-1">
             25:00
           </div>

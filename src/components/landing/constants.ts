@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { AlarmClock, BarChart3, Monitor } from "lucide-react";
 import {
   MockCalendar,
   MockKanban,
@@ -44,20 +45,24 @@ export const FEATURES: Feature[] = [
 export interface Step {
   title: string;
   desc: string;
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
 }
 
 export const STEPS: Step[] = [
   {
     title: "Open one tab",
     desc: "Zero distractions. One destination for your stream of consciousness.",
+    icon: Monitor,
   },
   {
     title: "Set your session",
     desc: "Define your craft through structured intervals of deep work.",
+    icon: AlarmClock,
   },
   {
     title: "Track your day",
     desc: "A visual record of focused time to guide tomorrow's flow.",
+    icon: BarChart3,
   },
 ];
 

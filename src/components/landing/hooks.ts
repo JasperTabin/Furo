@@ -24,17 +24,26 @@ export function useScrollActiveIndex(itemCount: number) {
       }
 
       const stickyHeight =
+        sticky.offsetHeight ||
         sticky.getBoundingClientRect().height ||
         window.visualViewport?.height ||
         window.innerHeight;
+      const containerTop =
+        container.getBoundingClientRect().top + window.scrollY;
+      const scrollStart = containerTop;
       const scrollRange = Math.max(container.offsetHeight - stickyHeight, 0);
+      const scrollEnd = scrollStart + scrollRange;
+
       if (scrollRange === 0) {
         setActiveIndex(0);
         return;
       }
 
-      const { top } = container.getBoundingClientRect();
-      const scrolledWithinSection = Math.min(Math.max(-top, 0), scrollRange);
+      const currentScroll = window.scrollY;
+      const scrolledWithinSection = Math.min(
+        Math.max(currentScroll - scrollStart, 0),
+        Math.max(scrollEnd - scrollStart, 0),
+      );
       const segmentSize = scrollRange / itemCount;
       const nextIndex = Math.min(
         Math.floor(scrolledWithinSection / Math.max(segmentSize, 1)),
