@@ -1,5 +1,5 @@
 // Container & orchestration logic
-import { Modal } from "../../../components/ui/Modal";
+import { Modal } from "../../../shared/components/Modal";
 import { SettingsPanel } from "./Settings";
 import { useSettings } from "../hooks/useSettings";
 
@@ -28,7 +28,7 @@ export const SettingsModal = ({
   };
 
   return (
-   <Modal isOpen={isOpen}>
+    <Modal isOpen={isOpen}>
       <div className="max-h-[90dvh] overflow-y-auto overscroll-contain">
         <SettingsPanel
           getValue={getValue}

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { X, Shuffle, SkipBack, Play, SkipForward, Volume2 } from "lucide-react";
+import { Square, SkipForward } from "lucide-react";
 
 // ── Shared Container ─────────────────────────────────────────────────── (Done)
 function MockShell({ children }: { children: ReactNode }) {
@@ -50,9 +50,21 @@ export function MockKanban() {
       <p className="font-serif text-lg text-center mb-4">Kanban Board</p>
       <div className="grid grid-cols-3 gap-2">
         {[
-          { label: "TO DO", count: 3, cards: ["Design landing page", "Review PR #234", "Update docs"] },
-          { label: "DOING", count: 2, cards: ["Ship v1.2 release", "Fix auth bug"] },
-          { label: "DONE", count: 3, cards: ["Team standup", "Deploy to prod", "Write tests"] },
+          {
+            label: "TO DO",
+            count: 3,
+            cards: ["Design landing page", "Review PR #234", "Update docs"],
+          },
+          {
+            label: "DOING",
+            count: 2,
+            cards: ["Ship v1.2 release", "Fix auth bug"],
+          },
+          {
+            label: "DONE",
+            count: 3,
+            cards: ["Team standup", "Deploy to prod", "Write tests"],
+          },
         ].map((col) => (
           <div
             key={col.label}
@@ -108,42 +120,43 @@ export function MockCalendar() {
 export function MockMusic() {
   return (
     <MockShell>
-      <div className="max-w-80 mx-auto w-full border border-(--color-border) rounded-xl p-5">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-sm font-medium ">Study with Me</p>
-            <p className="text-xs text-(--color-fg)">Ambient Waves</p>
+      <div className="w-72 border border-(--color-border) rounded-xl overflow-hidden mx-auto">
+        {/* Bar: Title · Count · Controls */}
+        <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-3 py-2.5 border-b border-(--color-border)">
+          <div className="min-w-0">
+            <p className="text-xs font-medium tracking-wide truncate leading-tight">
+              Study with Me
+            </p>
+            <p className="text-[0.6rem] text-(--color-fg)/40 truncate mt-0.5 tracking-wide">
+              Ambient Waves
+            </p>
           </div>
-          <span aria-hidden="true" className="text-(--color-fg)">
-            <X size={14} />
+
+          <span className="text-[0.6rem] tabular-nums text-(--color-fg)/30 tracking-widest px-1 shrink-0">
+            01&thinsp;/&thinsp;11
           </span>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span
+              aria-hidden="true"
+              className="w-7 h-7 rounded-md flex items-center justify-center border border-(--color-border) text-(--color-fg)/50"
+            >
+              <SkipForward size={12} />
+            </span>
+            <span
+              aria-hidden="true"
+              className="w-7 h-7 rounded-md flex items-center justify-center border border-(--color-border) text-(--color-fg)/50"
+            >
+              <Square size={10} strokeWidth={2.5} />
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4">
-          <span aria-hidden="true" className="text-(--color-fg)">
-            <Shuffle size={13} />
-          </span>
-          <span aria-hidden="true" className="text-(--color-fg)">
-            <SkipBack size={14} />
-          </span>
-          <span
-            aria-hidden="true"
-            className="w-9 h-9 rounded-full border border-(--color-border) flex items-center justify-center"
-          >
-            <Play size={13} />
-          </span>
-          <span aria-hidden="true" className="text-(--color-fg)">
-            <SkipForward size={14} />
-          </span>
-          <span className="font-mono text-[9px] text-(--color-fg)">1/11</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Volume2 size={14} className="text-(--color-fg)" />
-          <div className="flex-1 h-0.5 rounded-full bg-(--color-border) relative">
-            <div className="absolute inset-y-0 left-0 w-4/5 bg-(--color-fg) rounded-full" />
-          </div>
-          <span className="text-xs text-(--color-fg) w-5 text-right">80</span>
+        {/* Video placeholder */}
+        <div className="w-full aspect-video bg-(--color-border)/10 flex items-center justify-center">
+          <p className="text-xs text-(--color-fg)/30 tracking-wide">
+            Video here
+          </p>
         </div>
       </div>
     </MockShell>
@@ -169,7 +182,6 @@ export function MockMiniPlayer() {
             </div>
           </div>
         </div>
-
       </div>
     </MockShell>
   );

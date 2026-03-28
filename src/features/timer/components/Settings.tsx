@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { X, Minus, Plus, Settings } from "lucide-react";
 import { DURATION_FIELDS } from "../configs/constants";
-import { PALETTE_OPTIONS, useTheme } from "../../../hooks/useTheme";
-import type { PaletteOption, Palette } from "../../../hooks/useTheme";
+import { PALETTE_OPTIONS, useTheme } from "../../../shared/hooks/useTheme";
+import type { PaletteOption, Palette } from "../../../shared/hooks/useTheme";
 
 export const SettingsButton = ({
   onClick,

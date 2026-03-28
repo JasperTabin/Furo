@@ -1,6 +1,6 @@
 // ADD/EDIT MODAL CONTAINER - Orchestrator & Container
 import { useState } from "react";
-import { Modal } from "../../../components/ui/Modal";
+import { Modal } from "../../../shared/components/Modal";
 import {
   Header,
   TitleInput,
@@ -68,7 +68,10 @@ export const AddEditView = ({
   };
 
   const handleRemoveTag = (index: number) => {
-    setField("tags", form.tags.filter((_, i) => i !== index));
+    setField(
+      "tags",
+      form.tags.filter((_, i) => i !== index),
+    );
   };
 
   const handleSave = () => {
@@ -104,10 +107,7 @@ export const AddEditView = ({
 
   return (
     <Modal isOpen={isOpen} maxWidth="w-full sm:max-w-md mx-auto">
-      <Header
-        title={isEditing ? "Edit Task" : "Add Task"}
-        onClose={onClose}
-      />
+      <Header title={isEditing ? "Edit Task" : "Add Task"} onClose={onClose} />
       <div
         className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0"
         onKeyDown={handleKeyDown}

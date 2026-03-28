@@ -6,17 +6,12 @@ import {
   ListChecks,
   CalendarDays,
 } from "lucide-react";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "../hooks/useTheme";
 import { useEffect, useRef, useState } from "react";
-
-type AppView = "timer" | "todo" | "calendar";
+import { type AppView } from "../../app/Page";
 
 /* TITLE */
-export const HeaderTitle = ({
-  onClick,
-}: {
-  onClick: () => void;
-}) => (
+export const HeaderTitle = ({ onClick }: { onClick: () => void }) => (
   <button
     type="button"
     onClick={onClick}
