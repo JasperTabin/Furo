@@ -3,7 +3,7 @@
 import type { TimerSettings } from "./types";
 
 export const TIMER_STORAGE_KEY = "timerSettings";
-export const ALERT_SOUND = "Sound_1.mp3";
+export const ALERT_SOUND = "/public/sounds/Ring.mp3";
 
 export const DEFAULT_SETTINGS: TimerSettings = {
   workDuration: 25,

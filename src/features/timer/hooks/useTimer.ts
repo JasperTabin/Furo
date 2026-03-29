@@ -1,7 +1,5 @@
 // TIMER LOGIC
 
-// TIMER LOGIC
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { loadSettings } from "../utils/settings";
 import { ALERT_SOUND } from "../configs/constants";
@@ -20,10 +18,14 @@ export const useTimer = (settings?: TimerSettings) => {
   const getTotalTime = useCallback(
     (currentMode: TimerMode): number => {
       switch (currentMode) {
-        case "focus":      return currentSettings.workDuration * 60;
-        case "shortbreak": return currentSettings.breakDuration * 60;
-        case "longBreak":  return currentSettings.longBreakDuration * 60;
-        case "infinite":   return 0;
+        case "focus":
+          return currentSettings.workDuration * 60;
+        case "shortbreak":
+          return currentSettings.breakDuration * 60;
+        case "longBreak":
+          return currentSettings.longBreakDuration * 60;
+        case "infinite":
+          return 0;
       }
     },
     [currentSettings],
@@ -70,10 +72,13 @@ export const useTimer = (settings?: TimerSettings) => {
     [getTotalTime],
   );
 
-  const start      = useCallback(() => setStatus("running"), []);
-  const pause      = useCallback(() => setStatus("paused"), []);
-  const reset      = useCallback(() => updateMode(mode), [mode, updateMode]);
-  const switchMode = useCallback((newMode: TimerMode) => updateMode(newMode), [updateMode]);
+  const start = useCallback(() => setStatus("running"), []);
+  const pause = useCallback(() => setStatus("paused"), []);
+  const reset = useCallback(() => updateMode(mode), [mode, updateMode]);
+  const switchMode = useCallback(
+    (newMode: TimerMode) => updateMode(newMode),
+    [updateMode],
+  );
 
   const playTimerSound = useCallback(() => {
     if (!audioRef.current) return;
