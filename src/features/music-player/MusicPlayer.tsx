@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Music2, SkipForward, Square } from "lucide-react";
+import { Music2, SkipForward, X } from "lucide-react";
 
 interface Track {
   id: string;
@@ -59,7 +59,6 @@ export default function MusicPlayer() {
         </button>
       )}
 
-      {/* Card */}
       {isOpen && (
         <div
           role="region"
@@ -79,7 +78,6 @@ export default function MusicPlayer() {
             }
           `}</style>
 
-          {/* ── Bar: Title · Count · Controls ── */}
           <div
             className="
             grid grid-cols-[1fr_auto_auto] items-center gap-2
@@ -87,7 +85,6 @@ export default function MusicPlayer() {
             border-b border-(--color-border)
           "
           >
-            {/* Title + Artist */}
             <div className="min-w-0">
               <p
                 className="
@@ -107,7 +104,6 @@ export default function MusicPlayer() {
               </p>
             </div>
 
-            {/* Track count */}
             <span
               aria-label={`Track ${index + 1} of ${TRACKS.length}`}
               className="text-[0.6rem] tabular-nums text-(--color-fg)/30 tracking-widest px-1 shrink-0"
@@ -116,22 +112,7 @@ export default function MusicPlayer() {
               {String(TRACKS.length).padStart(2, "0")}
             </span>
 
-            {/* Controls */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={() => setIsOpen(false)}
-                aria-label="Close player"
-                title="Close"
-                className="
-                  w-7 h-7 rounded-md flex items-center justify-center
-                  border border-(--color-border)
-                  text-(--color-fg)/50 hover:text-(--color-fg)
-                  hover:bg-(--color-fg)/5
-                  transition-colors duration-150
-                "
-              >
-                <Square size={10} strokeWidth={2.5} />
-              </button>
               <button
                 onClick={skipNext}
                 aria-label="Next track"
@@ -146,10 +127,23 @@ export default function MusicPlayer() {
               >
                 <SkipForward size={12} />
               </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Close player"
+                title="Close"
+                className="
+                  w-7 h-7 rounded-md flex items-center justify-center
+                  border border-(--color-border)
+                  text-(--color-fg)/50 hover:text-(--color-fg)
+                  hover:bg-(--color-fg)/5
+                  transition-colors duration-150
+                "
+              >
+                <X size={10} strokeWidth={2.5} />
+              </button>
             </div>
           </div>
 
-          {/* ── Video ── */}
           <div className="w-full aspect-video bg-black">
             <iframe
               key={current.id}

@@ -124,12 +124,10 @@ const CalendarGrid = ({
             >
               <div className="flex items-center justify-center sm:w-full sm:items-start sm:justify-between">
                 <span
-                  className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-base font-bold leading-none sm:h-auto sm:w-auto sm:items-start sm:justify-start sm:rounded-none sm:bg-transparent sm:text-lg sm:font-medium ${
-                    isSelected
-                      ? "bg-orange-500 text-(--color-bg) sm:text-orange-500"
-                      : day.isToday
-                        ? "bg-orange-500/10 text-orange-500"
-                        : "text-(--color-fg)"
+                  className={`inline-flex h-8 w-8 items-center justify-center text-base font-bold leading-none sm:h-auto sm:w-auto sm:items-start sm:justify-start sm:text-lg sm:font-medium ${
+                    isSelected || day.isToday || dayEvents.length > 0
+                      ? "text-orange-400"
+                      : "text-(--color-fg)"
                   }`}
                 >
                   {day.dayNumber}
@@ -144,7 +142,7 @@ const CalendarGrid = ({
 
               {dayEvents.length > 0 && (
                 <span
-                  className="absolute bottom-1.5 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-orange-500 sm:hidden"
+                  className="absolute bottom-1.5 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-orange-400 sm:hidden"
                   aria-hidden="true"
                 />
               )}
