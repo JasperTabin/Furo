@@ -1,4 +1,6 @@
-export type AppView = "timer" | "todo" | "calendar" | "music" | "countdown" | "kanban";
+// Defines what panels exist, their default order, and how to save/load that order from localStorage.
+
+export type AppView = "timer" | "todo" | "calendar" | "music" | "countdown";
 
 export const ALL_PANELS: AppView[] = [
   "timer",
@@ -6,7 +8,6 @@ export const ALL_PANELS: AppView[] = [
   "countdown",
   "calendar",
   "todo",
-  "kanban",
 ];
 
 const PANEL_ORDER_STORAGE_KEY = "furo-panel-order";
@@ -25,7 +26,9 @@ export const readPanelOrder = (): AppView[] => {
     if (!Array.isArray(parsed)) return ALL_PANELS;
 
     const validPanels = parsed.filter(isAppView);
-    const missingPanels = ALL_PANELS.filter((panel) => !validPanels.includes(panel));
+    const missingPanels = ALL_PANELS.filter(
+      (panel) => !validPanels.includes(panel),
+    );
     return [...validPanels, ...missingPanels];
   } catch {
     return ALL_PANELS;

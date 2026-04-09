@@ -10,7 +10,7 @@ import {
 import { useLanding } from "../shared/hooks/useLanding";
 import { Analytics } from "@vercel/analytics/react";
 import { Dashboard } from "./Dashboard";
-import { KanbanPage } from "./KanbanPage";
+import { KanbanPage } from "../features/todo/KanbanPage";
 
 function App() {
   const { showLanding, enterApp, returnToLanding } = useLanding();
@@ -19,9 +19,7 @@ function App() {
   );
   const [showKanbanPage, setShowKanbanPage] = useState(false);
 
-  const openKanbanPage = () => {
-    setShowKanbanPage(true);
-  };
+  const openKanbanPage = () => setShowKanbanPage(true);
 
   const resetLayout = () => {
     setPanelOrder(ALL_PANELS);
@@ -30,31 +28,16 @@ function App() {
 
   const reorderPanels = (from: AppView, to: AppView) => {
     setPanelOrder((prev) => {
-      if (from === "kanban" || to === "kanban") {
-        return prev;
-      }
-
-      const dashboardOrder = prev.filter((panel) => panel !== "kanban");
-      const fromIndex = dashboardOrder.indexOf(from);
-      const toIndex = dashboardOrder.indexOf(to);
+      const fromIndex = prev.indexOf(from);
+      const toIndex = prev.indexOf(to);
 
       if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
         return prev;
       }
 
-      const reorderedDashboard = [...dashboardOrder];
-      [reorderedDashboard[fromIndex], reorderedDashboard[toIndex]] = [
-        reorderedDashboard[toIndex],
-        reorderedDashboard[fromIndex],
-      ];
-
-      let dashboardCursor = 0;
-      return prev.map((panel) => {
-        if (panel === "kanban") return panel;
-        const nextPanel = reorderedDashboard[dashboardCursor];
-        dashboardCursor += 1;
-        return nextPanel;
-      });
+      const next = [...prev];
+      [next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]];
+      return next;
     });
   };
 

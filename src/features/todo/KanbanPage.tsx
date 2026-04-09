@@ -1,4 +1,4 @@
-import { KanbanPanel } from "../features/todo/KanbanPanel";
+import { KanbanPanel } from "../todo/KanbanPanel";
 
 interface KanbanPageProps {
   onBack: () => void;

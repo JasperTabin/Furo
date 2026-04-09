@@ -530,7 +530,7 @@ export const TimerPanel = () => {
                 </TooltipTrigger>
                 <TooltipContent
                   side="right"
-                  className="max-w-xs bg-gray-800 border-gray-700 text-gray-100"
+                  className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
                 >
                   {isReversed
                     ? "Work as long as you want with a stopwatch."
@@ -559,9 +559,9 @@ export const TimerPanel = () => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="max-w-xs bg-gray-800 border-gray-700 text-gray-100"
+                    className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
                   >
-                    Opens a floating timer window that follows you around.
+                    Mini timer window that follows you around.
                   </TooltipContent>
                 </Tooltip>
               </div>

@@ -1,3 +1,5 @@
+//The shell that wraps the dashboard — provides the navbar and the scrollable content area.
+
 import { type ReactNode } from "react";
 import { Nav } from "../shared/components/Nav";
 

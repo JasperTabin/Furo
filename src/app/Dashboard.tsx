@@ -1,3 +1,5 @@
+// Renders the dashboard panels in a 2-column grid. Handles drag-and-drop reordering between panels.
+
 import { type AppView } from "./panelConfig";
 import { CalendarPanel } from "../features/calendar/CalendarPanel";
 import TimerPanel from "../features/timer/TimerPanel";
