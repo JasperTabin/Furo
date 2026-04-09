@@ -28,34 +28,6 @@
   --color-border: #3a4f68;
 }
 
-/* ── Warm Light ── */
-:root.palette-warm {
-  --color-bg: #f7f3ed;
-  --color-fg: #2b2b2b;
-  --color-border: #ddd3c3;
-}
-
-/* ── Warm Dark ── */
-:root.palette-warm.dark {
-  --color-bg: #26221d;
-  --color-fg: #f2ebe3;
-  --color-border: #4e463c;
-}
-
-/* ── Nordic Light ── */
-:root.palette-nordic {
-  --color-bg: #e8edf0;
-  --color-fg: #1e2233;
-  --color-border: #8a9ab0;
-}
-
-/* ── Nordic Dark ── */
-:root.palette-nordic.dark {
-  --color-bg: #1e2233;
-  --color-fg: #d4d8e8;
-  --color-border: #3a4560;
-}
-
 /* ── Rose Light ── */
 :root.palette-rose {
   --color-bg: #fdf0f3;
@@ -68,20 +40,6 @@
   --color-bg: #2a1018;
   --color-fg: #fdf0f3;
   --color-border: #6a3040;
-}
-
-/* ── Moss Light ── */
-:root.palette-moss {
-  --color-bg: #f0f5f0;
-  --color-fg: #1a2a1e;
-  --color-border: #90b898;
-}
-
-/* ── Moss Dark ── */
-:root.palette-moss.dark {
-  --color-bg: #1a2a1e;
-  --color-fg: #d8eedd;
-  --color-border: #3a5a40;
 }
 
 body {
@@ -102,50 +60,6 @@ body {
 }
 
 @layer utilities {
-  .btn-base {
-    @apply px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium tracking-wide rounded-md border transition focus:outline-none focus:ring-2 focus:ring-(--color-fg)/40;
-  }
-
-  .btn-active {
-    @apply bg-(--color-fg) text-(--color-bg) border-(--color-fg) hover:brightness-90;
-  }
-
-  .btn-inactive {
-    @apply bg-transparent text-(--color-fg)/70 border-(--color-border) hover:text-(--color-fg) hover:border-(--color-fg)/60 hover:bg-(--color-fg)/5;
-  }
-
-  .btn-danger {
-    @apply text-red-500 border border-red-500/40 hover:bg-red-500/10;
-  }
-
-  .btn-theme-item {
-    @apply flex items-center gap-3 px-4 py-3 hover:bg-(--color-border)/20 cursor-pointer w-full;
-  }
-
-  .btn-theme-item-active {
-    @apply flex items-center gap-3 px-4 py-3 bg-(--color-border)/30 cursor-pointer w-full;
-  }
-
-  .btn-tab-base {
-    @apply flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-200 sm:gap-2 sm:px-4;
-  }
-
-  .btn-tab-active {
-    @apply bg-(--color-fg) text-(--color-bg) shadow-sm;
-  }
-
-  .btn-tab-inactive {
-    @apply bg-(--color-bg) text-(--color-fg) opacity-100 hover:bg-(--color-fg)/5;
-  }
-
-  .tab-container {
-    @apply flex gap-1 p-1 bg-(--color-bg) border border-(--color-border) rounded-xl sm:gap-2;
-  }
-
-  .btn-theme-trigger {
-    @apply flex items-center gap-2 p-2 rounded-md hover:bg-(--color-border)/20 transition-colors;
-  }
-
   .card-base {
     @apply bg-(--color-bg) border border-(--color-border) rounded-xl transition-all;
   }
@@ -154,13 +68,10 @@ body {
     @apply hover:border-(--color-border)/70;
   }
 
-  .input-base {
-    @apply px-4 py-3 bg-(--color-bg) border border-(--color-border) rounded-xl focus:outline-none focus:border-(--color-border)/70 transition-colors;
-  }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -171,28 +82,7 @@ body {
     font-size: 16px;
   }
 
-  .date-input-fix {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    -webkit-appearance: none;
-    appearance: none;
-    font-size: 16px;
-  }
-
   .badge-base {
     @apply text-xs px-2 py-1 rounded-full;
-  }
-
-  .badge-priority-low {
-    @apply bg-blue-500/20 text-blue-400;
-  }
-
-  .badge-priority-medium {
-    @apply bg-yellow-500/20 text-yellow-400;
-  }
-
-  .badge-priority-high {
-    @apply bg-red-500/20 text-red-400;
   }
 }

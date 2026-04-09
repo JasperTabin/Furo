@@ -1,0 +1,10 @@
+// Centralized exports for shadcn/ui components
+export { Button } from "./button"
+export { Input } from "./input"
+export { Select } from "./select"
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card"
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog"
+export { Separator } from "./separator"
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip"
+export { Toggle } from "./toggle"
+export { Popover, PopoverContent, PopoverTrigger } from "./popover"

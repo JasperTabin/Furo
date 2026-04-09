@@ -1,43 +1,34 @@
 import { type ReactNode } from "react";
-import { Header } from "../shared/components/Header";
-import MusicPlayer from "../features/music-player/MusicPlayer";
-import { useFullscreen } from "../features/timer/hooks/useFullscreen";
-import { type AppView } from "./Page";
+import { Nav } from "../shared/components/Nav";
 
 interface LayoutProps {
   children: ReactNode;
-  currentView: AppView;
-  onViewChange: (view: AppView) => void;
+  onResetLayout: () => void;
+  onOpenKanbanPage: () => void;
   onHome: () => void;
 }
 
 export function Layout({
   children,
-  currentView,
-  onViewChange,
+  onResetLayout,
+  onOpenKanbanPage,
   onHome,
 }: LayoutProps) {
-  const { isFullscreen } = useFullscreen();
-
   return (
-    <div
-      className={[
-        "h-dvh overflow-hidden flex flex-col transition-colors duration-500",
-        "bg-(--color-bg) text-(--color-fg)",
-        isFullscreen ? "" : "p-6 sm:p-8",
-      ].join(" ")}
-    >
-      {!isFullscreen && (
-        <Header
-          currentView={currentView}
-          onViewChange={onViewChange}
-          onTitleClick={onHome}
-        />
-      )}
+    <div className="h-dvh overflow-hidden bg-(--color-bg) text-(--color-fg) transition-colors duration-500">
+      <Nav
+        onResetLayout={onResetLayout}
+        onOpenKanbanPage={onOpenKanbanPage}
+        onTitleClick={onHome}
+      />
 
-      <main className="flex-1 flex flex-col overflow-x-hidden">{children}</main>
-
-      <MusicPlayer />
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto flex w-full max-w-4xl flex-col px-4 py-4 pb-26 sm:px-6 sm:py-6 sm:pb-28 lg:px-8">
+            <div className="w-full">{children}</div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
