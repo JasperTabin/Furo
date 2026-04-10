@@ -1,10 +1,4 @@
-import {
-  Kanban,
-  Moon,
-  RotateCcw,
-  Sun,
-  SwatchBook,
-} from "lucide-react";
+import { Kanban, Moon, RotateCcw, Sun, SwatchBook } from "lucide-react";
 import { PALETTE_OPTIONS, useTheme } from "../hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +30,7 @@ export const Nav = ({
   return (
     <TooltipProvider delayDuration={300}>
       <div className="pointer-events-none fixed bottom-4 left-1/2 z-50 -translate-x-1/2 sm:bottom-5">
-        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-(--color-border)/70 bg-(--color-bg)/90 p-1.5 shadow-xl backdrop-blur-xl">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-(--color-border)/70 bg-(--color-bg) p-1.5 shadow-xl backdrop-blur-xl">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -88,7 +82,9 @@ export const Nav = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(isDark ? "light" : "dark")}
-                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                aria-label={
+                  isDark ? "Switch to light mode" : "Switch to dark mode"
+                }
                 className="h-10 w-10 rounded-full text-(--color-fg) hover:bg-(--color-border)/30"
               >
                 {isDark ? <Moon size={18} /> : <Sun size={18} />}

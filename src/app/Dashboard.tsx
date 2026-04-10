@@ -109,7 +109,7 @@ export function Dashboard({ panelOrder, onReorderPanels }: DashboardProps) {
           handleDrop(panel.key, sourcePanel);
         }}
         className={cn(
-          "group overflow-hidden rounded-[2rem] border border-(--color-border)/55 bg-(--color-bg) flex flex-col transition-colors",
+          "group overflow-hidden rounded-2xl border border-(--color-border)/40 bg-(--color-bg) flex flex-col transition-colors",
           panel.key !== "timer" && "px-5 py-5 sm:px-6 sm:py-6",
           dragOverPanel === panel.key && "border-(--color-fg)/60",
         )}
