@@ -14,30 +14,30 @@ interface UsePaginationReturn<T> {
 
 export const usePagination = <T>(
   items: T[],
-  itemsPerPage: number = ITEMS_PER_PAGE
+  itemsPerPage: number = ITEMS_PER_PAGE,
 ): UsePaginationReturn<T> => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = useMemo(
     () => calculateTotalPages(items.length, itemsPerPage),
-    [items.length, itemsPerPage]
+    [items.length, itemsPerPage],
   );
 
   const boundedPage = useMemo(
     () => boundPage(currentPage, totalPages),
-    [currentPage, totalPages]
+    [currentPage, totalPages],
   );
 
   const paginatedItems = useMemo(
     () => paginateItems(items, boundedPage, itemsPerPage),
-    [items, boundedPage, itemsPerPage]
+    [items, boundedPage, itemsPerPage],
   );
 
   const setPage = useCallback(
     (page: number) => {
       setCurrentPage(boundPage(page, totalPages));
     },
-    [totalPages]
+    [totalPages],
   );
 
   return {

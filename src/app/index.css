@@ -55,7 +55,7 @@ body {
 
 @layer utilities {
   .card-base {
-    @apply bg-(--color-bg) border border-(--color-border) rounded-xl transition-all;
+    @apply bg-(--color-fg)/5 border border-(--color-border)/20 rounded-xl transition-all;
   }
 
   .card-hover {

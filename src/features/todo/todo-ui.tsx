@@ -33,7 +33,7 @@ export const ColumnHeader = ({
 }) => (
   <div>
     <div className="mb-3 flex items-center justify-between">
-      <h3 className="text-sm font-semibold uppercase tracking-wider opacity-60">
+      <h3 className="text-sm font-semibold uppercase tracking-wider">
         {title}
       </h3>
       <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export const ColumnHeader = ({
         </button>
       </div>
     </div>
-    <div className="h-px bg-(--color-border)/30" />
+    <div className="h-px bg-(--color-border)/40" />
   </div>
 );
 
@@ -152,6 +152,7 @@ export const Card = ({
           >
             <Edit2 size={14} />
           </button>
+
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -245,7 +246,7 @@ export const Pagination = ({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 pt-3">
+    <div className="flex items-center justify-center gap-2 pt-3 border-t border-(--color-border)/40">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -254,9 +255,11 @@ export const Pagination = ({
       >
         <ChevronLeft size={16} />
       </button>
+
       <span className="px-2 text-xs font-medium">
         PAGE {currentPage} / {totalPages}
       </span>
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -308,7 +311,7 @@ export const Column = ({
   onDrop: (e: React.DragEvent) => void;
 }) => {
   return (
-    <div className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col border border-(--color-border) rounded-xl overflow-hidden todo-column snap-start max-h-[calc(100dvh-16rem)]">
+    <div className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col overflow-hidden todo-column snap-start max-h-[calc(100dvh-16rem)]">
       <div className="shrink-0 p-4">
         <ColumnHeader title={title} count={totalCount} onAdd={onAdd} />
       </div>
@@ -381,7 +384,7 @@ const STATUS_CONFIG: Record<
   todo: {
     label: "Todo",
     tabActiveClassName:
-      "border-amber-500/70 bg-amber-500 text-[#2c1700] shadow-[0_10px_30px_rgba(245,158,11,0.26)]",
+      "border-amber-500/20 bg-amber-500 text-[#2c1700] shadow-[0_10px_30px_rgba(245,158,11,0.26)]",
     badgeClassName: "border border-amber-500/30 bg-amber-500/18 text-amber-300",
   },
   doing: {
@@ -425,9 +428,9 @@ export const ListCard = ({
   };
 
   return (
-    <div className="group flex items-center gap-2.5 rounded-xl border border-(--color-border)/60 bg-(--color-fg)/[0.03] px-2.5 py-2 transition-colors hover:border-(--color-fg)/20 hover:bg-(--color-fg)/[0.05]">
+    <div className="group flex items-center gap-2.5 rounded-xl border border-(--color-border)/60 bg-(--color-fg)/3 px-2.5 py-2 transition-colors hover:border-(--color-fg)/20 hover:bg-(--color-fg)/3">
       <div
-        className={`h-9 w-[3px] shrink-0 self-stretch ${priority.accentClassName}`}
+        className={`h-9 w-0.75 shrink-0 self-stretch ${priority.accentClassName}`}
       />
 
       <div className="min-w-0 flex-1">
@@ -556,7 +559,7 @@ export const ListView = ({
                 className={`rounded-xl border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   isActive
                     ? activeClassName
-                    : "border-(--color-border)/60 bg-transparent text-(--color-fg)/72 hover:border-(--color-fg)/20 hover:bg-(--color-fg)/[0.05] hover:text-(--color-fg)"
+                    : "border-(--color-border)/60 bg-transparent text-(--color-fg)/72 hover:border-(--color-fg)/20 hover:bg-(--color-fg)/5 hover:text-(--color-fg)"
                 }`}
               >
                 {tab.label} ({counts[tab.key]})
