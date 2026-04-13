@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { todoStorage } from "./todoStorage";
 import { generateId, groupByStatus } from "./todo.utils";
-import type { Todo, TodoStatus, TodoPriority } from "./todo.types";
+import type { Todo, TodoTag, TodoStatus, TodoPriority } from "./todo.types";
 
 export const useTodos = () => {
   const [todos, setTodos] = useState<Todo[]>(() => todoStorage.load());
@@ -25,7 +25,7 @@ export const useTodos = () => {
       priority: TodoPriority = "medium",
       dueDate?: number,
       status: TodoStatus = "todo",
-      tags?: string[],
+      tags?: TodoTag[],
       notes?: string,
     ) => {
       const newTodo: Todo = {
@@ -52,7 +52,7 @@ export const useTodos = () => {
         description?: string;
         priority?: TodoPriority;
         dueDate?: number;
-        tags?: string[];
+        tags?: TodoTag[];
         notes?: string;
       },
     ) => {
@@ -78,7 +78,6 @@ export const useTodos = () => {
     todoList,
     doingList,
     doneList,
-
     addTodo,
     updateTodo,
     updateTodoStatus,

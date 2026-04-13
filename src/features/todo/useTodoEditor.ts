@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { Todo, TodoFormData, TodoStatus } from "./todo.types";
+import type { Todo, TodoTag, TodoFormData, TodoStatus } from "./todo.types";
 
 interface UseTodoEditorParams {
   addTodo: (
@@ -8,7 +8,7 @@ interface UseTodoEditorParams {
     priority?: TodoFormData["priority"],
     dueDate?: number,
     status?: TodoStatus,
-    tags?: string[],
+    tags?: TodoTag[],
     notes?: string,
   ) => void;
   updateTodo: (id: string, data: TodoFormData) => void;
@@ -41,7 +41,6 @@ export const useTodoEditor = ({ addTodo, updateTodo }: UseTodoEditorParams) => {
         updateTodo(id, data);
         return;
       }
-
       addTodo(
         data.text,
         data.description,

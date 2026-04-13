@@ -1,7 +1,5 @@
-import { useMemo } from "react";
 import { X } from "lucide-react";
 import { useTodos } from "./useTodo";
-import { usePagination } from "./useTodoPagination";
 import { useDrag } from "./useTodoDrag";
 import { Column } from "./todo-ui";
 import { TodoEditorModal } from "./TodoEditorModal";
@@ -17,10 +15,6 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
     updateTodoStatus,
     deleteTodo,
   } = useTodos();
-
-  const todoPagination = usePagination(todoList);
-  const doingPagination = usePagination(doingList);
-  const donePagination = usePagination(doneList);
 
   const {
     dragOverColumn,
@@ -38,59 +32,31 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
     handleSave,
   } = useTodoEditor({ addTodo, updateTodo });
 
-  const columns = useMemo(
-    () => [
-      {
-        key: "todo" as const,
-        title: "To Do",
-        totalCount: todoList.length,
-        todos: todoPagination.paginatedItems,
-        currentPage: todoPagination.currentPage,
-        totalPages: todoPagination.totalPages,
-        onPageChange: todoPagination.setPage,
-      },
-      {
-        key: "doing" as const,
-        title: "Doing",
-        totalCount: doingList.length,
-        todos: doingPagination.paginatedItems,
-        currentPage: doingPagination.currentPage,
-        totalPages: doingPagination.totalPages,
-        onPageChange: doingPagination.setPage,
-      },
-      {
-        key: "done" as const,
-        title: "Done",
-        totalCount: doneList.length,
-        todos: donePagination.paginatedItems,
-        currentPage: donePagination.currentPage,
-        totalPages: donePagination.totalPages,
-        onPageChange: donePagination.setPage,
-      },
-    ],
-    [
-      todoList.length,
-      doingList.length,
-      doneList.length,
-      todoPagination.paginatedItems,
-      todoPagination.currentPage,
-      todoPagination.totalPages,
-      todoPagination.setPage,
-      doingPagination.paginatedItems,
-      doingPagination.currentPage,
-      doingPagination.totalPages,
-      doingPagination.setPage,
-      donePagination.paginatedItems,
-      donePagination.currentPage,
-      donePagination.totalPages,
-      donePagination.setPage,
-    ],
-  );
+  const columns = [
+    {
+      key: "todo" as const,
+      title: "To Do",
+      totalCount: todoList.length,
+      items: todoList,
+    },
+    {
+      key: "doing" as const,
+      title: "Doing",
+      totalCount: doingList.length,
+      items: doingList,
+    },
+    {
+      key: "done" as const,
+      title: "Done",
+      totalCount: doneList.length,
+      items: doneList,
+    },
+  ];
 
   return (
     <>
-      <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
-        <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 ">
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-3 px-4 sm:px-4">
           <h2 className="text-base font-semibold tracking-[0.02em]">Kanban</h2>
           <button
             type="button"
@@ -102,17 +68,14 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
           </button>
         </div>
 
-        <div className="flex gap-4 min-h-0 overflow-x-auto snap-x snap-mandatory [-webkit-overflow-scrolling:touch] px-4 sm:px-0 scroll-pl-4 items-start">
+        <div className="flex gap-4 flex-1 min-h-0 overflow-x-auto snap-x snap-mandatory [-webkit-overflow-scrolling:touch] px-4 sm:px-0 scroll-pl-4 items-stretch">
           {columns.map((column) => (
             <Column
               key={column.key}
               title={column.title}
               totalCount={column.totalCount}
-              todos={column.todos}
-              currentPage={column.currentPage}
-              totalPages={column.totalPages}
+              todos={column.items}
               isDragOver={dragOverColumn === column.key}
-              onPageChange={column.onPageChange}
               onAdd={() => openAddModal(column.key)}
               onEdit={openEditModal}
               onDelete={deleteTodo}

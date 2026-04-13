@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Plus,
   Trash2,
@@ -10,14 +10,9 @@ import {
 } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import type { Todo, TodoPriority, TodoStatus } from "./todo.types";
-import { todoStorage } from "./todoStorage";
-import {
-  formatDate,
-  isPastDue,
-  calculateTotalPages,
-  paginateItems,
-  boundPage,
-} from "./todo.utils";
+import { formatDate, isPastDue } from "./todo.utils";
+import { usePagination } from "./useTodoPagination";
+import { getTagChipClass } from "./tag-colors";
 
 // ============================================================================
 // KANBAN - COLUMN HEADER
@@ -54,43 +49,10 @@ export const ColumnHeader = ({
 // ============================================================================
 // KANBAN - CARD
 // ============================================================================
-const PRIORITY_CONFIG: Record<
-  TodoPriority,
-  {
-    accentClassName: string;
-  }
-> = {
-  low: {
-    accentClassName: "bg-sky-500",
-  },
-  medium: {
-    accentClassName: "bg-amber-500",
-  },
-  high: {
-    accentClassName: "bg-red-500",
-  },
-};
-
-const getCardTagStyles = (color: string) => {
-  switch (color) {
-    case "blue":
-      return {
-        chipClassName: "border-blue-500/30 bg-blue-500/14 text-blue-300",
-      };
-    case "green":
-      return {
-        chipClassName:
-          "border-emerald-500/30 bg-emerald-500/14 text-emerald-300",
-      };
-    case "amber":
-      return {
-        chipClassName: "border-amber-500/30 bg-amber-500/14 text-amber-300",
-      };
-    default:
-      return {
-        chipClassName: "border-(--color-border) text-(--color-fg)",
-      };
-  }
+const PRIORITY_CONFIG: Record<TodoPriority, { accentClassName: string }> = {
+  low: { accentClassName: "bg-sky-500" },
+  medium: { accentClassName: "bg-amber-500" },
+  high: { accentClassName: "bg-red-500" },
 };
 
 export const Card = ({
@@ -110,11 +72,6 @@ export const Card = ({
 }) => {
   const priority = PRIORITY_CONFIG[todo.priority];
   const isOverdue = isPastDue(todo.dueDate, todo.status);
-  const availableTags = useMemo(() => todoStorage.loadTags(), []);
-  const tagColorMap = useMemo(
-    () => new Map(availableTags.map((tag) => [tag.name, tag.color])),
-    [availableTags],
-  );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -152,7 +109,6 @@ export const Card = ({
           >
             <Edit2 size={14} />
           </button>
-
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -191,22 +147,18 @@ export const Card = ({
               {formatDate(todo.dueDate)}
             </span>
           )}
-          {todo.tags &&
-            todo.tags.length > 0 &&
-            todo.tags.map((tag, index) => {
-              const color = tagColorMap.get(tag);
-              const styles = getCardTagStyles(color ?? "");
 
-              return (
-                <span
-                  key={index}
-                  className={`badge-base inline-flex items-center border ${styles.chipClassName}`}
-                >
-                  #{tag}
-                </span>
-              );
-            })}
-          {todo.notes && todo.notes.trim() && (
+          {/* ✅ Colored chips — color comes from the tag itself, no dot */}
+          {todo.tags?.map((tag) => (
+            <span
+              key={tag.name}
+              className={`badge-base border ${getTagChipClass(tag.color)}`}
+            >
+              #{tag.name}
+            </span>
+          ))}
+
+          {todo.notes?.trim() && (
             <span className="badge-base flex items-center gap-1 bg-(--color-border)/30">
               <StickyNote size={10} />
               <span>notes</span>
@@ -255,11 +207,9 @@ export const Pagination = ({
       >
         <ChevronLeft size={16} />
       </button>
-
       <span className="px-2 text-xs font-medium">
         PAGE {currentPage} / {totalPages}
       </span>
-
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -279,10 +229,7 @@ export const Column = ({
   title,
   totalCount,
   todos,
-  currentPage,
-  totalPages,
   isDragOver,
-  onPageChange,
   onAdd,
   onEdit,
   onDelete,
@@ -296,10 +243,7 @@ export const Column = ({
   title: string;
   totalCount: number;
   todos: Todo[];
-  currentPage: number;
-  totalPages: number;
   isDragOver: boolean;
-  onPageChange: (page: number) => void;
   onAdd: () => void;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
@@ -309,63 +253,52 @@ export const Column = ({
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;
-}) => {
-  return (
-    <div className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col overflow-hidden todo-column snap-start max-h-[calc(100dvh-16rem)]">
-      <div className="shrink-0 p-4">
-        <ColumnHeader title={title} count={totalCount} onAdd={onAdd} />
-      </div>
-      <div className="no-scrollbar overflow-y-auto p-3 pt-0">
-        <div
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          role="region"
-          aria-label={`${title} column`}
-          className={`flex h-full flex-col rounded-xl transition-all ${
-            todos.length === 0 ? "border-2 border-dashed" : ""
-          } ${
-            isDragOver
-              ? "border-(--color-border) bg-(--color-border)/10"
-              : todos.length === 0
-                ? "border-(--color-border)/30"
-                : ""
-          }`}
-        >
-          <div className="space-y-3">
-            {todos.length === 0 ? (
-              <div className="py-8 text-center opacity-30">
-                <p className="text-sm">No tasks</p>
-              </div>
-            ) : (
-              todos.map((todo) => (
-                <Card
-                  key={todo.id}
-                  todo={todo}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onStatusChange={onStatusChange}
-                  onDragStart={onDragStart}
-                  onDragEnd={onDragEnd}
-                />
-              ))
-            )}
-          </div>
+}) => (
+  <div className="w-full shrink-0 sm:w-auto sm:flex-1 flex flex-col overflow-hidden todo-column snap-start h-full">
+    <div className="shrink-0 p-4">
+      <ColumnHeader title={title} count={totalCount} onAdd={onAdd} />
+    </div>
+    <div className="no-scrollbar overflow-y-auto p-3 pt-0 flex-1 flex flex-col">
+      <div
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        role="region"
+        aria-label={`${title} column`}
+        className={`flex flex-1 flex-col rounded-xl transition-all ${
+          isDragOver ? "border-(--color-border) bg-(--color-border)/10" : ""
+        }`}
+      >
+        <div className="space-y-3">
+          {todos.length === 0 ? (
+            <div
+              className={`py-8 text-center rounded-xl border-2 border-dashed border-(--color-border) transition-all ${
+                isDragOver ? "opacity-0" : "opacity-30"
+              }`}
+            >
+              <p className="text-sm">No tasks</p>
+            </div>
+          ) : (
+            todos.map((todo) => (
+              <Card
+                key={todo.id}
+                todo={todo}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onStatusChange={onStatusChange}
+                onDragStart={onDragStart}
+                onDragEnd={onDragEnd}
+              />
+            ))
+          )}
         </div>
       </div>
-      <div className="shrink-0 px-3 pb-3">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
-      </div>
     </div>
-  );
-};
+  </div>
+);
 
 // ============================================================================
-// LIST VIEW - STATUS CYCLE
+// LIST VIEW
 // ============================================================================
 const NEXT_STATUS: Record<TodoStatus, TodoStatus> = {
   todo: "doing",
@@ -375,11 +308,7 @@ const NEXT_STATUS: Record<TodoStatus, TodoStatus> = {
 
 const STATUS_CONFIG: Record<
   TodoStatus,
-  {
-    label: string;
-    tabActiveClassName: string;
-    badgeClassName: string;
-  }
+  { label: string; tabActiveClassName: string; badgeClassName: string }
 > = {
   todo: {
     label: "Todo",
@@ -405,9 +334,6 @@ const STATUS_CONFIG: Record<
 const ALL_TAB_ACTIVE_CLASS =
   "border-(--color-fg)/15 bg-(--color-fg) text-(--color-bg) shadow-[0_10px_30px_rgba(0,0,0,0.24)]";
 
-// ============================================================================
-// LIST VIEW - CARD
-// ============================================================================
 export const ListCard = ({
   todo,
   onEdit,
@@ -422,36 +348,29 @@ export const ListCard = ({
   const status = STATUS_CONFIG[todo.status];
   const priority = PRIORITY_CONFIG[todo.priority];
 
-  const handleCycleStatus = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    onStatusChange(todo.id, NEXT_STATUS[todo.status]);
-  };
-
   return (
     <div className="group flex items-center gap-2.5 rounded-xl border border-(--color-border)/60 bg-(--color-fg)/3 px-2.5 py-2 transition-colors hover:border-(--color-fg)/20 hover:bg-(--color-fg)/3">
       <div
         className={`h-9 w-0.75 shrink-0 self-stretch ${priority.accentClassName}`}
       />
-
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-sm font-medium text-(--color-fg) ${
-            todo.status === "done" ? "line-through opacity-65" : ""
-          }`}
+          className={`truncate text-sm font-medium text-(--color-fg) ${todo.status === "done" ? "line-through opacity-65" : ""}`}
         >
           {todo.text}
         </p>
       </div>
-
       <button
-        onClick={handleCycleStatus}
+        onClick={(e) => {
+          e.stopPropagation();
+          onStatusChange(todo.id, NEXT_STATUS[todo.status]);
+        }}
         title={`Move to ${STATUS_CONFIG[NEXT_STATUS[todo.status]].label}`}
         aria-label={`Status: ${status.label}. Click to move to ${STATUS_CONFIG[NEXT_STATUS[todo.status]].label}`}
         className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors ${status.badgeClassName}`}
       >
         {status.label}
       </button>
-
       <div className="flex shrink-0 items-center gap-1">
         <button
           onClick={(e) => {
@@ -478,9 +397,6 @@ export const ListCard = ({
   );
 };
 
-// ============================================================================
-// LIST VIEW - CONTAINER
-// ============================================================================
 type StatusFilter = "all" | TodoStatus;
 
 const FILTER_TABS: { key: StatusFilter; label: string }[] = [
@@ -489,8 +405,6 @@ const FILTER_TABS: { key: StatusFilter; label: string }[] = [
   { key: "doing", label: "Doing" },
   { key: "done", label: "Done" },
 ];
-
-const LIST_ITEMS_PER_PAGE = 4;
 
 export const ListView = ({
   todos,
@@ -512,7 +426,6 @@ export const ListView = ({
   onStatusChange: (id: string, status: TodoStatus) => void;
 }) => {
   const [filter, setFilter] = useState<StatusFilter>("all");
-  const [page, setPage] = useState(1);
 
   const counts: Record<StatusFilter, number> = {
     all: todos.length,
@@ -524,13 +437,8 @@ export const ListView = ({
   const filtered =
     filter === "all" ? todos : todos.filter((t) => t.status === filter);
 
-  const totalPages = calculateTotalPages(filtered.length, LIST_ITEMS_PER_PAGE);
-  const currentPage = boundPage(page, totalPages);
-  const paginatedItems = paginateItems(
-    filtered,
-    currentPage,
-    LIST_ITEMS_PER_PAGE,
-  );
+  const { paginatedItems, currentPage, totalPages, setPage } =
+    usePagination(filtered);
 
   const handleFilterChange = (newFilter: StatusFilter) => {
     setFilter(newFilter);
@@ -550,7 +458,6 @@ export const ListView = ({
               tab.key === "all"
                 ? ALL_TAB_ACTIVE_CLASS
                 : STATUS_CONFIG[tab.key as TodoStatus].tabActiveClassName;
-
             return (
               <button
                 key={tab.key}
@@ -567,7 +474,6 @@ export const ListView = ({
             );
           })}
         </div>
-
         <button
           onClick={() => onAdd(addStatus)}
           className="flex shrink-0 items-center gap-1.5 rounded-xl bg-(--color-fg) px-3 py-1.5 text-[11px] font-medium text-(--color-bg) transition-opacity hover:opacity-85"
@@ -595,8 +501,7 @@ export const ListView = ({
             ))
           )}
         </div>
-
-        <div className="mt-auto ">
+        <div className="mt-auto">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
