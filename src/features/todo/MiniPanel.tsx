@@ -1,19 +1,9 @@
-import { useTodos } from "./useTodo";
-import { ListView } from "./todo-ui";
-import { TodoEditorModal } from "./TodoEditorModal";
-import { useTodoEditor } from "./useTodoEditor";
+import { useTodoEditor, useTodos } from "./useTodo";
+import { ListView } from "./MiniKanban";
+import { TodoEditorModal } from "./ToDoModal";
 
 export const TodoPanel = () => {
-  const {
-    todos,
-    todoList,
-    doingList,
-    doneList,
-    addTodo,
-    updateTodo,
-    updateTodoStatus,
-    deleteTodo,
-  } = useTodos();
+  const { todos, addTodo, updateTodo, deleteTodo } = useTodos();
 
   const {
     isModalOpen,
@@ -28,15 +18,11 @@ export const TodoPanel = () => {
     <>
       <ListView
         todos={todos}
-        todoCount={todoList.length}
-        doingCount={doingList.length}
-        doneCount={doneList.length}
         onAdd={openAddModal}
         onEdit={openEditModal}
         onDelete={deleteTodo}
-        onStatusChange={updateTodoStatus}
+        onStatusChange={(id, status) => updateTodo(id, { status })}
       />
-
       <TodoEditorModal
         key={`${editingTodo?.id ?? "new"}-${isModalOpen}`}
         isOpen={isModalOpen}

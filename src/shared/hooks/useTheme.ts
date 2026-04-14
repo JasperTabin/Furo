@@ -36,17 +36,25 @@ export const PALETTE_OPTIONS: PaletteOption[] = [
   },
 ];
 
-const applyTheme = (palette: Palette, mode: Mode) => {
+const MODE_STORAGE_KEY = "furo-mode";
+const PALETTE_STORAGE_KEY = "furo-palette";
+
+export const getStoredMode = (): Mode =>
+  (localStorage.getItem(MODE_STORAGE_KEY) as Mode) ?? "light";
+
+export const getStoredPalette = (): Palette =>
+  (localStorage.getItem(PALETTE_STORAGE_KEY) as Palette) ?? "default";
+
+export const applyTheme = (palette: Palette, mode: Mode) => {
   const root = document.documentElement;
   root.classList.remove("dark", "palette-slate", "palette-rose");
   if (mode === "dark") root.classList.add("dark");
   if (palette !== "default") root.classList.add(`palette-${palette}`);
 };
 
-const savedMode = (localStorage.getItem("furo-mode") as Mode) ?? "light";
-const savedPalette =
-  (localStorage.getItem("furo-palette") as Palette) ?? "default";
-applyTheme(savedPalette, savedMode);
+export const bootstrapTheme = () => {
+  applyTheme(getStoredPalette(), getStoredMode());
+};
 
 let listeners: Array<() => void> = [];
 const notify = () => listeners.forEach((fn) => fn());
@@ -62,18 +70,17 @@ export const useTheme = () => {
     };
   }, []);
 
-  const mode = (localStorage.getItem("furo-mode") as Mode) ?? "light";
-  const palette =
-    (localStorage.getItem("furo-palette") as Palette) ?? "default";
+  const mode = getStoredMode();
+  const palette = getStoredPalette();
 
   const setMode = (m: Mode) => {
-    localStorage.setItem("furo-mode", m);
+    localStorage.setItem(MODE_STORAGE_KEY, m);
     applyTheme(palette, m);
     notify();
   };
 
   const setPalette = (p: Palette) => {
-    localStorage.setItem("furo-palette", p);
+    localStorage.setItem(PALETTE_STORAGE_KEY, p);
     applyTheme(p, mode);
     notify();
   };

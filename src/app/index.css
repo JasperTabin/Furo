@@ -79,6 +79,78 @@ body {
   .badge-base {
     @apply text-xs px-2 py-1 rounded-full;
   }
+
+  .todo-icon-button {
+    @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-(--color-border) text-(--color-fg)/65 transition-colors hover:bg-(--color-fg)/5 hover:text-(--color-fg);
+  }
+
+  .todo-icon-button-primary {
+    @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-(--color-fg) text-(--color-bg) transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-30;
+  }
+
+  .todo-icon-button-selected {
+    @apply ring-2 ring-(--color-fg)/35 ring-offset-1 ring-offset-(--color-bg) scale-110;
+  }
+
+  .todo-badge-overdue {
+    @apply bg-red-500/20 text-red-400;
+  }
+
+  .todo-priority-accent-low {
+    @apply bg-sky-500;
+  }
+
+  .todo-priority-accent-medium {
+    @apply bg-amber-500;
+  }
+
+  .todo-priority-accent-high {
+    @apply bg-red-500;
+  }
+
+  .todo-tag-chip-default {
+    @apply border-(--color-border) bg-(--color-fg)/8 text-(--color-fg)/80;
+  }
+
+  .todo-tag-chip-blue {
+    @apply border-blue-500/30 bg-blue-500/15 text-blue-300;
+  }
+
+  .todo-tag-chip-green {
+    @apply border-emerald-500/30 bg-emerald-500/15 text-emerald-300;
+  }
+
+  .todo-tag-chip-amber {
+    @apply border-amber-500/30 bg-amber-500/15 text-amber-300;
+  }
+
+  .todo-tag-chip-red {
+    @apply border-red-500/30 bg-red-500/15 text-red-300;
+  }
+
+  .todo-tag-chip-purple {
+    @apply border-purple-500/30 bg-purple-500/15 text-purple-300;
+  }
+
+  .todo-tag-swatch-blue {
+    @apply bg-blue-500;
+  }
+
+  .todo-tag-swatch-green {
+    @apply bg-emerald-500;
+  }
+
+  .todo-tag-swatch-amber {
+    @apply bg-amber-500;
+  }
+
+  .todo-tag-swatch-red {
+    @apply bg-red-500;
+  }
+
+  .todo-tag-swatch-purple {
+    @apply bg-purple-500;
+  }
 }
 
 .scrollbar-thin {

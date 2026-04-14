@@ -5,7 +5,7 @@ import { CalendarPanel } from "../features/calendar/CalendarPanel";
 import TimerPanel from "../features/timer/TimerPanel";
 import { MusicPlayerPanel } from "../features/music-player/MusicPlayerPanel";
 import { CountdownPanel } from "../features/countdown/CountdownPanel";
-import { TodoPanel } from "../features/todo/TodoPanel";
+import { TodoPanel } from "../features/todo/MiniPanel";
 import { type DragEvent, type ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import { GripHorizontal } from "lucide-react";

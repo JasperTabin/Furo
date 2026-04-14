@@ -1,27 +1,19 @@
+import { useMemo } from "react";
 import { X } from "lucide-react";
-import { useTodos } from "./useTodo";
-import { useDrag } from "./useTodoDrag";
-import { Column } from "./todo-ui";
-import { TodoEditorModal } from "./TodoEditorModal";
-import { useTodoEditor } from "./useTodoEditor";
+import { useDrag, useTodoEditor, useTodos } from "./useTodo";
+import { Column } from "./Kanban";
+import { TodoEditorModal } from "./ToDoModal";
 
 export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
-  const {
-    todoList,
-    doingList,
-    doneList,
-    addTodo,
-    updateTodo,
-    updateTodoStatus,
-    deleteTodo,
-  } = useTodos();
+  const { todoList, doingList, doneList, addTodo, updateTodo, deleteTodo } =
+    useTodos();
 
   const {
     dragOverColumn,
     handleDragStart,
     handleDragEnd,
     createColumnHandlers,
-  } = useDrag(updateTodoStatus);
+  } = useDrag((id, status) => updateTodo(id, { status }));
 
   const {
     isModalOpen,
@@ -32,30 +24,18 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
     handleSave,
   } = useTodoEditor({ addTodo, updateTodo });
 
-  const columns = [
-    {
-      key: "todo" as const,
-      title: "To Do",
-      totalCount: todoList.length,
-      items: todoList,
-    },
-    {
-      key: "doing" as const,
-      title: "Doing",
-      totalCount: doingList.length,
-      items: doingList,
-    },
-    {
-      key: "done" as const,
-      title: "Done",
-      totalCount: doneList.length,
-      items: doneList,
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      { key: "todo" as const, title: "To Do", items: todoList },
+      { key: "doing" as const, title: "Doing", items: doingList },
+      { key: "done" as const, title: "Done", items: doneList },
+    ],
+    [todoList, doingList, doneList],
+  );
 
   return (
     <>
-      <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 ">
+      <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
         <div className="mb-4 flex shrink-0 items-center justify-between gap-3 px-4 sm:px-4">
           <h2 className="text-base font-semibold tracking-[0.02em]">Kanban</h2>
           <button
@@ -69,20 +49,20 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <div className="flex gap-4 flex-1 min-h-0 overflow-x-auto snap-x snap-mandatory [-webkit-overflow-scrolling:touch] px-4 sm:px-0 scroll-pl-4 items-stretch">
-          {columns.map((column) => (
+          {columns.map((col) => (
             <Column
-              key={column.key}
-              title={column.title}
-              totalCount={column.totalCount}
-              todos={column.items}
-              isDragOver={dragOverColumn === column.key}
-              onAdd={() => openAddModal(column.key)}
+              key={col.key}
+              title={col.title}
+              totalCount={col.items.length}
+              todos={col.items}
+              isDragOver={dragOverColumn === col.key}
+              onAdd={() => openAddModal(col.key)}
               onEdit={openEditModal}
               onDelete={deleteTodo}
-              onStatusChange={updateTodoStatus}
+              onStatusChange={(id, status) => updateTodo(id, { status })}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
-              {...createColumnHandlers(column.key)}
+              {...createColumnHandlers(col.key)}
             />
           ))}
         </div>

@@ -3,7 +3,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Pencil,
+  Edit2,
   StickyNote,
   Trash2,
   X,
@@ -22,6 +22,7 @@ import {
   getDateKey,
   getMonthGrid,
   getMonthLabel,
+  buildTimeValue,
   getTimeParts,
   formatPanelDate,
   formatEventTime,
@@ -186,7 +187,10 @@ const EventModal = ({
             </p>
           </div>
 
-          <form onSubmit={onSubmit} className="shrink-0 space-y-3 px-4 pb-3 pt-3 sm:px-5">
+          <form
+            onSubmit={onSubmit}
+            className="shrink-0 space-y-3 px-4 pb-3 pt-3 sm:px-5"
+          >
             <Input
               id="title"
               value={formData.title}
@@ -294,7 +298,7 @@ const EventModal = ({
                     {paginatedEvents.map((event) => (
                       <div
                         key={event.id}
-                        className="rounded-xl border border-(--color-border) bg-(--color-bg) px-3 py-2.5"
+                        className="group/event-card rounded-xl border border-(--color-border) bg-(--color-bg) px-3 py-2.5"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div
@@ -314,7 +318,7 @@ const EventModal = ({
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 opacity-0 pointer-events-none transition-opacity group-hover/event-card:opacity-100 group-hover/event-card:pointer-events-auto group-focus-within/event-card:opacity-100 group-focus-within/event-card:pointer-events-auto">
                             <Button
                               variant="outline"
                               size="icon"
@@ -322,10 +326,10 @@ const EventModal = ({
                                 e.stopPropagation();
                                 onEdit(event);
                               }}
-                              className="h-7 w-7 rounded-lg border-(--color-border) bg-transparent text-(--color-fg)/65 hover:bg-blue-500/14 hover:text-blue-300"
+                              className="h-7 w-7 rounded-lg border-transparent p-1.5 text-(--color-fg)/55 shadow-none transition-colors hover:bg-(--color-fg)/8 hover:text-(--color-fg)"
                               aria-label="Edit event"
                             >
-                              <Pencil size={13} />
+                              <Edit2 size={13} />
                             </Button>
                             <Button
                               variant="outline"
@@ -334,7 +338,7 @@ const EventModal = ({
                                 e.stopPropagation();
                                 onDelete(event.id);
                               }}
-                              className="h-7 w-7 rounded-lg border-(--color-border) bg-transparent text-(--color-fg)/65 hover:bg-red-500/14 hover:text-red-300"
+                              className="h-7 w-7 rounded-lg border-transparent p-1.5 text-(--color-fg)/55 shadow-none transition-colors hover:bg-(--color-fg)/8 hover:text-(--color-fg)"
                               aria-label="Delete event"
                             >
                               <Trash2 size={13} />
@@ -432,11 +436,15 @@ export const CalendarPanel = () => {
     field: "hour" | "minute" | "period",
     value: string,
   ) => {
-    const newTime = `${field === "hour" ? value : timeParts.hour}:${field === "minute" ? value : timeParts.minute} ${field === "period" ? value : timeParts.period}`;
+    const newTime = buildTimeValue(
+      field === "hour" ? value : timeParts.hour,
+      field === "minute" ? value : timeParts.minute,
+      (field === "period" ? value : timeParts.period) as "AM" | "PM",
+    );
     handleFormChange("time", newTime);
   };
 
-  const handleEditEvent = (event: CalendarEvent) => {
+  const openEditEvent = (event: CalendarEvent) => {
     setEditingEventId(event.id);
     setFormData({
       title: event.title,
@@ -445,7 +453,7 @@ export const CalendarPanel = () => {
     });
   };
 
-  const handleDeleteEvent = (id: string) => {
+  const deleteExistingEvent = (id: string) => {
     const EVENTS_PER_PAGE = 2;
     if (editingEventId === id) resetFormState();
     deleteEvent(id);
@@ -455,6 +463,14 @@ export const CalendarPanel = () => {
     if (eventsPage >= newTotalPages && eventsPage > 0) {
       setEventsPage(eventsPage - 1);
     }
+  };
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    openEditEvent(event);
+  };
+
+  const handleDeleteEvent = (id: string) => {
+    deleteExistingEvent(id);
   };
 
   const handleSaveEvent = (event: FormEvent<HTMLFormElement>) => {

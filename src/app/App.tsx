@@ -6,9 +6,9 @@ const Landing = lazy(() =>
   import("../features/landing/Landing").then((m) => ({ default: m.Landing })),
 );
 
-const KanbanPage = lazy(() =>
-  import("../features/todo/KanbanPage").then((m) => ({
-    default: m.KanbanPage,
+const KanbanPanel = lazy(() =>
+  import("../features/todo/KanbanPanel").then((m) => ({
+    default: m.KanbanPanel,
   })),
 );
 
@@ -46,7 +46,11 @@ function App() {
         </Suspense>
       ) : showKanbanPage ? (
         <Suspense fallback={null}>
-          <KanbanPage onBack={() => setShowKanbanPage(false)} />
+          <div className="h-dvh overflow-hidden bg-(--color-bg) text-(--color-fg)">
+            <div className="relative flex h-full w-full flex-col overflow-y-hidden px-4 pt-4 pb-4">
+              <KanbanPanel onClose={() => setShowKanbanPage(false)} />
+            </div>
+          </div>
         </Suspense>
       ) : (
         <Suspense fallback={null}>
