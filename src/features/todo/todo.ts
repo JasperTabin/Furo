@@ -29,6 +29,9 @@ export interface Todo {
   dueDate?: number;
   tags?: TodoTag[];
   notes?: string;
+  pomodoroCompleted?: number;
+  totalFocusMinutes?: number;
+  lastFocusedAt?: number;
   createdAt: number;
 }
 
@@ -124,6 +127,11 @@ const isTodo = (v: unknown): v is Todo => {
     (t.description === undefined || typeof t.description === "string") &&
     (t.dueDate === undefined || typeof t.dueDate === "number") &&
     (t.notes === undefined || typeof t.notes === "string") &&
+    (t.pomodoroCompleted === undefined ||
+      typeof t.pomodoroCompleted === "number") &&
+    (t.totalFocusMinutes === undefined ||
+      typeof t.totalFocusMinutes === "number") &&
+    (t.lastFocusedAt === undefined || typeof t.lastFocusedAt === "number") &&
     (t.tags === undefined ||
       (Array.isArray(t.tags) && t.tags.every(isValidTag)))
   );
@@ -146,4 +154,56 @@ export const todoStorage = {
       if (import.meta.env.DEV) console.error("Failed to save todos:", e);
     }
   },
+};
+
+type TodoListener = () => void;
+
+let todosCache: Todo[] | null = null;
+const todoListeners = new Set<TodoListener>();
+
+const emitTodoChange = () => {
+  todoListeners.forEach((listener) => listener());
+};
+
+const readTodos = () => {
+  if (todosCache) return todosCache;
+  todosCache = todoStorage.load();
+  return todosCache;
+};
+
+const writeTodos = (next: Todo[]) => {
+  todosCache = next;
+  todoStorage.save(next);
+  emitTodoChange();
+};
+
+export const todoStore = {
+  getSnapshot: (): Todo[] => readTodos(),
+  subscribe: (listener: TodoListener) => {
+    todoListeners.add(listener);
+    return () => todoListeners.delete(listener);
+  },
+  add: (todo: Todo) => {
+    writeTodos([todo, ...readTodos()]);
+  },
+  update: (
+    id: string,
+    patch: Partial<Omit<Todo, "id" | "createdAt">>,
+  ): Todo | undefined => {
+    let updatedTodo: Todo | undefined;
+
+    writeTodos(
+      readTodos().map((todo) => {
+        if (todo.id !== id) return todo;
+        updatedTodo = { ...todo, ...patch };
+        return updatedTodo;
+      }),
+    );
+
+    return updatedTodo;
+  },
+  delete: (id: string) => {
+    writeTodos(readTodos().filter((todo) => todo.id !== id));
+  },
+  getById: (id: string) => readTodos().find((todo) => todo.id === id),
 };

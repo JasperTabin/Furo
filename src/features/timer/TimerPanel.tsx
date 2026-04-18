@@ -1,71 +1,34 @@
-import { useRef, useState, useSyncExternalStore } from "react";
+// UI
+
 import { createPortal } from "react-dom";
 import {
-  Check,
+  Info,
   Maximize,
   Minimize,
   Pause,
   Play,
-  Square,
   Settings,
+  Square,
   X,
-  Minus,
-  Plus,
-  Info,
 } from "lucide-react";
-import { useTimer } from "./useTimer";
-import { useFullscreen } from "../../shared/hooks/useFullscreen";
-import { useMiniPlayer } from "./useMiniPlayer";
-import { MiniPlayerWindow } from "./MiniPlayer";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { useSettings } from "./useSettings";
-
+import { useTimerPanel } from "./useTimerPanel";
+import { formatTime, type TimerMode, type TimerStatus } from "./timer";
 import {
-  formatTime,
-  DURATION_FIELDS,
-  type TimerMode,
-  type TimerStatus,
-} from "./timer";
+  FocusTaskPickerModal,
+  SettingsModal,
+  TaskCompletionModal,
+} from "./TimerModals";
 
 // ============================================================================
-// INLINE HOOK
-// ============================================================================
-const subscribeToViewport = (onStoreChange: () => void) => {
-  window.addEventListener("resize", onStoreChange);
-  window.addEventListener("fullscreenchange", onStoreChange);
-
-  return () => {
-    window.removeEventListener("resize", onStoreChange);
-    window.removeEventListener("fullscreenchange", onStoreChange);
-  };
-};
-
-const getViewportSnapshot = () =>
-  Math.min(window.innerWidth, window.innerHeight);
-const getServerSnapshot = () => 0;
-
-const useFullscreenTimerSize = (isFullscreen: boolean) => {
-  const viewport = useSyncExternalStore(
-    subscribeToViewport,
-    getViewportSnapshot,
-    getServerSnapshot,
-  );
-
-  if (!isFullscreen) return undefined;
-
-  return Math.max(96, Math.min(viewport * 0.34, 480));
-};
-
-// ============================================================================
-// SUB-COMPONENTS
+// Modes
 // ============================================================================
 const ModeSwitcher = ({
   onSwitchMode,
@@ -73,23 +36,24 @@ const ModeSwitcher = ({
 }: {
   onSwitchMode: (mode: TimerMode) => void;
   currentMode: TimerMode;
-}) => {
-  return (
-    <Tabs
-      value={currentMode}
-      onValueChange={(v: string) => onSwitchMode(v as TimerMode)}
-      className="w-full"
-    >
-      <TabsList className="w-full">
-        <TabsTrigger value="focus">Pomodoro</TabsTrigger>
-        <TabsTrigger value="shortbreak">Short Break</TabsTrigger>
-        <TabsTrigger value="longBreak">Long Break</TabsTrigger>
-      </TabsList>
-    </Tabs>
-  );
-};
+}) => (
+  <Tabs
+    value={currentMode}
+    onValueChange={(v: string) => onSwitchMode(v as TimerMode)}
+    className="w-full"
+  >
+    <TabsList className="w-full">
+      <TabsTrigger value="focus">Pomodoro</TabsTrigger>
+      <TabsTrigger value="shortbreak">Short Break</TabsTrigger>
+      <TabsTrigger value="longBreak">Long Break</TabsTrigger>
+    </TabsList>
+  </Tabs>
+);
 
-const Timer = ({
+// ============================================================================
+// Timer display
+// ============================================================================
+const TimerDisplay = ({
   timeLeft,
   isFullscreen,
   fontSize,
@@ -117,6 +81,9 @@ const Timer = ({
   );
 };
 
+// ============================================================================
+// Timer Controls
+// ============================================================================
 const TimerControls = ({
   status,
   onStart,
@@ -240,218 +207,284 @@ const TimerControls = ({
   );
 };
 
-const SettingsPanel = ({
-  getValue,
-  onStep,
-  onClose,
-  onReset,
-  onSave,
-  hasChanges,
+// ============================================================================
+// Classic or Reverse
+// ============================================================================
+const TimerModeCard = ({
+  isReversed,
+  onToggle,
 }: {
-  getValue: (field: "work" | "break" | "long" | "sessions") => number;
-  onStep: (
-    field: "work" | "break" | "long" | "sessions",
-    direction: "inc" | "dec",
-  ) => void;
-  onClose: () => void;
-  onReset: () => void;
-  onSave: () => void;
-  hasChanges: boolean;
-}) => {
-  return (
-    <div className="flex flex-col">
-      <div className="space-y-3 px-4 pb-4 pt-4 sm:px-5">
-        {[
-          DURATION_FIELDS.filter((f) => f.field !== "sessions"),
-          DURATION_FIELDS.filter((f) => f.field === "sessions"),
-        ].map((section) => (
-          <div key={section[0]?.field ?? "section"} className="space-y-2">
-            <div className="space-y-2">
-              {section.map(({ field, label }) => {
-                const value = getValue(field);
-                return (
-                  <div
-                    key={field}
-                    className="flex items-center justify-between rounded-xl border border-(--color-border) bg-(--color-bg) px-3 py-2.5"
-                  >
-                    <span className="pr-3 text-sm font-medium text-(--color-fg)/82">
-                      {label}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        onClick={() => onStep(field, "dec")}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-xl border-(--color-border) bg-transparent text-(--color-fg)/65 hover:bg-(--color-fg)/5 hover:text-(--color-fg)"
-                        aria-label={`Decrease ${label}`}
-                      >
-                        <Minus size={14} />
-                      </Button>
-                      <div className="min-w-[48px] text-center text-base font-semibold text-(--color-fg)">
-                        {value}
-                      </div>
-                      <Button
-                        onClick={() => onStep(field, "inc")}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-xl border-(--color-border) bg-transparent text-(--color-fg)/65 hover:bg-(--color-fg)/5 hover:text-(--color-fg)"
-                        aria-label={`Increase ${label}`}
-                      >
-                        <Plus size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+  isReversed: boolean;
+  onToggle: (checked: boolean) => void;
+}) => (
+  <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-(--color-border)/55 w-full">
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-(--color-fg)/70">
+        {isReversed ? "Reverse" : "Classic"}
+      </span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="cursor-help">
+            <Info size={14} className="text-(--color-fg)/40" />
           </div>
-        ))}
-      </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
+        >
+          {isReversed
+            ? "Work as long as you want with a stopwatch."
+            : "Pomodoro timer with automatic breaks and long break intervals."}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+    <Switch
+      checked={isReversed}
+      onCheckedChange={onToggle}
+      aria-label="Toggle timer mode"
+    />
+  </div>
+);
 
-      <div className=" px-4 py-3 sm:px-5">
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={onReset}
-            variant="outline"
-            className="h-8 flex-1 rounded-xl border-(--color-border) bg-transparent text-(--color-fg)/65 hover:bg-(--color-fg)/5 hover:text-(--color-fg)"
+// ============================================================================
+// Mini player toggle
+// ============================================================================
+const MiniPlayerCard = ({
+  isOpen,
+  onToggle,
+}: {
+  isOpen: boolean;
+  onToggle: (checked: boolean) => void;
+}) => (
+  <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-(--color-border)/55 w-full">
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-(--color-fg)/70">
+        Mini Player
+      </span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="cursor-help">
+            <Info size={14} className="text-(--color-fg)/40" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
+        >
+          Mini timer window that follows you around.
+        </TooltipContent>
+      </Tooltip>
+    </div>
+    <Switch
+      checked={isOpen}
+      onCheckedChange={onToggle}
+      aria-label="Toggle mini player"
+    />
+  </div>
+);
+
+// ============================================================================
+// Auto continue toggle
+// ============================================================================
+const AutoContinueCard = ({
+  isEnabled,
+  onToggle,
+}: {
+  isEnabled: boolean;
+  onToggle: (checked: boolean) => void;
+}) => (
+  <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-(--color-border)/55 w-full">
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-(--color-fg)/70">
+        Auto Start
+      </span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="cursor-help">
+            <Info size={14} className="text-(--color-fg)/40" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
+        >
+          Automatically starts the next work session after a break ends.
+        </TooltipContent>
+      </Tooltip>
+    </div>
+    <Switch
+      checked={isEnabled}
+      onCheckedChange={onToggle}
+      aria-label="Toggle auto continue"
+    />
+  </div>
+);
+
+// ============================================================================
+// Task Card
+// ============================================================================
+const FocusTaskCard = ({
+  taskTitle,
+  onClear,
+}: {
+  taskTitle?: string;
+  onClear: () => void;
+}) => {
+  const hasTask = Boolean(taskTitle);
+
+  return (
+    <div className="group/focus-task w-full rounded-xl border border-(--color-border)/55 px-3 py-3">
+      <div className="relative flex items-center justify-center">
+        <p
+          className={`truncate px-8 text-center text-sm font-medium text-(--color-fg) ${
+            hasTask ? "" : "opacity-55"
+          }`}
+        >
+          {hasTask ? taskTitle : "Choose a task to focus on"}
+        </p>
+
+        {hasTask && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="absolute right-0 rounded-lg p-1.5 text-(--color-fg)/55 opacity-0 transition-colors hover:bg-(--color-fg)/8 hover:text-(--color-fg) group-hover/focus-task:opacity-100 group-focus-within/focus-task:opacity-100"
+            aria-label="Clear active task"
+            title="Clear active task"
           >
-            Reset
-          </Button>
-          <Button
-            onClick={onSave}
-            disabled={!hasChanges}
-            variant="default"
-            className="h-8 w-8 rounded-xl bg-white p-0 text-black hover:bg-white/90"
-            aria-label="Save settings"
-          >
-            <Check size={16} />
-          </Button>
-          <Button
-            onClick={onClose}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-xl border-(--color-border) bg-transparent text-(--color-fg)/65 hover:bg-(--color-fg)/5 hover:text-(--color-fg)"
-            aria-label="Close settings"
-          >
-            <X size={16} />
-          </Button>
-        </div>
+            <X size={14} />
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
-const SettingsModal = ({
-  isOpen,
-  onClose,
-  onSave,
-  getValue,
-  handleStep,
-  hasChanges,
-  resetToDefaults,
-  saveCurrentSettings,
+// ============================================================================
+// Mini player window
+// ============================================================================
+const MiniPlayerWindow = ({
+  status,
+  timeLeft,
+  onStart,
+  onPause,
+  onStop,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: () => void;
-  getValue: (field: "work" | "break" | "long" | "sessions") => number;
-  handleStep: (
-    field: "work" | "break" | "long" | "sessions",
-    direction: "inc" | "dec",
-  ) => void;
-  hasChanges: boolean;
-  resetToDefaults: () => void;
-  saveCurrentSettings: () => unknown;
+  status: TimerStatus;
+  timeLeft: number;
+  onStart: () => void;
+  onPause: () => void;
+  onStop: () => void;
 }) => {
-  const handleSave = () => {
-    saveCurrentSettings();
-    onSave();
-    onClose();
-  };
+  const isIdle = status === "idle";
+  const isRunning = status === "running";
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-      <DialogContent
-        className="max-h-[90dvh] overflow-y-auto border-(--color-border) bg-(--color-bg) p-0 text-(--color-fg) shadow-[0_28px_120px_rgba(0,0,0,0.35)] sm:max-w-sm sm:rounded-2xl"
-        aria-describedby={undefined}
-      >
-        <DialogTitle className="sr-only">Settings</DialogTitle>
-        <SettingsPanel
-          getValue={getValue}
-          onStep={handleStep}
-          onClose={onClose}
-          onReset={resetToDefaults}
-          onSave={handleSave}
-          hasChanges={hasChanges}
-        />
-      </DialogContent>
-    </Dialog>
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4 p-4 bg-(--color-bg) text-(--color-fg) overflow-hidden select-none">
+      <div className="text-5xl font-bold tracking-tight leading-none">
+        {formatTime(timeLeft)}
+      </div>
+
+      <div className="flex items-center justify-center gap-2">
+        {isIdle ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={onStart}
+                variant="default"
+                size="icon"
+                className="h-10 w-10 rounded-full"
+                aria-label="Start timer"
+              >
+                <Play size={16} fill="currentColor" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Start</TooltipContent>
+          </Tooltip>
+        ) : (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={isRunning ? onPause : onStart}
+                  variant={isRunning ? "default" : "outline"}
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
+                  aria-label={isRunning ? "Pause timer" : "Resume timer"}
+                >
+                  {isRunning ? (
+                    <Pause size={16} fill="currentColor" />
+                  ) : (
+                    <Play size={16} fill="currentColor" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{isRunning ? "Pause" : "Resume"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onStop}
+                  variant="destructive"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
+                  aria-label="Stop timer"
+                >
+                  <Square size={16} fill="currentColor" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Stop</TooltipContent>
+            </Tooltip>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
 // ============================================================================
-// MAIN COMPONENT
+// Timer Panel
 // ============================================================================
 export const TimerPanel = () => {
-  const fullscreenRef = useRef<HTMLDivElement | null>(null);
-  const { isFullscreen, toggleFullscreen } = useFullscreen(fullscreenRef);
-  const fullscreenFontSize = useFullscreenTimerSize(isFullscreen);
   const {
-    openMiniPlayer,
-    closeMiniPlayer,
+    fullscreenRef,
+    fullscreenFontSize,
     popupContainer,
     isOpen,
     isSupported,
-  } = useMiniPlayer();
-
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isReversed, setIsReversed] = useState(false);
-
-  const {
-    settings,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    isTaskPickerOpen,
+    setIsTaskPickerOpen,
+    isCompletionPromptOpen,
+    autoContinue,
+    setAutoContinue,
     getValue,
     handleStep,
     hasChanges,
     resetToDefaults,
     saveCurrentSettings,
-  } = useSettings();
-
-  const {
     mode,
     status,
     timeLeft,
-    sessionsCompleted,
     start,
     pause,
     reset,
     switchMode,
-  } = useTimer(settings);
-
-  const setReverseMode = (nextReversed: boolean) => {
-    setIsReversed(nextReversed);
-    switchMode(nextReversed ? "infinite" : "focus");
-  };
-
-  const handleMiniPlayerToggle = (checked: boolean) => {
-    if (checked) {
-      openMiniPlayer();
-    } else {
-      closeMiniPlayer();
-    }
-  };
-
-  const handleSettingsSave = () => {
-    if (status === "idle") {
-      reset();
-    }
-  };
-
-  const handleToggleFullscreen = () => {
-    if (!isFullscreen) {
-      setIsSettingsOpen(false);
-    }
-    toggleFullscreen();
-  };
+    isReversed,
+    setReverseMode,
+    handleMiniPlayerToggle,
+    handleSettingsSave,
+    handleToggleFullscreen,
+    handleStart,
+    handleClearFocusTask,
+    handleKeepTaskInDoing,
+    handleMarkTaskComplete,
+    handleTaskSelection,
+    handleStartWithoutTask,
+    activeTodo,
+    selectableTasks,
+    isFullscreen,
+  } = useTimerPanel();
 
   if (isFullscreen) {
     return (
@@ -459,46 +492,14 @@ export const TimerPanel = () => {
         ref={fullscreenRef}
         className="flex h-full w-full flex-col items-center justify-center gap-6 bg-(--color-bg) px-4 py-6 text-(--color-fg) sm:gap-6 sm:px-6"
       >
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-sm font-medium tracking-widest text-(--color-fg)/60 uppercase">
-            {mode === "focus"
-              ? "Focus"
-              : mode === "shortbreak"
-                ? "Short Break"
-                : mode === "longBreak"
-                  ? "Long Break"
-                  : "Infinite"}
-          </div>
-          <Timer
-            timeLeft={timeLeft}
-            isFullscreen
-            fontSize={fullscreenFontSize}
-          />
-          {!isReversed && mode !== "infinite" && (
-            <div className="flex justify-center gap-2">
-              {Array.from({ length: settings.sessionsUntilLongBreak }).map(
-                (_, i) => (
-                  <div
-                    key={i}
-                    className="h-3 w-3 rounded-full transition-colors duration-300"
-                    style={{
-                      backgroundColor:
-                        i <
-                        settings.sessionsUntilLongBreak -
-                          (sessionsCompleted % settings.sessionsUntilLongBreak)
-                          ? "var(--color-fg)"
-                          : "transparent",
-                      border: "2px solid var(--color-fg)",
-                    }}
-                  />
-                ),
-              )}
-            </div>
-          )}
-        </div>
+        <TimerDisplay
+          timeLeft={timeLeft}
+          isFullscreen
+          fontSize={fullscreenFontSize}
+        />
         <TimerControls
           status={status}
-          onStart={start}
+          onStart={handleStart}
           onPause={pause}
           onReset={reset}
           onSettingsClick={() => setIsSettingsOpen(true)}
@@ -517,60 +518,17 @@ export const TimerPanel = () => {
         className="flex w-full min-w-0 flex-col gap-10 px-4 py-4 sm:px-5 sm:py-5"
       >
         <div className="flex flex-col gap-2 items-center w-full max-w-md mx-auto">
-          <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-(--color-border)/55 w-full">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-(--color-fg)/70">
-                {isReversed ? "Reverse" : "Classic"}
-              </span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="cursor-help">
-                    <Info size={14} className="text-(--color-fg)/40" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
-                >
-                  {isReversed
-                    ? "Work as long as you want with a stopwatch."
-                    : "Pomodoro technique with timed focus sessions."}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <Switch
-              checked={isReversed}
-              onCheckedChange={setReverseMode}
-              aria-label="Toggle timer mode"
-            />
-          </div>
+          <TimerModeCard isReversed={isReversed} onToggle={setReverseMode} />
 
           {isSupported && (
-            <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-(--color-border)/55 w-full">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-(--color-fg)/70">
-                  Mini Player
-                </span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="cursor-help">
-                      <Info size={14} className="text-(--color-fg)/40" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="max-w-xs bg-(--color-bg) border border-(--color-border) text-gray-100"
-                  >
-                    Mini timer window that follows you around.
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <Switch
-                checked={isOpen}
-                onCheckedChange={handleMiniPlayerToggle}
-                aria-label="Toggle mini player"
-              />
-            </div>
+            <MiniPlayerCard isOpen={isOpen} onToggle={handleMiniPlayerToggle} />
+          )}
+
+          {!isReversed && (
+            <AutoContinueCard
+              isEnabled={autoContinue}
+              onToggle={setAutoContinue}
+            />
           )}
 
           {!isReversed ? (
@@ -578,46 +536,23 @@ export const TimerPanel = () => {
           ) : (
             <div className="h-9" />
           )}
+
+          {!isReversed && (
+            <FocusTaskCard
+              taskTitle={activeTodo?.text}
+              onClear={handleClearFocusTask}
+            />
+          )}
         </div>
 
         <div className="flex flex-col items-center gap-4">
-          <div className="text-sm font-medium tracking-widest text-(--color-fg)/60 uppercase">
-            {mode === "focus"
-              ? "Focus"
-              : mode === "shortbreak"
-                ? "Short Break"
-                : mode === "longBreak"
-                  ? "Long Break"
-                  : "Infinite"}
-          </div>
-          <Timer timeLeft={timeLeft} isFullscreen={false} />
-          {!isReversed && (
-            <div className="flex justify-center gap-2">
-              {Array.from({ length: settings.sessionsUntilLongBreak }).map(
-                (_, i) => (
-                  <div
-                    key={i}
-                    className="h-3 w-3 rounded-full transition-colors duration-300"
-                    style={{
-                      backgroundColor:
-                        i <
-                        settings.sessionsUntilLongBreak -
-                          (sessionsCompleted % settings.sessionsUntilLongBreak)
-                          ? "var(--color-fg)"
-                          : "transparent",
-                      border: "2px solid var(--color-fg)",
-                    }}
-                  />
-                ),
-              )}
-            </div>
-          )}
+          <TimerDisplay timeLeft={timeLeft} isFullscreen={false} />
         </div>
 
         <div className="flex justify-center">
           <TimerControls
             status={status}
-            onStart={start}
+            onStart={handleStart}
             onPause={pause}
             onReset={reset}
             onSettingsClick={() => setIsSettingsOpen(true)}
@@ -639,6 +574,24 @@ export const TimerPanel = () => {
         saveCurrentSettings={saveCurrentSettings}
       />
 
+      <FocusTaskPickerModal
+        isOpen={isTaskPickerOpen}
+        tasks={selectableTasks.map((task) => ({
+          id: task.id,
+          text: task.text,
+          status: task.status,
+        }))}
+        onSelectTask={handleTaskSelection}
+        onStartWithoutTask={handleStartWithoutTask}
+        onClose={() => setIsTaskPickerOpen(false)}
+      />
+
+      <TaskCompletionModal
+        isOpen={isCompletionPromptOpen}
+        onComplete={handleMarkTaskComplete}
+        onKeepDoing={handleKeepTaskInDoing}
+      />
+
       {popupContainer &&
         createPortal(
           <MiniPlayerWindow
@@ -647,10 +600,6 @@ export const TimerPanel = () => {
             onStart={start}
             onPause={pause}
             onStop={reset}
-            mode={mode}
-            sessionsCompleted={sessionsCompleted}
-            sessionsUntilLongBreak={settings.sessionsUntilLongBreak}
-            isReversed={isReversed}
           />,
           popupContainer,
         )}

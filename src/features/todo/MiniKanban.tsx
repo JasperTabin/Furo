@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Edit2, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit2, Play, Plus, Trash2 } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import type { Todo, TodoStatus } from "./todo";
 import { getPriorityAccentClass } from "./todo";
@@ -52,36 +52,61 @@ const BADGE_CLASS =
 
 export const ListCard = ({
   todo,
+  activeFocusTaskId,
   onEdit,
   onDelete,
   onStatusChange,
+  onStartFocus,
 }: {
   todo: Todo;
+  activeFocusTaskId: string | null;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TodoStatus) => void;
+  onStartFocus: (todo: Todo) => void;
 }) => {
   const isDone = todo.status === "done";
+  const isActive = todo.id === activeFocusTaskId;
+  const canFocus = todo.status !== "done";
+  const focusLabel = todo.status === "doing" ? "Resume Focus" : "Start Focus";
 
   return (
     <div
       className={`group/list-card flex items-center gap-2.5 rounded-xl border px-2.5 py-2 transition-colors ${
         isDone
           ? "border-(--color-border)/30 bg-transparent opacity-70 hover:border-(--color-border)/45"
-          : "border-(--color-border)/60 hover:border-(--color-fg)/20 hover:bg-(--color-fg)/3"
+          : isActive
+            ? "border-(--color-fg)/30 bg-(--color-fg)/6"
+            : "border-(--color-border)/60 hover:border-(--color-fg)/20 hover:bg-(--color-fg)/3"
       }`}
     >
       <div
         className={`h-9 w-0.75 shrink-0 self-stretch ${getPriorityAccentClass(todo.priority)}`}
       />
 
-      <p
-        className={`min-w-0 flex-1 truncate text-sm font-medium text-(--color-fg) ${isDone ? "line-through opacity-75" : ""}`}
-      >
-        {todo.text}
-      </p>
+      <div className="min-w-0 flex-1">
+        <p
+          className={`truncate text-sm font-medium text-(--color-fg) ${isDone ? "line-through opacity-75" : ""}`}
+        >
+          {todo.text}
+        </p>
+      </div>
 
       <div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity group-hover/list-card:opacity-100 group-hover/list-card:pointer-events-auto group-focus-within/list-card:opacity-100 group-focus-within/list-card:pointer-events-auto">
+        {canFocus && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStartFocus(todo);
+            }}
+            className="rounded-lg p-1.5 text-(--color-fg)/55 transition-colors hover:bg-(--color-fg)/8 hover:text-(--color-fg)"
+            aria-label={focusLabel}
+            title={focusLabel}
+          >
+            <Play size={13} fill="currentColor" />
+          </button>
+        )}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -140,16 +165,20 @@ const TAB_ACTIVE_CLASS =
 
 export const ListView = ({
   todos,
+  activeFocusTaskId,
   onAdd,
   onEdit,
   onDelete,
   onStatusChange,
+  onStartFocus,
 }: {
   todos: Todo[];
+  activeFocusTaskId: string | null;
   onAdd: (status: TodoStatus) => void;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TodoStatus) => void;
+  onStartFocus: (todo: Todo) => void;
 }) => {
   const {
     filter,
@@ -200,9 +229,11 @@ export const ListView = ({
               <ListCard
                 key={todo.id}
                 todo={todo}
+                activeFocusTaskId={activeFocusTaskId}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onStatusChange={onStatusChange}
+                onStartFocus={onStartFocus}
               />
             ))
           )}

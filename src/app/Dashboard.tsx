@@ -6,7 +6,12 @@ import TimerPanel from "../features/timer/TimerPanel";
 import { MusicPlayerPanel } from "../features/music-player/MusicPlayerPanel";
 import { CountdownPanel } from "../features/countdown/CountdownPanel";
 import { TodoPanel } from "../features/todo/MiniPanel";
-import { type DragEvent, type ReactNode, useState } from "react";
+import {
+  type DragEvent,
+  type ReactNode,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { cn } from "@/lib/utils";
 import { GripHorizontal } from "lucide-react";
 
@@ -15,9 +20,30 @@ interface DashboardProps {
   onReorderPanels: (from: AppView, to: AppView) => void;
 }
 
+const MOBILE_BREAKPOINT_QUERY = "(min-width: 640px)";
+
+const subscribeToDesktopLayout = (onStoreChange: () => void) => {
+  const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+  mediaQuery.addEventListener("change", onStoreChange);
+
+  return () => {
+    mediaQuery.removeEventListener("change", onStoreChange);
+  };
+};
+
+const getDesktopLayoutSnapshot = () =>
+  window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
+
+const getServerDesktopLayoutSnapshot = () => false;
+
 export function Dashboard({ panelOrder, onReorderPanels }: DashboardProps) {
   const [draggedPanel, setDraggedPanel] = useState<AppView | null>(null);
   const [dragOverPanel, setDragOverPanel] = useState<AppView | null>(null);
+  const isDesktopLayout = useSyncExternalStore(
+    subscribeToDesktopLayout,
+    getDesktopLayoutSnapshot,
+    getServerDesktopLayoutSnapshot,
+  );
   const isAppView = (value: string): value is AppView =>
     ["timer", "todo", "calendar", "music", "countdown", "kanban"].includes(
       value,
@@ -37,16 +63,25 @@ export function Dashboard({ panelOrder, onReorderPanels }: DashboardProps) {
       return panelConfig ? { key, ...panelConfig } : null;
     })
     .filter((item): item is { key: AppView; content: ReactNode } => !!item);
-  const desktopColumns = panelItems.reduce(
-    (columns, panel, index) => {
-      const isLastOddItem =
-        panelItems.length % 2 === 1 && index === panelItems.length - 1;
-      const targetColumn = isLastOddItem ? 1 : index % 2;
-      columns[targetColumn].push(panel);
-      return columns;
-    },
-    [[], []] as Array<Array<{ key: AppView; content: ReactNode }>>,
-  );
+  const orderedPanelItems = [
+    ...panelItems.filter((panel) => panel.key === "timer"),
+    ...panelItems.filter((panel) => panel.key === "todo"),
+    ...panelItems.filter((panel) => panel.key === "calendar"),
+    ...panelItems.filter((panel) => panel.key === "music"),
+    ...panelItems.filter((panel) => panel.key === "countdown"),
+  ];
+
+  const desktopColumns = [
+    orderedPanelItems.filter(
+      (panel) => panel.key === "timer" || panel.key === "todo",
+    ),
+    orderedPanelItems.filter(
+      (panel) =>
+        panel.key === "calendar" ||
+        panel.key === "music" ||
+        panel.key === "countdown",
+    ),
+  ] as Array<Array<{ key: AppView; content: ReactNode }>>;
 
   const handleDragStart = (
     event: DragEvent<HTMLDivElement>,
@@ -139,15 +174,20 @@ export function Dashboard({ panelOrder, onReorderPanels }: DashboardProps) {
 
   return (
     <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-      <div className="hidden flex-col gap-4 sm:flex">
-        {desktopColumns[0].map(renderPanelCard)}
-      </div>
-      <div className="hidden flex-col gap-4 sm:flex">
-        {desktopColumns[1].map(renderPanelCard)}
-      </div>
-      <div className="flex flex-col gap-4 sm:hidden">
-        {panelItems.map(renderPanelCard)}
-      </div>
+      {isDesktopLayout ? (
+        <>
+          <div className="flex flex-col gap-4">
+            {desktopColumns[0].map(renderPanelCard)}
+          </div>
+          <div className="flex flex-col gap-4">
+            {desktopColumns[1].map(renderPanelCard)}
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-4 sm:col-span-2">
+          {orderedPanelItems.map(renderPanelCard)}
+        </div>
+      )}
     </div>
   );
 }

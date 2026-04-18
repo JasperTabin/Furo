@@ -1,4 +1,4 @@
-import { Calendar, Edit2, Plus, StickyNote, Trash2 } from "lucide-react";
+import { Calendar, Edit2, Play, Plus, StickyNote, Trash2 } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import type { Todo, TodoStatus } from "./todo";
 import {
@@ -46,21 +46,27 @@ export const ColumnHeader = ({
 // ============================================================================
 export const Card = ({
   todo,
+  activeFocusTaskId,
   onEdit,
   onDelete,
   onStatusChange,
+  onStartFocus,
   onDragStart,
   onDragEnd,
 }: {
   todo: Todo;
+  activeFocusTaskId: string | null;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TodoStatus) => void;
+  onStartFocus: (todo: Todo) => void;
   onDragStart: (e: React.DragEvent, todo: Todo) => void;
   onDragEnd: (e: React.DragEvent) => void;
 }) => {
   const priorityAccentClass = getPriorityAccentClass(todo.priority);
   const isOverdue = isPastDue(todo.dueDate, todo.status);
+  const isActive = todo.id === activeFocusTaskId;
+  const canFocus = todo.status !== "done";
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -82,11 +88,28 @@ export const Card = ({
       tabIndex={0}
       role="button"
       aria-label={`${todo.text}, ${todo.priority} priority, status: ${todo.status}. Press Enter to edit, Delete to remove.`}
-      className="card-base card-hover group cursor-grab active:cursor-grabbing p-4 todo-card focus:outline-none focus:ring-2 focus:ring-(--color-fg)/40"
+      className={`card-base card-hover group cursor-grab active:cursor-grabbing p-4 todo-card focus:outline-none focus:ring-2 focus:ring-(--color-fg)/40 ${
+        isActive ? "border-(--color-fg)/35 bg-(--color-fg)/5" : ""
+      }`}
     >
       <div className="mb-3 flex items-center justify-between">
         <div className={`h-1 w-12 rounded-full ${priorityAccentClass}`} />
         <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+          {canFocus && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartFocus(todo);
+              }}
+              className="rounded-lg p-1.5 text-(--color-fg)/55 transition-colors hover:bg-(--color-fg)/8 hover:text-(--color-fg)"
+              aria-label={todo.status === "doing" ? "Resume Focus" : "Start Focus"}
+              title={todo.status === "doing" ? "Resume Focus" : "Start Focus"}
+              tabIndex={-1}
+            >
+              <Play size={13} fill="currentColor" />
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -184,11 +207,13 @@ export const Column = ({
   title,
   totalCount,
   todos,
+  activeFocusTaskId,
   isDragOver,
   onAdd,
   onEdit,
   onDelete,
   onStatusChange,
+  onStartFocus,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -198,11 +223,13 @@ export const Column = ({
   title: string;
   totalCount: number;
   todos: Todo[];
+  activeFocusTaskId: string | null;
   isDragOver: boolean;
   onAdd: () => void;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TodoStatus) => void;
+  onStartFocus: (todo: Todo) => void;
   onDragStart: (e: React.DragEvent, todo: Todo) => void;
   onDragEnd: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -238,9 +265,11 @@ export const Column = ({
               <Card
                 key={todo.id}
                 todo={todo}
+                activeFocusTaskId={activeFocusTaskId}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onStatusChange={onStatusChange}
+                onStartFocus={onStartFocus}
                 onDragStart={onDragStart}
                 onDragEnd={onDragEnd}
               />

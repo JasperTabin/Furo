@@ -1,5 +1,10 @@
+// Mini player logic
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MINI_PLAYER_WINDOW_SIZE } from "./MiniPlayer";
+
+const MINI_PLAYER_WINDOW_SIZE = {
+  width: 100,
+  height: 220,
+} as const;
 
 interface DocumentPictureInPicture {
   requestWindow(options?: { width?: number; height?: number }): Promise<Window>;

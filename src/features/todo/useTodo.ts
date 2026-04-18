@@ -1,10 +1,16 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   formatDateForInput,
   generateId,
   groupByStatus,
   parseDateInput,
-  todoStorage,
+  todoStore,
 } from "./todo";
 import type {
   Todo,
@@ -14,30 +20,9 @@ import type {
   TodoTag,
   TodoTagColor,
 } from "./todo";
+import { activeTaskStore } from "../timer/useTimerPanel";
 
 const ITEMS_PER_PAGE = 4;
-
-// ============================================================================
-// usePagination
-// ============================================================================
-
-export const usePagination = <T>(items: T[], itemsPerPage = ITEMS_PER_PAGE) => {
-  const [page, setPageRaw] = useState(1);
-
-  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
-  const currentPage = Math.max(1, Math.min(page, totalPages));
-  const paginatedItems = items.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
-
-  const setPage = useCallback(
-    (p: number) => setPageRaw(Math.max(1, Math.min(p, totalPages))),
-    [totalPages],
-  );
-
-  return { currentPage, totalPages, paginatedItems, setPage };
-};
 
 // ============================================================================
 // useDrag
@@ -87,11 +72,10 @@ export const useDrag = (onDrop: (id: string, status: TodoStatus) => void) => {
 // ============================================================================
 
 export const useTodos = () => {
-  const [todos, setTodos] = useState<Todo[]>(() => todoStorage.load());
-
-  useEffect(() => {
-    todoStorage.save(todos);
-  }, [todos]);
+  const todos = useSyncExternalStore(
+    todoStore.subscribe,
+    todoStore.getSnapshot,
+  );
 
   const {
     todo: todoList,
@@ -99,29 +83,53 @@ export const useTodos = () => {
     done: doneList,
   } = useMemo(() => groupByStatus(todos), [todos]);
 
-  // Single-object signature — no more 7 positional args
   const addTodo = useCallback(
     (data: TodoFormData, status: TodoStatus = "todo") => {
-      setTodos((prev) => [
-        { id: generateId(), ...data, status, createdAt: Date.now() },
-        ...prev,
-      ]);
+      todoStore.add({
+        id: generateId(),
+        ...data,
+        status,
+        createdAt: Date.now(),
+      });
     },
     [],
   );
 
-  // Merged updateTodo + updateTodoStatus into one
   const updateTodo = useCallback(
     (id: string, patch: Partial<Omit<Todo, "id" | "createdAt">>) => {
-      setTodos((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, ...patch } : t)),
-      );
+      const { activeFocusTaskId } = activeTaskStore.getSnapshot();
+      const isActiveFocusTask = activeFocusTaskId === id;
+
+      if (patch.status === "done" && isActiveFocusTask) {
+        // Active task moved to Done — stop timer, clear active state, no popup.
+        activeTaskStore.interruptActiveTask("taskMovedToDone");
+      }
+
+      if (patch.status === "todo" && isActiveFocusTask) {
+        // Active task moved back to Todo — treat as a completely fresh task.
+        // Wipe all focus metrics so it has no history of prior work.
+        // The interruptionRequest will also reset the interval counter in useTimerPanel.
+        patch = {
+          ...patch,
+          pomodoroCompleted: undefined,
+          totalFocusMinutes: undefined,
+          lastFocusedAt: undefined,
+        };
+        activeTaskStore.interruptActiveTask("taskMovedToTodo");
+      }
+
+      todoStore.update(id, patch);
     },
     [],
   );
 
   const deleteTodo = useCallback((id: string) => {
-    setTodos((prev) => prev.filter((t) => t.id !== id));
+    const { activeFocusTaskId } = activeTaskStore.getSnapshot();
+    if (activeFocusTaskId === id) {
+      // Deleted task was the active focus task — treat same as moving to Done.
+      activeTaskStore.interruptActiveTask("taskMovedToDone");
+    }
+    todoStore.delete(id);
   }, []);
 
   return {
@@ -134,6 +142,9 @@ export const useTodos = () => {
     deleteTodo,
   };
 };
+
+export const useActiveTask = () =>
+  useSyncExternalStore(activeTaskStore.subscribe, activeTaskStore.getSnapshot);
 
 // ============================================================================
 // useTodoEditor  (modal open/close + save routing)
@@ -301,8 +312,8 @@ export const useTodoEditorForm = ({
 
 export const useTodoListView = (todos: Todo[]) => {
   const [filter, setFilter] = useState<TodoStatus>("todo");
+  const [page, setPageRaw] = useState(1);
 
-  // Counts derived here — no need to pass them in as props
   const counts = useMemo(
     () => ({
       todo: todos.filter((t) => t.status === "todo").length,
@@ -317,8 +328,18 @@ export const useTodoListView = (todos: Todo[]) => {
     [todos, filter],
   );
 
-  const { paginatedItems, currentPage, totalPages, setPage } =
-    usePagination(filtered);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const currentPage = Math.max(1, Math.min(page, totalPages));
+  const paginatedItems = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  const setPage = useCallback(
+    (nextPage: number) =>
+      setPageRaw(Math.max(1, Math.min(nextPage, totalPages))),
+    [totalPages],
+  );
 
   const handleFilterChange = useCallback(
     (next: TodoStatus) => {

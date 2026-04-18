@@ -1,3 +1,5 @@
+// Timer settings logic
+
 import { useState, useMemo } from "react";
 import {
   DEFAULT_SETTINGS,
@@ -14,17 +16,17 @@ export const useSettings = () => {
       timerSettings.workDuration !== savedSettings.workDuration ||
       timerSettings.breakDuration !== savedSettings.breakDuration ||
       timerSettings.longBreakDuration !== savedSettings.longBreakDuration ||
-      timerSettings.sessionsUntilLongBreak !== savedSettings.sessionsUntilLongBreak,
+      timerSettings.longBreakInterval !== savedSettings.longBreakInterval,
     [timerSettings, savedSettings],
   );
 
-  function getSetterAndConfig(field: "work" | "break" | "long" | "sessions") {
+  function getSetterAndConfig(field: "work" | "break" | "long" | "interval") {
     const config = DURATION_FIELDS.find((f) => f.field === field)!;
     return { config };
   }
 
   function handleStep(
-    field: "work" | "break" | "long" | "sessions",
+    field: "work" | "break" | "long" | "interval",
     direction: "inc" | "dec",
   ) {
     const { config } = getSetterAndConfig(field);
@@ -37,7 +39,7 @@ export const useSettings = () => {
             ? prev.breakDuration
             : field === "long"
               ? prev.longBreakDuration
-              : prev.sessionsUntilLongBreak;
+              : prev.longBreakInterval;
 
       const next =
         direction === "inc"
@@ -54,19 +56,19 @@ export const useSettings = () => {
             ? { breakDuration: newValue }
             : field === "long"
               ? { longBreakDuration: newValue }
-              : { sessionsUntilLongBreak: newValue }),
+              : { longBreakInterval: newValue }),
       };
     });
   }
 
-  function getValue(field: "work" | "break" | "long" | "sessions") {
+  function getValue(field: "work" | "break" | "long" | "interval") {
     return field === "work"
       ? timerSettings.workDuration
       : field === "break"
         ? timerSettings.breakDuration
         : field === "long"
           ? timerSettings.longBreakDuration
-          : timerSettings.sessionsUntilLongBreak;
+          : timerSettings.longBreakInterval;
   }
 
   function resetToDefaults() {

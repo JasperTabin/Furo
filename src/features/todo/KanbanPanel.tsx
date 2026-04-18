@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { X } from "lucide-react";
-import { useDrag, useTodoEditor, useTodos } from "./useTodo";
+import { useActiveTask, useDrag, useTodoEditor, useTodos } from "./useTodo";
 import { Column } from "./Kanban";
 import { TodoEditorModal } from "./ToDoModal";
+import { activeTaskStore } from "../timer/useTimerPanel";
 
 export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
   const { todoList, doingList, doneList, addTodo, updateTodo, deleteTodo } =
     useTodos();
+  const { activeFocusTaskId } = useActiveTask();
 
   const {
     dragOverColumn,
@@ -33,6 +35,11 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
     [todoList, doingList, doneList],
   );
 
+  const handleStartFocus = (todoId: string) => {
+    activeTaskStore.startClassicFocus(todoId);
+    onClose();
+  };
+
   return (
     <>
       <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
@@ -55,11 +62,13 @@ export const KanbanPanel = ({ onClose }: { onClose: () => void }) => {
               title={col.title}
               totalCount={col.items.length}
               todos={col.items}
+              activeFocusTaskId={activeFocusTaskId}
               isDragOver={dragOverColumn === col.key}
               onAdd={() => openAddModal(col.key)}
               onEdit={openEditModal}
               onDelete={deleteTodo}
               onStatusChange={(id, status) => updateTodo(id, { status })}
+              onStartFocus={(todo) => handleStartFocus(todo.id)}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               {...createColumnHandlers(col.key)}
